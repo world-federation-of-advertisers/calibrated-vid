@@ -1,4 +1,4 @@
-"""Build the standalone calibration-method benchmark notebook."""
+"""Build the technical provider-model and demographic-allocation notebook."""
 
 from pathlib import Path
 
@@ -20,38 +20,21 @@ def code(text: str):
 cells = [
     markdown(
         r"""
-# Calibration method benchmark
+# Technical benchmark: provider-calibrated total reach and demographic allocation
 
-This notebook compares alternative ways to turn aggregate VID reaches and Reference-ID overlaps into calibrated union reach. It is separate from the campaign-scenario notebook so that the implementation choices and their tradeoffs can be evaluated directly.
+This notebook evaluates a model-provider architecture in which two models run for every report:
 
-The benchmark asks three different questions:
+1. A **demographic-agnostic total-reach model** uses aggregate Reference-ID and campaign inputs to estimate calibrated union reach.
+2. The existing **VID demographic model** produces age, gender, and geography estimates. A provider-supplied adjustment makes those estimates agree with the calibrated total.
 
-1. **Pairwise accuracy:** can the method calibrate a report containing two EDPs?
-2. **Union accuracy at scale:** how accurately does it estimate union reach for five and ten EDPs?
-3. **Higher-order accuracy:** how close are its inferred three-way, four-way, and five-plus-way intersections?
+The measurement system runs both models. It does not fit a new calibration model for each report and does not need access to the provider's panel or internal model coefficients.
 
-These are not equivalent. A method can estimate final union reach reasonably well without recovering every individual higher-order intersection accurately.
-"""
-    ),
-    markdown(
-        r"""
-## The pairwise-inference option
+The benchmark separates four questions:
 
-For every EDP pair (i,j), first estimate its Reference-ID capture rate using a frozen campaign-size model. Two forms are tested:
-
-\[
-\operatorname{logit}(c_{ij})=a_{ij}+b\ln(x)
-\]
-
-and the simpler direct form
-
-\[
-c_{ij}=\operatorname{clip}\left(a_{ij}+b\ln(x),0,1\right).
-\]
-
-The calibrated pair overlap is \(\hat I_{ij}=J_{ij}/c_{ij}\), where \(J_{ij}\) is the collision-adjusted Reference-ID overlap. The system then finds the maximum-entropy audience distribution that preserves every per-EDP reach and calibrated pair overlap. This supplies one coherent set of three-way through ten-way intersections without depending on sparse direct high-order matches.
-
-Pairwise information does **not** mathematically determine the higher orders. Maximum entropy is an explicit “least additional structure” assumption. An oracle diagnostic supplies the true synthetic pair overlaps to show how much error remains even when pair calibration is perfect.
+- Does a panel-trained total model improve union reach?
+- Does campaign objective and audience strategy add information beyond Reference-ID counts?
+- Is proportional demographic scaling sufficient, or does a panel-learned adjustment help?
+- Does the architecture preserve basic bounds and cross-report consistency?
 """
     ),
     code(
@@ -61,22 +44,15 @@ import csv
 import json
 import sys
 
-import matplotlib.pyplot as plt
 import numpy as np
 from IPython.display import Image, Markdown, display
 
 
 def find_project_root():
-    candidates = [Path.cwd(), Path.cwd().parent, Path.cwd() / "synthetic_validation"]
-    for candidate in candidates:
+    for candidate in (Path.cwd(), Path.cwd().parent):
         if (candidate / "src" / "reference_calibration").exists():
             return candidate.resolve()
     raise RuntimeError("Run from the repository root or notebooks/.")
-
-
-PROJECT_ROOT = find_project_root()
-sys.path.insert(0, str(PROJECT_ROOT / "src"))
-OUTPUT_DIR = PROJECT_ROOT / "outputs" / "method_benchmark_final"
 
 
 def markdown_table(rows, columns):
@@ -89,254 +65,331 @@ def markdown_table(rows, columns):
     return "\n".join([header, separator, *body])
 
 
+PROJECT_ROOT = find_project_root()
+sys.path.insert(0, str(PROJECT_ROOT / "src"))
+OUTPUT_DIR = PROJECT_ROOT / "outputs" / "provider_model_final"
+
+RUN_BENCHMARK = False
+if RUN_BENCHMARK:
+    from reference_calibration.provider_benchmark import run_provider_benchmark
+    run_provider_benchmark(OUTPUT_DIR, profile="full")
+
+summary = json.loads((OUTPUT_DIR / "provider_summary.json").read_text())
+with (OUTPUT_DIR / "provider_metrics.csv").open() as stream:
+    metrics = list(csv.DictReader(stream))
+methods = {item["name"]: item for item in summary["methods"]}
+
 print("Project: repository root")
 print(f"Benchmark outputs: {OUTPUT_DIR.relative_to(PROJECT_ROOT)}")
-"""
-    ),
-    markdown(
-        r"""
-## Reproduce the benchmark
-
-The checked-in results use the full profile: 30,000 synthetic people representing 120 million people, 24 broad-reach calibration campaigns, eight whole-campaign holdouts, 13 stress scenarios, three campaigns per scenario, six report shapes, and up to ten EDPs.
-
-Set `RUN_BENCHMARK` to `True` to rerun it. A full run takes several minutes. Leaving it `False` loads the existing results immediately.
-"""
-    ),
-    code(
-        r"""
-RUN_BENCHMARK = False
-
-if RUN_BENCHMARK:
-    from reference_calibration.method_benchmark import run_method_benchmark
-    run_method_benchmark(
-        OUTPUT_DIR,
-        profile="full",
-        campaigns_per_scenario=3,
-    )
-
-summary = json.loads((OUTPUT_DIR / "method_summary.json").read_text())
-with (OUTPUT_DIR / "method_metrics.csv").open() as stream:
-    metrics = list(csv.DictReader(stream))
-
-print(f"Methods: {summary['method_count']}")
-print(f"Stress scenarios: {summary['scenario_count']}")
 print(f"Detailed metric rows: {len(metrics):,}")
 """
     ),
     markdown(
         r"""
-## Methods tested
+## 1. Runtime data flow
 
-The first eight calibrated methods change the capture-rate model but retain the original divide-then-reconcile workflow. The pairwise methods deliberately discard direct higher-order Reference-ID measurements after calibrating all pairs. The joint methods fit one audience table against all observed Reference-ID patterns. The Bayesian row is a deterministic Poisson-likelihood/MAP approximation rather than a full MCMC implementation.
+For a requested campaign, week set, and EDP set, the measurement system supplies the model provider's approved workload with:
+
+- each EDP's reach;
+- the aggregate Reference-ID overlap pattern, including pairwise and available higher-order counts;
+- the participating EDPs;
+- campaign objective and audience-strategy summaries; and
+- campaign scale and reporting-window information.
+
+The total model returns one calibrated union-reach estimate (T). Separately, the VID demographic model returns an initial vector (v_1,ldots,v_D). The provider-packaged demographic method returns:
+
+\[
+(R_1,\ldots,R_D)=g(T,v_1,\ldots,v_D,\text{report context}).
+\]
+
+No Reference ID is assigned an age, gender, or geography, and no VID-to-Reference-ID crosswalk is constructed.
+"""
+    ),
+    markdown(
+        r"""
+## 2. Synthetic panel and holdout design
+
+The population contains ten EDPs, thirteen weeks, and eighteen mutually exclusive age × gender × geography cells. The harness creates a true demographic label and a stable but imperfect VID demographic label for each synthetic person. VID labeling is somewhat more accurate for people who are easier to link, creating realistic interaction between audience selection, matchability, and demographic error.
+
+The panel-training campaigns span all thirteen campaign scenarios rather than only broad reach. Every snapshot and report shape from one campaign remains in the same split. Separate campaign seeds are used for:
+
+- provider-model fitting;
+- whole-campaign panel holdouts; and
+- independent scenario evaluation.
+
+This is deliberately favorable to a model provider with a diverse panel. It tests whether moving calibration upstream can work when the provider has representative examples of the intended campaign types. It does not establish that a real panel has this coverage.
 """
     ),
     code(
         r"""
-method_rows = [
+design_rows = [
+    {"item": "Panel-training campaigns", "value": summary["panel_train_campaigns"]},
+    {"item": "Whole-campaign panel holdouts", "value": summary["panel_holdout_campaigns"]},
+    {"item": "Independent evaluation campaigns", "value": summary["evaluation_campaigns"]},
+    {"item": "Training report observations", "value": summary["training_observations"]},
+    {"item": "Demographic cells", "value": summary["demographic_cells"]},
+    {"item": "EDP counts tested", "value": "2, 5, and 10"},
+]
+display(Markdown(markdown_table(design_rows, [("item", "Design item"), ("value", "Value")])))
+"""
+    ),
+    markdown(
+        r"""
+## 3. Illustrative provider total model
+
+The provider model in this notebook is an implementation example, not a required production model family. It predicts the logarithmic correction to the existing VID total:
+
+\[
+\widehat T = T_{VID}\exp(f(x)).
+\]
+
+The result is clipped to the ordinary logical range: at least the largest individual EDP reach and no more than the summed EDP reaches or population.
+
+The observable feature vector includes:
+
+- individual EDP presence and reach;
+- pairwise Reference-ID overlap relative to the smaller EDP and to the VID pair estimate;
+- summary statistics for pairwise, three-way, and higher-order Reference-ID signals;
+- report size and the VID total; and, in the context-aware version,
+- objective and audience-strategy proportions, both unweighted and reach-weighted.
+
+A regularized radial-basis model is fitted against panel-truth total reach. The context-free and context-aware versions use the same fitting process, allowing the value of campaign metadata to be measured directly.
+"""
+    ),
+    code(
+        r"""
+parameter_rows = [
     {
-        "method": method["label"],
-        "category": method["category"],
-        "parameters": method["parameter_count"],
-        "description": method["explanation"],
-    }
-    for method in summary["methods"]
+        "model": "Provider total: Reference-ID inputs only",
+        "parameters": summary["provider_models"]["reference_only_parameter_count"],
+    },
+    {
+        "model": "Provider total: Reference ID + campaign context",
+        "parameters": summary["provider_models"]["context_parameter_count"],
+    },
+    {
+        "model": "Contextual demographic adjustment",
+        "parameters": summary["provider_models"]["contextual_demographic_parameter_count"],
+    },
 ]
-display(Markdown(markdown_table(
-    method_rows,
-    [
-        ("method", "Method"),
-        ("category", "Type"),
-        ("parameters", "Parameters"),
-        ("description", "What changes"),
-    ],
-)))
+display(Markdown(markdown_table(parameter_rows, [("model", "Model"), ("parameters", "Stored parameters")])) )
 """
     ),
     markdown(
         r"""
-## Overall union-reach result
+## 4. Total-reach methods compared
 
-Methods are ranked by mean absolute union-reach error across the 13 stress scenarios and six report shapes. The oracle is shown separately because it uses synthetic truth unavailable in production.
+The benchmark also fits two measurement-layer approaches on representative reach campaigns in the same synthetic world:
+
+- direct pair calibration followed by maximum-entropy higher-order inference; and
+- two-group mixture pair calibration followed by the same inference step.
+
+This produces an apples-to-apples comparison with the provider models because every method is evaluated on the same campaigns and report requests.
 """
     ),
     code(
         r"""
-production_methods = [
-    method for method in summary["methods"]
-    if method["category"] != "diagnostic oracle"
+TOTAL_METHODS = [
+    "existing_vid",
+    "direct_pair_proportional",
+    "mixture_pair_proportional",
+    "provider_reference_proportional",
+    "provider_context_proportional",
 ]
-ranking = sorted(production_methods, key=lambda method: method["stress_union"]["mean"])
-ranking_rows = []
-for rank, method in enumerate(ranking, 1):
-    name = method["name"]
-    ranking_rows.append({
-        "rank": rank,
-        "method": method["label"],
-        "mean": f"{method['stress_union']['mean']:.1%}",
-        "p90": f"{method['stress_union']['p90']:.1%}",
-        "holdout": f"{method['holdout_union']['mean']:.1%}",
-        "runtime": f"{1000 * method['mean_runtime_seconds']:.1f} ms",
+rows = []
+for name in TOTAL_METHODS:
+    item = methods[name]
+    holdout = next(value for value in summary["holdout_methods"] if value["name"] == name)
+    rows.append({
+        "method": item["label"],
+        "evaluation": f"{item['total_error']['mean']:.2%}",
+        "holdout": f"{holdout['total_error']['mean']:.2%}",
+        "p90": f"{item['total_error']['p90']:.2%}",
+        "two": f"{item['total_error_by_edp_count']['2']['mean']:.2%}",
+        "five": f"{item['total_error_by_edp_count']['5']['mean']:.2%}",
+        "ten": f"{item['total_error_by_edp_count']['10']['mean']:.2%}",
     })
-
 display(Markdown(markdown_table(
-    ranking_rows,
+    rows,
     [
-        ("rank", "Rank"),
         ("method", "Method"),
-        ("mean", "Stress mean error"),
-        ("p90", "Stress p90"),
-        ("holdout", "Broad holdout mean"),
-        ("runtime", "Mean runtime/report"),
+        ("evaluation", "Evaluation mean"),
+        ("holdout", "Panel holdout mean"),
+        ("p90", "Evaluation p90"),
+        ("two", "2 EDPs"),
+        ("five", "5 EDPs"),
+        ("ten", "10 EDPs"),
     ],
 )))
-"""
-    ),
-    code(
-        r"""
-display(Image(filename=str(OUTPUT_DIR / "union_error_by_method.png")))
+display(Image(filename=str(OUTPUT_DIR / "provider_total_error_by_scenario.png")))
 """
     ),
     markdown(
         r"""
-## Pairwise versus five- and ten-EDP union accuracy
+## 5. Demographic allocation methods
 
-This is the clean answer to whether the candidate methods improve pairwise measurements or only higher-order reports. The two-EDP column measures pairwise union directly; the other columns show how the same method scales.
+The benchmark tests three provider choices:
+
+### Proportional scaling
+
+\[
+R_d=T\frac{v_d}{\sum_k v_k}.
+\]
+
+This fixes the total while preserving the VID demographic mix.
+
+### Fixed panel adjustment
+
+The provider learns one additive share correction for each demographic cell from panel campaigns. The correction is normalized so the resulting shares sum to one.
+
+### Contextual panel adjustment
+
+The provider learns how the VID share error changes with objective, audience strategy, participating EDPs, campaign scale, and the starting VID distribution. The model predicts changes to demographic shares rather than another total, preventing the two model components from competing over total reach.
+
+The final shares are projected onto the nonnegative demographic simplex and multiplied by (T). Population caps are enforced. The measurement system sees only the packaged adjustment function.
 """
     ),
     code(
         r"""
-selected_names = [
-    "baseline_vid",
-    "pair_fixed_divide",
-    "pair_log_shared_divide",
-    "three_group_divide",
-    "pairwise_maxent_logit",
-    "pairwise_maxent_direct",
-    "pairwise_maxent_mixture",
-    "oracle_pairwise_maxent",
-    "joint_low_rank_inclusive",
-    "joint_mixture_affinity",
-    "bayesian_map_affinity",
+DEMO_METHODS = [
+    "existing_vid",
+    "provider_context_proportional",
+    "provider_context_fixed_demo",
+    "provider_context_learned_demo",
+    "oracle_total_proportional",
+    "oracle_total_learned_demo",
 ]
-lookup = {method["name"]: method for method in summary["methods"]}
-size_rows = []
-for name in selected_names:
-    method = lookup[name]
-    size_rows.append({
-        "method": method["label"],
-        "two": f"{summary['union_by_edp_count']['2'][name]['mean']:.1%}",
-        "five": f"{summary['union_by_edp_count']['5'][name]['mean']:.1%}",
-        "ten": f"{summary['union_by_edp_count']['10'][name]['mean']:.1%}",
+rows = []
+for name in DEMO_METHODS:
+    item = methods[name]
+    rows.append({
+        "method": item["label"],
+        "total": f"{item['total_error']['mean']:.2%}",
+        "demo_reach": f"{item['demographic_reach_error']['mean']:.2%}",
+        "demo_distribution": f"{item['demographic_distribution_error']['mean']:.2%}",
     })
-
 display(Markdown(markdown_table(
-    size_rows,
+    rows,
     [
         ("method", "Method"),
-        ("two", "2-EDP union error"),
-        ("five", "5-EDP union error"),
-        ("ten", "10-EDP union error"),
+        ("total", "Total-reach error"),
+        ("demo_reach", "Combined demographic reach error"),
+        ("demo_distribution", "Demographic distribution error"),
     ],
 )))
+display(Image(filename=str(OUTPUT_DIR / "provider_demographic_error_by_scenario.png")))
 """
     ),
     markdown(
         r"""
-## Intersection accuracy by order
+## 6. Interpreting the demographic metrics
 
-This chart is not another union metric. It measures the weighted absolute error of the final internally consistent intersections at each order. “5+ way” combines fifth- through tenth-order intersections. A pairwise closure can produce good union reach while individual high-order intersections remain uncertain.
+Combined demographic reach error includes both total-reach error and incorrect allocation among demographic cells. Demographic distribution error first normalizes both vectors to shares and then measures how much audience share must move between cells to match truth.
+
+The oracle-total rows are important. If proportional scaling still has material error with perfect total reach, the remaining problem is demographic allocation rather than deduplication. The difference between oracle proportional and oracle learned allocation measures the incremental value of the provider's panel-based demographic adjustment.
+"""
+    ),
+    markdown(
+        r"""
+## 7. Output validity
+
+Every demographic method is checked for:
+
+- negative values;
+- demographic values above their population;
+- failure to add exactly to the corresponding total estimate; and
+- behavior for 2-, 5-, and 10-EDP reports.
 """
     ),
     code(
         r"""
-display(Image(filename=str(OUTPUT_DIR / "intersection_error_by_method.png")))
-"""
-    ),
-    code(
-        r"""
-order_rows = []
-for name in selected_names:
-    method = lookup[name]
-    order_rows.append({
-        "method": method["label"],
-        "pair": f"{summary['intersection_by_order']['2'][name]['mean']:.1%}",
-        "three": f"{summary['intersection_by_order']['3'][name]['mean']:.1%}",
-        "four": f"{summary['intersection_by_order']['4'][name]['mean']:.1%}",
-        "higher": f"{summary['intersection_by_order']['5'][name]['mean']:.1%}",
+validity_rows = []
+for name in DEMO_METHODS:
+    sum_errors = [
+        float(row["value"])
+        for row in metrics
+        if row["split"] == "evaluation"
+        and row["method"] == name
+        and row["category"] == "demographic_sum_error"
+    ]
+    population_errors = [
+        float(row["value"])
+        for row in metrics
+        if row["split"] == "evaluation"
+        and row["method"] == name
+        and row["category"] == "demographic_population_violation"
+    ]
+    validity_rows.append({
+        "method": methods[name]["label"],
+        "max_sum_error": f"{max(sum_errors, default=0.0):.3%}",
+        "max_population_violation": f"{max(population_errors, default=0.0):.3%}",
     })
 display(Markdown(markdown_table(
-    order_rows,
+    validity_rows,
     [
         ("method", "Method"),
-        ("pair", "Pairwise intersection"),
-        ("three", "Three-way"),
-        ("four", "Four-way"),
-        ("higher", "Five-way and higher"),
+        ("max_sum_error", "Largest total mismatch"),
+        ("max_population_violation", "Largest population violation"),
     ],
 )))
 """
     ),
     markdown(
         r"""
-## What pairwise inference can and cannot recover
+## 8. Cross-report consistency
 
-The oracle pairwise method uses the true synthetic pair overlaps and then performs the same maximum-entropy higher-order inference. Its remaining error is evidence that pairs alone do not identify the exact higher-order audience structure. The difference between the production pairwise method and the oracle indicates how much opportunity remains in pair calibration—although the two errors can occasionally cancel, so this is a diagnostic rather than a formal decomposition.
+The provider total model is a deterministic function of the requested report, but separate predictions for nested reports are not mathematically guaranteed to be monotone. The benchmark checks:
+
+- weeks 1–3 versus weeks 1–12;
+- weeks 1–12 versus the full flight;
+- two EDPs versus five EDPs; and
+- five EDPs versus ten EDPs.
+
+The stored-result reconciliation mechanism remains useful when published reports must never contradict earlier results.
 """
     ),
     code(
         r"""
-scenario_rows = []
-for scenario, values in summary["union_by_scenario"].items():
-    baseline = values["baseline_vid"]["mean"]
-    direct = values["pairwise_maxent_direct"]["mean"]
-    oracle = values["oracle_pairwise_maxent"]["mean"]
-    joint = values["joint_low_rank_inclusive"]["mean"]
-    scenario_rows.append({
-        "scenario": scenario.replace("_", " "),
-        "baseline": f"{baseline:.1%}",
-        "direct": f"{direct:.1%}",
-        "oracle": f"{oracle:.1%}",
-        "joint": f"{joint:.1%}",
-        "pair_gap": f"{direct - oracle:+.1%}",
+consistency_rows = []
+for name in TOTAL_METHODS:
+    result = summary["consistency"]["evaluation"][name]
+    consistency_rows.append({
+        "method": methods[name]["label"],
+        "checks": result["checks"],
+        "violations": result["violations"],
+        "maximum": f"{result['maximum'] / 1_000_000:.3f}M",
     })
-
 display(Markdown(markdown_table(
-    scenario_rows,
+    consistency_rows,
     [
-        ("scenario", "Scenario"),
-        ("baseline", "Existing VID"),
-        ("direct", "Direct pair + inference"),
-        ("oracle", "Oracle pairs + inference"),
-        ("joint", "Joint low-rank"),
-        ("pair_gap", "Direct minus oracle"),
+        ("method", "Method"),
+        ("checks", "Checks"),
+        ("violations", "Raw violations"),
+        ("maximum", "Largest violation"),
     ],
 )))
 """
     ),
     markdown(
         r"""
-## Findings
+## 9. Conclusions and decision rule
 
-1. **Pairwise calibration followed by maximum-entropy inference is the strongest tested family.** The two-group mixture version has 9.6% mean stress error, the direct fixed-plus-log version has 11.2%, and the existing VID baseline has 40.1%.
-2. **The two pair calibrations have different strengths.** The direct model is slightly better for two and five EDPs—3.8% and 11.3% versus 5.0% and 11.5%—while the mixture is substantially better at ten EDPs: 12.2% versus 18.6%.
-3. **Inferring higher orders from pairs is useful but not exact.** With perfect synthetic pair overlaps, mean error is 0.0% for two EDPs, 4.3% for five, and 7.5% for ten. That remaining error is the price of not directly knowing the higher-order structure.
-4. **The app-retargeting case is primarily a pair-calibration transfer problem.** Direct and mixture pairwise calibration have 42.3% and 38.6% mean error, whereas oracle pairs reduce it to 8.9%.
-5. **Website and customer-list retargeting contain both problems.** Better pair calibration helps substantially, but even oracle pairs leave roughly 10% error because those scenarios have strong higher-order structure.
-6. **More flexible campaign-size curves did not solve the main issue.** The spline, order-specific log, hierarchical pair, and low-rank capture curves all remained around 22–23% mean stress error with the original divide-then-reconcile decoder.
-7. **The tested Bayesian/MAP decoder is not currently worth its complexity.** It was slower and less accurate on average than direct pairwise inference. That rejects this implementation, not every possible Bayesian capture-recapture model.
-8. **Broad and already-well-modeled reports need a fallback.** Existing VID remains best on the broad-reach holdout and on the broad-awareness control. The direct pair model is also safer than the mixture on broad holdouts—0.8% versus 3.1% mean error—so the apparent ten-EDP advantage of the mixture must be validated on real non-reach campaigns.
+The synthetic result favors the provider-model architecture in this test:
 
-## Recommendation
+1. A panel-trained total model performs better than the existing VID baseline and the two strongest measurement-layer calibration comparators.
+2. Objective and audience-strategy inputs improve the provider total model relative to the same model using Reference-ID inputs alone.
+3. Proportional scaling is a valid, simple demographic baseline, but it leaves demographic error even when total reach is known perfectly.
+4. The contextual panel adjustment reduces demographic error in both whole-campaign holdouts and independent evaluation campaigns.
+5. The provider model still creates occasional raw cross-report inconsistencies, so the existing reconciliation layer remains relevant.
 
-Advance two candidates to real-data validation: **bounded direct pair fixed-plus-log plus maximum-entropy inference**, and **two-group mixture pair calibration plus the same inference step**. The direct model is simpler and safer on broad holdouts; the mixture performed better on the most difficult ten-EDP synthetic reports. The current synthetic evidence is not strong enough to choose between them for production.
+The exact radial-basis total model and linear demographic adjustment used here are examples, not prescribed production choices. The model provider should be free to select another total-reach or demographic-adjustment method, provided the packaged model accepts the agreed inputs, returns bounded outputs, and beats simpler alternatives on whole-campaign panel holdouts.
 
-Before production selection:
+The next validation should reproduce this comparison with real panel campaigns, including broad awareness, CRM, website retargeting, app activity, lead, sales, lookalike, and mixed-objective reports. The provider should compare at least:
 
-- fit and compare the direct and logit pair models using approved aggregate records from real campaigns;
-- validate customer-list, website-retargeting, app, lead, sales, lookalike, and broad-reach campaigns as separate holdout strata;
-- establish an observable activation or fallback rule so broad campaigns retain the existing VID result when correction is not supported;
-- report uncertainty that includes both pair-calibration error and the irreducible range of higher-order structures compatible with the calibrated pairs; and
-- retain direct higher-order Reference-ID measurements as diagnostics, even if the production point estimate is primarily inferred from pairs.
+- total model without campaign context;
+- total model with campaign context;
+- proportional demographic scaling; and
+- its proposed panel-learned demographic adjustment.
 """
     ),
 ]
@@ -345,11 +398,7 @@ Before production selection:
 notebook = nbf.v4.new_notebook(
     cells=cells,
     metadata={
-        "kernelspec": {
-            "display_name": "Python 3",
-            "language": "python",
-            "name": "python3",
-        },
+        "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
         "language_info": {"name": "python", "version": "3.12"},
     },
 )

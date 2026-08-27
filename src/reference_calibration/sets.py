@@ -221,5 +221,47 @@ def enforce_marginals(
     return values
 
 
+def project_to_bounded_sum(
+    target: np.ndarray,
+    total: float,
+    lower: np.ndarray | None = None,
+    upper: np.ndarray | None = None,
+) -> np.ndarray:
+    """Return the closest vector with a fixed sum and element-wise bounds."""
+    values = np.asarray(target, dtype=float)
+    low = np.zeros_like(values) if lower is None else np.asarray(lower, dtype=float)
+    high = np.full_like(values, np.inf) if upper is None else np.asarray(upper, dtype=float)
+    if values.shape != low.shape or values.shape != high.shape:
+        raise ValueError("target, lower, and upper must have the same shape")
+    if np.any(low < 0) or np.any(high < low):
+        raise ValueError("invalid bounds")
+    if total < float(low.sum()) - 1e-8 or total > float(high.sum()) + 1e-8:
+        raise ValueError("requested total is outside the feasible bounded range")
+
+    finite_upper = np.isfinite(high)
+    left = (
+        float(np.min(values[finite_upper] - high[finite_upper]))
+        if np.any(finite_upper)
+        else -abs(total) - np.max(np.abs(values))
+    )
+    right = float(np.max(values - low))
+    left = min(left, -abs(total) - np.max(np.abs(values)) - 1.0)
+    right = max(right, abs(total) + np.max(np.abs(values)) + 1.0)
+    for _ in range(120):
+        midpoint = 0.5 * (left + right)
+        projected = np.clip(values - midpoint, low, high)
+        if float(projected.sum()) > total:
+            left = midpoint
+        else:
+            right = midpoint
+    projected = np.clip(values - 0.5 * (left + right), low, high)
+    difference = total - float(projected.sum())
+    if abs(difference) > 1e-7:
+        available = (projected > low + 1e-10) & (projected < high - 1e-10)
+        if np.any(available):
+            projected[available] += difference / int(available.sum())
+    return projected
+
+
 def selected_masks(n: int, sizes: tuple[int, ...]) -> tuple[int, ...]:
     return tuple(mask for mask in range(1, 1 << n) if mask.bit_count() in sizes)

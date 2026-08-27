@@ -10,6 +10,11 @@ python3 -m venv "${VENV_DIR}"
 "${VENV_DIR}/bin/python" -m pip install --upgrade pip setuptools wheel
 "${VENV_DIR}/bin/python" -m pip install -e '.[notebook]'
 
-echo "Environment ready: ${PROJECT_DIR}/${VENV_DIR}"
+if [[ "${VENV_DIR}" = /* ]]; then
+  DISPLAY_VENV="${VENV_DIR}"
+else
+  DISPLAY_VENV="${PROJECT_DIR}/${VENV_DIR}"
+fi
+echo "Environment ready: ${DISPLAY_VENV}"
 echo "Run tests with: ${VENV_DIR}/bin/python -m unittest discover -s tests -v"
 echo "Open notebooks with: ${VENV_DIR}/bin/jupyter lab"

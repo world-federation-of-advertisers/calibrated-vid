@@ -37,6 +37,40 @@ META_CAMPAIGN_SCENARIOS = (
     "mixed_funnel_portfolio",
 )
 
+AGE_GROUPS = ("18-34", "35-54", "55+")
+GENDER_GROUPS = ("female", "male")
+GEO_GROUPS = ("northeast", "south_central", "west")
+DEMOGRAPHIC_LABELS = tuple(
+    f"{age} | {gender} | {geo}"
+    for age in AGE_GROUPS
+    for gender in GENDER_GROUPS
+    for geo in GEO_GROUPS
+)
+
+CAMPAIGN_OBJECTIVES = (
+    "awareness",
+    "traffic",
+    "engagement",
+    "leads",
+    "app_promotion",
+    "sales",
+)
+
+AUDIENCE_STRATEGIES = (
+    "broad",
+    "interest",
+    "engagement_retargeting",
+    "lead_optimization",
+    "sales_prospecting",
+    "website_retargeting",
+    "customer_list",
+    "catalog_retargeting",
+    "lookalike",
+    "audience_expansion",
+    "app_retargeting",
+    "niche",
+)
+
 
 def _sigmoid(value: np.ndarray | float) -> np.ndarray:
     return 1.0 / (1.0 + np.exp(-np.asarray(value)))
@@ -64,6 +98,11 @@ class SyntheticWorld:
     email_agreement: np.ndarray
     target_link_probability: np.ndarray
     realized_link_probability: np.ndarray
+    true_demographic: np.ndarray
+    vid_demographic: np.ndarray
+    demographic_labels: tuple[str, ...]
+    true_demographic_population: np.ndarray
+    vid_demographic_population: np.ndarray
 
 
 @dataclass(frozen=True)
@@ -72,6 +111,75 @@ class Campaign:
     scenario: str
     events: np.ndarray
     final_reach_fraction: np.ndarray
+    objectives: tuple[str, ...]
+    audience_strategies: tuple[str, ...]
+
+
+def _noisy_category_labels(
+    truth: np.ndarray,
+    n_categories: int,
+    base_accuracy: float,
+    matchability: np.ndarray,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    """Generate a stable, imperfect demographic label for the VID model."""
+    accuracy = np.clip(base_accuracy + 0.06 * np.tanh(matchability), 0.55, 0.99)
+    result = np.asarray(truth, dtype=np.int16).copy()
+    changed = rng.random(len(result)) > accuracy
+    alternatives = rng.integers(0, n_categories - 1, size=int(changed.sum()))
+    original = result[changed]
+    alternatives += alternatives >= original
+    result[changed] = alternatives
+    return result
+
+
+def _campaign_context(scenario: str, n_edps: int) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """Return per-EDP objective and audience-strategy labels."""
+    fixed = {
+        "representative": ("awareness", "broad"),
+        "two_small_correlated": ("sales", "website_retargeting"),
+        "two_small_disjoint": ("traffic", "niche"),
+        "all_small_correlated": ("engagement", "engagement_retargeting"),
+        "high_matchability_remarketing": ("sales", "customer_list"),
+        "low_matchability_targeting": ("app_promotion", "app_retargeting"),
+        "broad_awareness_control": ("awareness", "broad"),
+        "traffic_optimization": ("traffic", "interest"),
+        "video_engagement_retargeting": ("engagement", "engagement_retargeting"),
+        "lead_generation": ("leads", "lead_optimization"),
+        "sales_prospecting": ("sales", "sales_prospecting"),
+        "website_retargeting": ("sales", "website_retargeting"),
+        "crm_customer_list": ("sales", "customer_list"),
+        "catalog_retargeting": ("sales", "catalog_retargeting"),
+        "lookalike_prospecting": ("sales", "lookalike"),
+        "advantage_audience_expansion": ("sales", "audience_expansion"),
+        "app_activity_retargeting": ("app_promotion", "app_retargeting"),
+        "unrelated_niche_control": ("traffic", "niche"),
+    }
+    if scenario in ("mixed_objectives", "mixed_funnel_portfolio"):
+        cycle = (
+            ("awareness", "broad"),
+            ("traffic", "interest"),
+            ("leads", "lead_optimization"),
+            ("sales", "website_retargeting"),
+        )
+        pairs = tuple(cycle[index % len(cycle)] for index in range(n_edps))
+    elif scenario.startswith("linkage_shift_"):
+        pairs = tuple(("sales", "sales_prospecting") for _ in range(n_edps))
+    elif scenario == "small_vs_large_nonreach":
+        pairs = tuple(
+            ("awareness", "broad")
+            if index % 4 == 0
+            else ("sales", "website_retargeting")
+            if index % 4 == 1
+            else ("traffic", "interest")
+            if index % 4 == 2
+            else ("leads", "lead_optimization")
+            for index in range(n_edps)
+        )
+    else:
+        objective, strategy = fixed[scenario]
+        pairs = tuple((objective, strategy) for _ in range(n_edps))
+    return tuple(pair[0] for pair in pairs), tuple(pair[1] for pair in pairs)
 
 
 def make_world(config: SimulationConfig) -> SyntheticWorld:
@@ -79,6 +187,40 @@ def make_world(config: SimulationConfig) -> SyntheticWorld:
     broad = rng.normal(size=config.n_users)
     segments = rng.normal(size=(5, config.n_users))
     matchability = rng.normal(size=config.n_users)
+
+    age_score = 0.90 * segments[0] + 0.35 * rng.normal(size=config.n_users)
+    age_thresholds = np.quantile(age_score, (0.42, 0.76))
+    true_age = np.digitize(age_score, age_thresholds).astype(np.int16)
+    true_gender = (
+        rng.random(config.n_users) < _sigmoid(0.18 * segments[1])
+    ).astype(np.int16)
+    geo_score = 0.75 * segments[2] + 0.55 * rng.normal(size=config.n_users)
+    geo_thresholds = np.quantile(geo_score, (0.34, 0.72))
+    true_geo = np.digitize(geo_score, geo_thresholds).astype(np.int16)
+
+    vid_age = _noisy_category_labels(true_age, len(AGE_GROUPS), 0.84, matchability, rng)
+    vid_gender = _noisy_category_labels(
+        true_gender,
+        len(GENDER_GROUPS),
+        0.94,
+        matchability,
+        rng,
+    )
+    vid_geo = _noisy_category_labels(true_geo, len(GEO_GROUPS), 0.88, matchability, rng)
+    true_demographic = (
+        (true_age * len(GENDER_GROUPS) + true_gender) * len(GEO_GROUPS) + true_geo
+    ).astype(np.int16)
+    vid_demographic = (
+        (vid_age * len(GENDER_GROUPS) + vid_gender) * len(GEO_GROUPS) + vid_geo
+    ).astype(np.int16)
+    true_demographic_population = (
+        np.bincount(true_demographic, minlength=len(DEMOGRAPHIC_LABELS)).astype(float)
+        * config.person_weight
+    )
+    vid_demographic_population = (
+        np.bincount(vid_demographic, minlength=len(DEMOGRAPHIC_LABELS)).astype(float)
+        * config.person_weight
+    )
 
     coverage = np.linspace(0.95, 0.10, config.n_edps)
     agreement = np.linspace(0.72, 0.52, config.n_edps)
@@ -111,6 +253,11 @@ def make_world(config: SimulationConfig) -> SyntheticWorld:
         email_agreement=agreement,
         target_link_probability=target_link,
         realized_link_probability=linkable.mean(axis=1),
+        true_demographic=true_demographic,
+        vid_demographic=vid_demographic,
+        demographic_labels=DEMOGRAPHIC_LABELS,
+        true_demographic_population=true_demographic_population,
+        vid_demographic_population=vid_demographic_population,
     )
 
 
@@ -366,6 +513,7 @@ def generate_campaign(
     scores = scores + matchability_shift * world.matchability[None, :]
 
     n, weeks, users = world.config.n_edps, world.config.n_weeks, world.config.n_users
+    objectives, audience_strategies = _campaign_context(scenario, n)
     events = np.zeros((n, weeks, users), dtype=bool)
 
     for edp in range(n):
@@ -393,4 +541,6 @@ def generate_campaign(
         scenario=scenario,
         events=events,
         final_reach_fraction=reach,
+        objectives=objectives,
+        audience_strategies=audience_strategies,
     )

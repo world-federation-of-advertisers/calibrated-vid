@@ -6,7 +6,13 @@ import hashlib
 import numpy as np
 
 from .population import Campaign, SyntheticWorld
-from .sets import exact_cells_from_membership, inclusive_intersections, members, union_values
+from .sets import (
+    exact_cells_from_membership,
+    inclusive_intersections,
+    members,
+    project_to_bounded_sum,
+    union_values,
+)
 
 
 @dataclass(frozen=True)
@@ -26,6 +32,13 @@ class ReportObservation:
     reference_intersections: np.ndarray
     collision_floor: np.ndarray
     reference_signal: np.ndarray
+    objectives: tuple[str, ...]
+    audience_strategies: tuple[str, ...]
+    demographic_labels: tuple[str, ...]
+    demographic_population: np.ndarray
+    edp_demographic_reaches: np.ndarray
+    truth_demographic_union: np.ndarray
+    baseline_demographic_union: np.ndarray
 
 
 @dataclass(frozen=True)
@@ -123,6 +136,43 @@ def measure_report(
         collision = float(rng.poisson(max(floor, 0.0)))
         reference[subset] = visible_intersections[subset] + collision
 
+    demographic_count = len(world.demographic_labels)
+    any_reached = np.any(reached, axis=0)
+    truth_demographic_union = (
+        np.bincount(
+            world.true_demographic[any_reached],
+            minlength=demographic_count,
+        ).astype(float)
+        * config.person_weight
+    )
+    edp_demographic_reaches = np.zeros((len(edps), demographic_count), dtype=float)
+    for local_index in range(len(edps)):
+        edp_demographic_reaches[local_index] = (
+            np.bincount(
+                world.vid_demographic[reached[local_index]],
+                minlength=demographic_count,
+            ).astype(float)
+            * config.person_weight
+        )
+    raw_demographic_union = np.zeros(demographic_count, dtype=float)
+    for demographic in range(demographic_count):
+        population = max(float(world.vid_demographic_population[demographic]), 1.0)
+        fractions = np.clip(edp_demographic_reaches[:, demographic] / population, 0.0, 1.0)
+        raw_demographic_union[demographic] = population * (
+            1.0 - float(np.prod(1.0 - fractions))
+        )
+    baseline_total = float(baseline_unions[-1])
+    if raw_demographic_union.sum() <= 0:
+        raw_demographic_union = world.vid_demographic_population.copy()
+    scaled_demographic_union = (
+        raw_demographic_union * baseline_total / float(raw_demographic_union.sum())
+    )
+    baseline_demographic_union = project_to_bounded_sum(
+        scaled_demographic_union,
+        baseline_total,
+        upper=world.true_demographic_population,
+    )
+
     return ReportObservation(
         campaign_id=campaign.campaign_id,
         scenario=campaign.scenario,
@@ -139,6 +189,13 @@ def measure_report(
         reference_intersections=reference,
         collision_floor=collision_floor,
         reference_signal=reference - collision_floor,
+        objectives=tuple(campaign.objectives[edp] for edp in edps),
+        audience_strategies=tuple(campaign.audience_strategies[edp] for edp in edps),
+        demographic_labels=world.demographic_labels,
+        demographic_population=world.true_demographic_population.copy(),
+        edp_demographic_reaches=edp_demographic_reaches,
+        truth_demographic_union=truth_demographic_union,
+        baseline_demographic_union=baseline_demographic_union,
     )
 
 

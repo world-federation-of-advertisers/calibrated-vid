@@ -1,0 +1,3769 @@
+{
+  "profile": "full",
+  "config": {
+    "n_users": 30000,
+    "population_size": 120000000,
+    "n_edps": 10,
+    "n_weeks": 13,
+    "reference_pool_size": 5000000000,
+    "calibration_train_campaigns": 24,
+    "calibration_holdout_campaigns": 8,
+    "stress_campaigns_per_scenario": 6,
+    "request_order_trials": 12,
+    "seed": 20260825,
+    "minimum_calibration_intersection": 50000.0,
+    "ridge_penalty": 0.35,
+    "material_holdout_improvement": 0.005,
+    "review_movement_fraction": 0.05
+  },
+  "panel_train_campaigns": 39,
+  "panel_holdout_campaigns": 26,
+  "evaluation_campaigns": 39,
+  "training_observations": 234,
+  "demographic_cells": 18,
+  "demographic_labels": [
+    "18-34 | female | northeast",
+    "18-34 | female | south_central",
+    "18-34 | female | west",
+    "18-34 | male | northeast",
+    "18-34 | male | south_central",
+    "18-34 | male | west",
+    "35-54 | female | northeast",
+    "35-54 | female | south_central",
+    "35-54 | female | west",
+    "35-54 | male | northeast",
+    "35-54 | male | south_central",
+    "35-54 | male | west",
+    "55+ | female | northeast",
+    "55+ | female | south_central",
+    "55+ | female | west",
+    "55+ | male | northeast",
+    "55+ | male | south_central",
+    "55+ | male | west"
+  ],
+  "methods": [
+    {
+      "name": "existing_vid",
+      "label": "Existing VID",
+      "category": "baseline",
+      "description": "Existing population-rate total and existing VID demographics.",
+      "total_error": {
+        "count": 351,
+        "mean": 0.3972313031479379,
+        "p90": 0.9164196744707763,
+        "p99": 2.936920064335802,
+        "max": 3.0651031862479314
+      },
+      "demographic_reach_error": {
+        "count": 351,
+        "mean": 0.41718603451636194,
+        "p90": 0.9164196744707767,
+        "p99": 2.936920064335803,
+        "max": 3.0651031862479323
+      },
+      "demographic_distribution_error": {
+        "count": 351,
+        "mean": 0.05609161244007383,
+        "p90": 0.12150630428076972,
+        "p99": 0.2793833459832291,
+        "max": 0.30314586752068634
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 117,
+          "mean": 0.124577652700503,
+          "p90": 0.38119075227928817,
+          "p99": 0.6191945566718208,
+          "max": 0.625114864864864
+        },
+        "5": {
+          "count": 117,
+          "mean": 0.41334666248978846,
+          "p90": 1.0565856163871097,
+          "p99": 1.9932386882381425,
+          "max": 1.9973859679332184
+        },
+        "10": {
+          "count": 117,
+          "mean": 0.6537695942535221,
+          "p90": 1.886648986757889,
+          "p99": 3.0533007298797292,
+          "max": 3.0651031862479314
+        }
+      }
+    },
+    {
+      "name": "direct_pair_proportional",
+      "label": "Direct pair inference + proportional demos",
+      "category": "measurement-layer calibration",
+      "description": "Calibrate pair overlaps, infer higher orders, then scale VID demographics proportionally.",
+      "total_error": {
+        "count": 351,
+        "mean": 0.11798640916211142,
+        "p90": 0.2540197983080332,
+        "p99": 1.0040890242885898,
+        "max": 1.0266424284754236
+      },
+      "demographic_reach_error": {
+        "count": 351,
+        "mean": 0.1617010574700601,
+        "p90": 0.25604810568996234,
+        "p99": 1.0040890242885898,
+        "max": 1.0266424284754239
+      },
+      "demographic_distribution_error": {
+        "count": 351,
+        "mean": 0.05588499716169448,
+        "p90": 0.1215063042807697,
+        "p99": 0.2793833459832291,
+        "max": 0.30314586752068645
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 117,
+          "mean": 0.02858892365718143,
+          "p90": 0.07539869048935062,
+          "p99": 0.1676418837680183,
+          "max": 0.18046567400140273
+        },
+        "5": {
+          "count": 117,
+          "mean": 0.10789910166196667,
+          "p90": 0.25271656435613266,
+          "p99": 0.5565262221950414,
+          "max": 0.560983409803215
+        },
+        "10": {
+          "count": 117,
+          "mean": 0.21747120216718616,
+          "p90": 0.49194924594342515,
+          "p99": 1.016218730897313,
+          "max": 1.0266424284754236
+        }
+      }
+    },
+    {
+      "name": "mixture_pair_proportional",
+      "label": "Mixture pair inference + proportional demos",
+      "category": "measurement-layer calibration",
+      "description": "Use the matchability mixture for pair capture, infer higher orders, then scale demographics.",
+      "total_error": {
+        "count": 351,
+        "mean": 0.09692851197302596,
+        "p90": 0.22479751406183887,
+        "p99": 0.8701963089069822,
+        "max": 0.8982207836244231
+      },
+      "demographic_reach_error": {
+        "count": 351,
+        "mean": 0.1534284331217237,
+        "p90": 0.2600131747776482,
+        "p99": 0.8701963089069824,
+        "max": 0.8982207836244234
+      },
+      "demographic_distribution_error": {
+        "count": 351,
+        "mean": 0.055700135940706094,
+        "p90": 0.1215063042807697,
+        "p99": 0.2793833459832291,
+        "max": 0.30314586752068645
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 117,
+          "mean": 0.03592492369302817,
+          "p90": 0.08834022430304718,
+          "p99": 0.17271329138364827,
+          "max": 0.1946477561575015
+        },
+        "5": {
+          "count": 117,
+          "mean": 0.11019956952497165,
+          "p90": 0.2614966938274927,
+          "p99": 0.5443968092369025,
+          "max": 0.54822089027008
+        },
+        "10": {
+          "count": 117,
+          "mean": 0.14466104270107807,
+          "p90": 0.3485664659206188,
+          "p99": 0.8831334116688334,
+          "max": 0.8982207836244231
+        }
+      }
+    },
+    {
+      "name": "provider_reference_proportional",
+      "label": "Provider total, Reference-ID inputs only + proportional demos",
+      "category": "provider total model",
+      "description": "Panel-trained total model without campaign objective or audience strategy.",
+      "total_error": {
+        "count": 351,
+        "mean": 0.05853187551569546,
+        "p90": 0.1700883067489511,
+        "p99": 0.32189573136833105,
+        "max": 0.3567988926351079
+      },
+      "demographic_reach_error": {
+        "count": 351,
+        "mean": 0.14110030121594558,
+        "p90": 0.2673401281352831,
+        "p99": 0.551284810224425,
+        "max": 0.6012997667163585
+      },
+      "demographic_distribution_error": {
+        "count": 351,
+        "mean": 0.05608336031211805,
+        "p90": 0.12150630428076975,
+        "p99": 0.2793833459832291,
+        "max": 0.3031458675206864
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 117,
+          "mean": 0.025642157402581616,
+          "p90": 0.04807580736315895,
+          "p99": 0.13270618827219433,
+          "max": 0.14398593446095168
+        },
+        "5": {
+          "count": 117,
+          "mean": 0.052043490021344854,
+          "p90": 0.13550842303453403,
+          "p99": 0.22103358650652785,
+          "max": 0.2392061791326703
+        },
+        "10": {
+          "count": 117,
+          "mean": 0.09790997912315988,
+          "p90": 0.2755357726514418,
+          "p99": 0.34543231647819733,
+          "max": 0.3567988926351079
+        }
+      }
+    },
+    {
+      "name": "provider_context_proportional",
+      "label": "Provider total with context + proportional demos",
+      "category": "provider total model",
+      "description": "Panel-trained total model adds objective and audience-strategy inputs.",
+      "total_error": {
+        "count": 351,
+        "mean": 0.03193879289553067,
+        "p90": 0.09631803437306495,
+        "p99": 0.24259446122768896,
+        "max": 0.3206979773411159
+      },
+      "demographic_reach_error": {
+        "count": 351,
+        "mean": 0.12523809166478364,
+        "p90": 0.2492831883406393,
+        "p99": 0.5548896939892831,
+        "max": 0.5997027019035704
+      },
+      "demographic_distribution_error": {
+        "count": 351,
+        "mean": 0.05609161244007384,
+        "p90": 0.12150630428076976,
+        "p99": 0.27938334598322917,
+        "max": 0.30314586752068634
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 117,
+          "mean": 0.017390655025080182,
+          "p90": 0.036272352138316276,
+          "p99": 0.06994091717745966,
+          "max": 0.07087054198400541
+        },
+        "5": {
+          "count": 117,
+          "mean": 0.019002718161131874,
+          "p90": 0.039866815687760536,
+          "p99": 0.07674174045882508,
+          "max": 0.10169011673358999
+        },
+        "10": {
+          "count": 117,
+          "mean": 0.05942300550037994,
+          "p90": 0.17837391406899575,
+          "p99": 0.2713776863354092,
+          "max": 0.3206979773411159
+        }
+      }
+    },
+    {
+      "name": "provider_context_fixed_demo",
+      "label": "Provider total + fixed panel demo adjustment",
+      "category": "provider total and demographic model",
+      "description": "Uses one panel-learned correction per demographic cell.",
+      "total_error": {
+        "count": 351,
+        "mean": 0.03193879289553067,
+        "p90": 0.09631803437306495,
+        "p99": 0.24259446122768896,
+        "max": 0.3206979773411159
+      },
+      "demographic_reach_error": {
+        "count": 351,
+        "mean": 0.11884561911528733,
+        "p90": 0.21093499767319485,
+        "p99": 0.49967025295276746,
+        "max": 0.5435962849857829
+      },
+      "demographic_distribution_error": {
+        "count": 351,
+        "mean": 0.05347289591313037,
+        "p90": 0.09605334670109555,
+        "p99": 0.252178127687934,
+        "max": 0.27594064922539124
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 117,
+          "mean": 0.017390655025080182,
+          "p90": 0.036272352138316276,
+          "p99": 0.06994091717745966,
+          "max": 0.07087054198400541
+        },
+        "5": {
+          "count": 117,
+          "mean": 0.019002718161131874,
+          "p90": 0.039866815687760536,
+          "p99": 0.07674174045882508,
+          "max": 0.10169011673358999
+        },
+        "10": {
+          "count": 117,
+          "mean": 0.05942300550037994,
+          "p90": 0.17837391406899575,
+          "p99": 0.2713776863354092,
+          "max": 0.3206979773411159
+        }
+      }
+    },
+    {
+      "name": "provider_context_learned_demo",
+      "label": "Provider total + contextual panel demo adjustment",
+      "category": "provider total and demographic model",
+      "description": "Adjusts VID demographic shares using panel and campaign context.",
+      "total_error": {
+        "count": 351,
+        "mean": 0.03193879289553067,
+        "p90": 0.09631803437306495,
+        "p99": 0.24259446122768896,
+        "max": 0.3206979773411159
+      },
+      "demographic_reach_error": {
+        "count": 351,
+        "mean": 0.06321009956800724,
+        "p90": 0.13169978127856996,
+        "p99": 0.24259446122768893,
+        "max": 0.32069797734111577
+      },
+      "demographic_distribution_error": {
+        "count": 351,
+        "mean": 0.025126310839949716,
+        "p90": 0.046343448080532555,
+        "p99": 0.0951894824835237,
+        "max": 0.11450987319867931
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 117,
+          "mean": 0.017390655025080182,
+          "p90": 0.036272352138316276,
+          "p99": 0.06994091717745966,
+          "max": 0.07087054198400541
+        },
+        "5": {
+          "count": 117,
+          "mean": 0.019002718161131874,
+          "p90": 0.039866815687760536,
+          "p99": 0.07674174045882508,
+          "max": 0.10169011673358999
+        },
+        "10": {
+          "count": 117,
+          "mean": 0.05942300550037994,
+          "p90": 0.17837391406899575,
+          "p99": 0.2713776863354092,
+          "max": 0.3206979773411159
+        }
+      }
+    },
+    {
+      "name": "oracle_total_proportional",
+      "label": "Oracle total + proportional demos",
+      "category": "diagnostic oracle",
+      "description": "Uses true synthetic total to isolate proportional allocation error.",
+      "total_error": {
+        "count": 351,
+        "mean": 0.0,
+        "p90": 0.0,
+        "p99": 0.0,
+        "max": 0.0
+      },
+      "demographic_reach_error": {
+        "count": 351,
+        "mean": 0.11218321063082404,
+        "p90": 0.24301260856153942,
+        "p99": 0.5587666919664582,
+        "max": 0.6062917350413728
+      },
+      "demographic_distribution_error": {
+        "count": 351,
+        "mean": 0.056091605315412026,
+        "p90": 0.12150630428076976,
+        "p99": 0.2793833459832291,
+        "max": 0.3031458675206864
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 117,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "5": {
+          "count": 117,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "10": {
+          "count": 117,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        }
+      }
+    },
+    {
+      "name": "oracle_total_learned_demo",
+      "label": "Oracle total + contextual panel demos",
+      "category": "diagnostic oracle",
+      "description": "Uses true synthetic total to isolate the remaining demographic-allocation error.",
+      "total_error": {
+        "count": 351,
+        "mean": 0.0,
+        "p90": 0.0,
+        "p99": 0.0,
+        "max": 0.0
+      },
+      "demographic_reach_error": {
+        "count": 351,
+        "mean": 0.049963872873271926,
+        "p90": 0.09268689616106524,
+        "p99": 0.19037896496704737,
+        "max": 0.2290197463973587
+      },
+      "demographic_distribution_error": {
+        "count": 351,
+        "mean": 0.024981936436635963,
+        "p90": 0.04634344808053261,
+        "p99": 0.09518948248352371,
+        "max": 0.11450987319867936
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 117,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "5": {
+          "count": 117,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "10": {
+          "count": 117,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        }
+      }
+    }
+  ],
+  "holdout_methods": [
+    {
+      "name": "existing_vid",
+      "label": "Existing VID",
+      "category": "baseline",
+      "description": "Existing population-rate total and existing VID demographics.",
+      "total_error": {
+        "count": 234,
+        "mean": 0.39791405542700037,
+        "p90": 1.037859977488211,
+        "p99": 2.9920099090082126,
+        "max": 3.0718783582250113
+      },
+      "demographic_reach_error": {
+        "count": 234,
+        "mean": 0.4166987373818597,
+        "p90": 1.0378599774882107,
+        "p99": 2.992009909008214,
+        "max": 3.0718783582250113
+      },
+      "demographic_distribution_error": {
+        "count": 234,
+        "mean": 0.055551797510682364,
+        "p90": 0.11662417151627402,
+        "p99": 0.2737063832339793,
+        "max": 0.2976712343477226
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 78,
+          "mean": 0.12442754944932546,
+          "p90": 0.3855076040630037,
+          "p99": 0.6187768181397116,
+          "max": 0.6243831607384053
+        },
+        "5": {
+          "count": 78,
+          "mean": 0.4182471168827361,
+          "p90": 1.0803182036705108,
+          "p99": 1.9859985782130256,
+          "max": 2.0061685973913734
+        },
+        "10": {
+          "count": 78,
+          "mean": 0.6510674999489398,
+          "p90": 1.8548854132126698,
+          "p99": 3.0408353251969595,
+          "max": 3.0718783582250113
+        }
+      }
+    },
+    {
+      "name": "direct_pair_proportional",
+      "label": "Direct pair inference + proportional demos",
+      "category": "measurement-layer calibration",
+      "description": "Calibrate pair overlaps, infer higher orders, then scale VID demographics proportionally.",
+      "total_error": {
+        "count": 234,
+        "mean": 0.11605777382713484,
+        "p90": 0.24407969826308887,
+        "p99": 1.0081176002778742,
+        "max": 1.0408155347677743
+      },
+      "demographic_reach_error": {
+        "count": 234,
+        "mean": 0.15836251202165488,
+        "p90": 0.24582946738241573,
+        "p99": 1.0081176002778742,
+        "max": 1.0408155347677748
+      },
+      "demographic_distribution_error": {
+        "count": 234,
+        "mean": 0.055375177265938894,
+        "p90": 0.11662417151627412,
+        "p99": 0.27370638323397933,
+        "max": 0.2976712343477226
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 78,
+          "mean": 0.028780347115851115,
+          "p90": 0.07896641824946043,
+          "p99": 0.16438628426413585,
+          "max": 0.17329196947038406
+        },
+        "5": {
+          "count": 78,
+          "mean": 0.11026046321356979,
+          "p90": 0.2531042827660036,
+          "p99": 0.5584490098630606,
+          "max": 0.5665815844990859
+        },
+        "10": {
+          "count": 78,
+          "mean": 0.20913251115198359,
+          "p90": 0.49588115832181817,
+          "p99": 1.025786993577011,
+          "max": 1.0408155347677743
+        }
+      }
+    },
+    {
+      "name": "mixture_pair_proportional",
+      "label": "Mixture pair inference + proportional demos",
+      "category": "measurement-layer calibration",
+      "description": "Use the matchability mixture for pair capture, infer higher orders, then scale demographics.",
+      "total_error": {
+        "count": 234,
+        "mean": 0.09737086180689422,
+        "p90": 0.2231004248463231,
+        "p99": 0.8533758035172005,
+        "max": 0.9051133124002751
+      },
+      "demographic_reach_error": {
+        "count": 234,
+        "mean": 0.1523381147490638,
+        "p90": 0.24173381502142066,
+        "p99": 0.8533758035172005,
+        "max": 0.9051133124002755
+      },
+      "demographic_distribution_error": {
+        "count": 234,
+        "mean": 0.055269948846898814,
+        "p90": 0.11662417151627412,
+        "p99": 0.27370638323397933,
+        "max": 0.29767123434772264
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 78,
+          "mean": 0.035037310573218135,
+          "p90": 0.08724896008328789,
+          "p99": 0.1696444872776688,
+          "max": 0.17829846309407915
+        },
+        "5": {
+          "count": 78,
+          "mean": 0.11336863956195299,
+          "p90": 0.24559045326029888,
+          "p99": 0.5454836795858864,
+          "max": 0.5530752939008993
+        },
+        "10": {
+          "count": 78,
+          "mean": 0.14370663528551153,
+          "p90": 0.33224126830598544,
+          "p99": 0.8965500764690634,
+          "max": 0.9051133124002751
+        }
+      }
+    },
+    {
+      "name": "provider_reference_proportional",
+      "label": "Provider total, Reference-ID inputs only + proportional demos",
+      "category": "provider total model",
+      "description": "Panel-trained total model without campaign objective or audience strategy.",
+      "total_error": {
+        "count": 234,
+        "mean": 0.06024005709272671,
+        "p90": 0.19141358795878574,
+        "p99": 0.3288983992279197,
+        "max": 0.37178394064503345
+      },
+      "demographic_reach_error": {
+        "count": 234,
+        "mean": 0.13961888390993635,
+        "p90": 0.2564817107928759,
+        "p99": 0.5337432036703423,
+        "max": 0.5775831286313432
+      },
+      "demographic_distribution_error": {
+        "count": 234,
+        "mean": 0.05553769907443687,
+        "p90": 0.11662417151627409,
+        "p99": 0.27370638323397933,
+        "max": 0.29767123434772264
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 78,
+          "mean": 0.026911034361467474,
+          "p90": 0.0541133781171347,
+          "p99": 0.139823196469489,
+          "max": 0.14735937296404097
+        },
+        "5": {
+          "count": 78,
+          "mean": 0.05233329724455784,
+          "p90": 0.14494868440035752,
+          "p99": 0.22267248154286584,
+          "max": 0.2388750962147547
+        },
+        "10": {
+          "count": 78,
+          "mean": 0.1014758396721548,
+          "p90": 0.2508933089302955,
+          "p99": 0.35340512895259285,
+          "max": 0.37178394064503345
+        }
+      }
+    },
+    {
+      "name": "provider_context_proportional",
+      "label": "Provider total with context + proportional demos",
+      "category": "provider total model",
+      "description": "Panel-trained total model adds objective and audience-strategy inputs.",
+      "total_error": {
+        "count": 234,
+        "mean": 0.03357043998317922,
+        "p90": 0.10543046950803517,
+        "p99": 0.23688317508015014,
+        "max": 0.2492056216614645
+      },
+      "demographic_reach_error": {
+        "count": 234,
+        "mean": 0.12405767078514116,
+        "p90": 0.23824730860127608,
+        "p99": 0.5468626072864715,
+        "max": 0.5906049021746755
+      },
+      "demographic_distribution_error": {
+        "count": 234,
+        "mean": 0.05554926247242057,
+        "p90": 0.11662417151627409,
+        "p99": 0.2737063832339793,
+        "max": 0.29767123434772264
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 78,
+          "mean": 0.018040943535572965,
+          "p90": 0.036938922001432936,
+          "p99": 0.0773091186377451,
+          "max": 0.08161350844277673
+        },
+        "5": {
+          "count": 78,
+          "mean": 0.020154637504643916,
+          "p90": 0.04519434217885145,
+          "p99": 0.086953993800791,
+          "max": 0.102802053950929
+        },
+        "10": {
+          "count": 78,
+          "mean": 0.06251573890932076,
+          "p90": 0.19627893272051292,
+          "p99": 0.2429534522798698,
+          "max": 0.2492056216614645
+        }
+      }
+    },
+    {
+      "name": "provider_context_fixed_demo",
+      "label": "Provider total + fixed panel demo adjustment",
+      "category": "provider total and demographic model",
+      "description": "Uses one panel-learned correction per demographic cell.",
+      "total_error": {
+        "count": 234,
+        "mean": 0.03357043998317922,
+        "p90": 0.10543046950803517,
+        "p99": 0.23688317508015014,
+        "max": 0.2492056216614645
+      },
+      "demographic_reach_error": {
+        "count": 234,
+        "mean": 0.1189497387564955,
+        "p90": 0.2107018563311262,
+        "p99": 0.49233126810157907,
+        "max": 0.5349750424229058
+      },
+      "demographic_distribution_error": {
+        "count": 234,
+        "mean": 0.05360253963020279,
+        "p90": 0.09027725462830323,
+        "p99": 0.24650116493868418,
+        "max": 0.2704660160524275
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 78,
+          "mean": 0.018040943535572965,
+          "p90": 0.036938922001432936,
+          "p99": 0.0773091186377451,
+          "max": 0.08161350844277673
+        },
+        "5": {
+          "count": 78,
+          "mean": 0.020154637504643916,
+          "p90": 0.04519434217885145,
+          "p99": 0.086953993800791,
+          "max": 0.102802053950929
+        },
+        "10": {
+          "count": 78,
+          "mean": 0.06251573890932076,
+          "p90": 0.19627893272051292,
+          "p99": 0.2429534522798698,
+          "max": 0.2492056216614645
+        }
+      }
+    },
+    {
+      "name": "provider_context_learned_demo",
+      "label": "Provider total + contextual panel demo adjustment",
+      "category": "provider total and demographic model",
+      "description": "Adjusts VID demographic shares using panel and campaign context.",
+      "total_error": {
+        "count": 234,
+        "mean": 0.03357043998317922,
+        "p90": 0.10543046950803517,
+        "p99": 0.23688317508015014,
+        "max": 0.2492056216614645
+      },
+      "demographic_reach_error": {
+        "count": 234,
+        "mean": 0.06537662524046993,
+        "p90": 0.13724508797292287,
+        "p99": 0.2368831750801501,
+        "max": 0.24920562166146454
+      },
+      "demographic_distribution_error": {
+        "count": 234,
+        "mean": 0.02523875290337051,
+        "p90": 0.04425951916108658,
+        "p99": 0.09473328935773875,
+        "max": 0.1100239497337758
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 78,
+          "mean": 0.018040943535572965,
+          "p90": 0.036938922001432936,
+          "p99": 0.0773091186377451,
+          "max": 0.08161350844277673
+        },
+        "5": {
+          "count": 78,
+          "mean": 0.020154637504643916,
+          "p90": 0.04519434217885145,
+          "p99": 0.086953993800791,
+          "max": 0.102802053950929
+        },
+        "10": {
+          "count": 78,
+          "mean": 0.06251573890932076,
+          "p90": 0.19627893272051292,
+          "p99": 0.2429534522798698,
+          "max": 0.2492056216614645
+        }
+      }
+    },
+    {
+      "name": "oracle_total_proportional",
+      "label": "Oracle total + proportional demos",
+      "category": "diagnostic oracle",
+      "description": "Uses true synthetic total to isolate proportional allocation error.",
+      "total_error": {
+        "count": 234,
+        "mean": 0.0,
+        "p90": 0.0,
+        "p99": 0.0,
+        "max": 0.0
+      },
+      "demographic_reach_error": {
+        "count": 234,
+        "mean": 0.11110359502136476,
+        "p90": 0.23324834303254804,
+        "p99": 0.5474127664679586,
+        "max": 0.5953424686954454
+      },
+      "demographic_distribution_error": {
+        "count": 234,
+        "mean": 0.055551797510682385,
+        "p90": 0.11662417151627406,
+        "p99": 0.27370638323397933,
+        "max": 0.2976712343477226
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 78,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "5": {
+          "count": 78,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "10": {
+          "count": 78,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        }
+      }
+    },
+    {
+      "name": "oracle_total_learned_demo",
+      "label": "Oracle total + contextual panel demos",
+      "category": "diagnostic oracle",
+      "description": "Uses true synthetic total to isolate the remaining demographic-allocation error.",
+      "total_error": {
+        "count": 234,
+        "mean": 0.0,
+        "p90": 0.0,
+        "p99": 0.0,
+        "max": 0.0
+      },
+      "demographic_reach_error": {
+        "count": 234,
+        "mean": 0.0503815398887471,
+        "p90": 0.08851903832217316,
+        "p99": 0.18946657871547745,
+        "max": 0.22004789946755174
+      },
+      "demographic_distribution_error": {
+        "count": 234,
+        "mean": 0.02519076994437355,
+        "p90": 0.04425951916108657,
+        "p99": 0.09473328935773873,
+        "max": 0.11002394973377588
+      },
+      "total_error_by_edp_count": {
+        "2": {
+          "count": 78,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "5": {
+          "count": 78,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "10": {
+          "count": 78,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        }
+      }
+    }
+  ],
+  "scenario_summary": {
+    "broad_awareness_control": {
+      "existing_vid": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0044039174986930645,
+          "p90": 0.008681728916958868,
+          "p99": 0.023055832664099368,
+          "max": 0.024324483351727336
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.03487340950486342,
+          "p90": 0.05799110511370831,
+          "p99": 0.06199120640351566,
+          "max": 0.06233952610535905
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.017364830097092648,
+          "p90": 0.029234610478187633,
+          "p99": 0.030889570705497874,
+          "max": 0.030997921056937563
+        }
+      },
+      "direct_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.020878520486092622,
+          "p90": 0.04272963848506736,
+          "p99": 0.09677287982434096,
+          "max": 0.10735336941989657
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.03829352234108071,
+          "p90": 0.06226377049105222,
+          "p99": 0.09739948669654756,
+          "max": 0.1073533694198967
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.015794918012966612,
+          "p90": 0.02923461047818764,
+          "p99": 0.03088957070549786,
+          "max": 0.03099792105693755
+        }
+      },
+      "mixture_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.03630576690782145,
+          "p90": 0.08215899298754364,
+          "p99": 0.08873654220843115,
+          "max": 0.08875583870890912
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.04640559011731498,
+          "p90": 0.08225360367231702,
+          "p99": 0.08873654220843126,
+          "max": 0.08875583870890925
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.013629671282947241,
+          "p90": 0.02923461047818764,
+          "p99": 0.030889570705497867,
+          "max": 0.03099792105693755
+        }
+      },
+      "provider_reference_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.03205005748619835,
+          "p90": 0.07895628010245978,
+          "p99": 0.15730449416055614,
+          "max": 0.16451372918415633
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.05346105391081727,
+          "p90": 0.09431309424008134,
+          "p99": 0.15737909676103728,
+          "max": 0.16451372918415633
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.017257552433667493,
+          "p90": 0.02923461047818764,
+          "p99": 0.030889570705497898,
+          "max": 0.03099792105693759
+        }
+      },
+      "provider_context_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.02980220028725388,
+          "p90": 0.07248102146203941,
+          "p99": 0.11766135302466048,
+          "max": 0.11804097199661913
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.05046543289719999,
+          "p90": 0.08883467012457526,
+          "p99": 0.11963261082455409,
+          "max": 0.11994874287621399
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.01736483009709265,
+          "p90": 0.029234610478187626,
+          "p99": 0.030889570705497874,
+          "max": 0.030997921056937563
+        }
+      },
+      "provider_context_fixed_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.02980220028725388,
+          "p90": 0.07248102146203941,
+          "p99": 0.11766135302466048,
+          "max": 0.11804097199661913
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.07317477135924513,
+          "p90": 0.13268832815847542,
+          "p99": 0.15086740913775773,
+          "max": 0.15204537339004676
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.032178150635617096,
+          "p90": 0.05197309447307582,
+          "p99": 0.05384183728598127,
+          "max": 0.054463998095515394
+        }
+      },
+      "provider_context_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.02980220028725388,
+          "p90": 0.07248102146203941,
+          "p99": 0.11766135302466048,
+          "max": 0.11804097199661913
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.0389744406783379,
+          "p90": 0.08395581901185369,
+          "p99": 0.1252195219801166,
+          "max": 0.12588630074545776
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.012842350830421699,
+          "p90": 0.029818199596297088,
+          "p99": 0.03374718037865255,
+          "max": 0.034136915344830966
+        }
+      },
+      "oracle_total_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.034729474952978394,
+          "p90": 0.05846922095637527,
+          "p99": 0.06177914141099574,
+          "max": 0.06199584211387511
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.017364737476489204,
+          "p90": 0.02923461047818764,
+          "p99": 0.03088957070549787,
+          "max": 0.030997921056937557
+        }
+      },
+      "oracle_total_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.022165292121423687,
+          "p90": 0.05963639919259417,
+          "p99": 0.06749436075730501,
+          "max": 0.06827383068966184
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.011082646060711852,
+          "p90": 0.02981819959629711,
+          "p99": 0.03374718037865255,
+          "max": 0.03413691534483096
+        }
+      }
+    },
+    "traffic_optimization": {
+      "existing_vid": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.06159111982788303,
+          "p90": 0.11027720763779175,
+          "p99": 0.1118113125036323,
+          "max": 0.11205647105658448
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.07222561483663205,
+          "p90": 0.11027720763779175,
+          "p99": 0.11181131250363238,
+          "max": 0.11205647105658458
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.018166782767164328,
+          "p90": 0.02195978762559902,
+          "p99": 0.04049194573603128,
+          "max": 0.04588772484040576
+        }
+      },
+      "direct_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.059858781324051945,
+          "p90": 0.1326387940803573,
+          "p99": 0.1377779733232464,
+          "max": 0.13834297077753993
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.07258788675945088,
+          "p90": 0.13263879408035745,
+          "p99": 0.1377779733232465,
+          "max": 0.13834297077754001
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.018875832417000762,
+          "p90": 0.021959787625599032,
+          "p99": 0.040491945736031265,
+          "max": 0.04588772484040575
+        }
+      },
+      "mixture_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0527672973587816,
+          "p90": 0.0896035440495717,
+          "p99": 0.09374229660963103,
+          "max": 0.0937802657872798
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.06549415138076757,
+          "p90": 0.09132363782527145,
+          "p99": 0.09374229660963114,
+          "max": 0.09378026578727994
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.018164480926185975,
+          "p90": 0.021959787625599015,
+          "p99": 0.04049194573603126,
+          "max": 0.045887724840405736
+        }
+      },
+      "provider_reference_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.047138326257834935,
+          "p90": 0.1083939863200484,
+          "p99": 0.2708346600592454,
+          "max": 0.2787154194851297
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.06440981725979056,
+          "p90": 0.13080865878513367,
+          "p99": 0.2708346600592452,
+          "max": 0.27871541948512946
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.018166782767164328,
+          "p90": 0.02195978762559901,
+          "p99": 0.040491945736031286,
+          "max": 0.04588772484040577
+        }
+      },
+      "provider_context_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.02049300132343659,
+          "p90": 0.05283350289177795,
+          "p99": 0.14428362498458183,
+          "max": 0.1550216966603825
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.04596885110219396,
+          "p90": 0.09252506925352984,
+          "p99": 0.14428362498458194,
+          "max": 0.15502169666038268
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.01816678276716433,
+          "p90": 0.021959787625599015,
+          "p99": 0.04049194573603128,
+          "max": 0.045887724840405764
+        }
+      },
+      "provider_context_fixed_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.02049300132343659,
+          "p90": 0.05283350289177795,
+          "p99": 0.14428362498458183,
+          "max": 0.1550216966603825
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.07344967564704397,
+          "p90": 0.10483634445643164,
+          "p99": 0.14464400461924554,
+          "max": 0.15502169666038246
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03270390109595515,
+          "p90": 0.03800681267609104,
+          "p99": 0.05005995754569219,
+          "max": 0.05394807148463489
+        }
+      },
+      "provider_context_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.02049300132343659,
+          "p90": 0.05283350289177795,
+          "p99": 0.14428362498458183,
+          "max": 0.1550216966603825
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.03790555391060238,
+          "p90": 0.09446957597770725,
+          "p99": 0.14428362498458175,
+          "max": 0.15502169666038237
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.01426602693727511,
+          "p90": 0.024230399760243354,
+          "p99": 0.04263098753823699,
+          "max": 0.04708824544729664
+        }
+      },
+      "oracle_total_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.03633356553432864,
+          "p90": 0.04391957525119802,
+          "p99": 0.08098389147206254,
+          "max": 0.0917754496808115
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.01816678276716432,
+          "p90": 0.02195978762559902,
+          "p99": 0.04049194573603126,
+          "max": 0.045887724840405736
+        }
+      },
+      "oracle_total_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.028532053874550226,
+          "p90": 0.048460799520486694,
+          "p99": 0.08526197507647404,
+          "max": 0.09417649089459335
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.014266026937275113,
+          "p90": 0.02423039976024336,
+          "p99": 0.042630987538237006,
+          "max": 0.04708824544729666
+        }
+      }
+    },
+    "video_engagement_retargeting": {
+      "existing_vid": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.40071167791465573,
+          "p90": 0.8140826586539262,
+          "p99": 0.8315647868882193,
+          "max": 0.8318802099707309
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.41770330086682145,
+          "p90": 0.8140826586539262,
+          "p99": 0.8315647868882196,
+          "max": 0.831880209970731
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.11277881476695757,
+          "p90": 0.19208628619070753,
+          "p99": 0.1959799269032565,
+          "max": 0.19599045566540776
+        }
+      },
+      "direct_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.21294854047293743,
+          "p90": 0.4758149616430598,
+          "p99": 0.48226758698738525,
+          "max": 0.4826042627496332
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.256117975956617,
+          "p90": 0.49689666035865854,
+          "p99": 0.5136551488010342,
+          "max": 0.5147332025189922
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.11277881476695759,
+          "p90": 0.19208628619070756,
+          "p99": 0.19597992690325647,
+          "max": 0.19599045566540774
+        }
+      },
+      "mixture_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.1906700778378019,
+          "p90": 0.39839359821886094,
+          "p99": 0.4064180704778396,
+          "max": 0.40680777011408026
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.2461913292523643,
+          "p90": 0.47591878866681525,
+          "p99": 0.4936967252740765,
+          "max": 0.49457514680756076
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.11277881476695757,
+          "p90": 0.19208628619070753,
+          "p99": 0.19597992690325647,
+          "max": 0.19599045566540774
+        }
+      },
+      "provider_reference_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.05950184724696169,
+          "p90": 0.15262074743416779,
+          "p99": 0.29692159824582753,
+          "max": 0.3031216059504335
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.24246857464470203,
+          "p90": 0.3951341150370508,
+          "p99": 0.39962948797554765,
+          "max": 0.3999813076778409
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.11277881476695756,
+          "p90": 0.1920862861907075,
+          "p99": 0.19597992690325647,
+          "max": 0.19599045566540774
+        }
+      },
+      "provider_context_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.035222535228524005,
+          "p90": 0.08871937487613016,
+          "p99": 0.1924339813809999,
+          "max": 0.1977377931153685
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.24188831389393903,
+          "p90": 0.3859166626330437,
+          "p99": 0.39540093467673465,
+          "max": 0.3957491775255862
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.11277881476695757,
+          "p90": 0.19208628619070753,
+          "p99": 0.19597992690325647,
+          "max": 0.19599045566540774
+        }
+      },
+      "provider_context_fixed_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.035222535228524005,
+          "p90": 0.08871937487613016,
+          "p99": 0.1924339813809999,
+          "max": 0.1977377931153685
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.1918469897287563,
+          "p90": 0.32748163117139867,
+          "p99": 0.33959750233579084,
+          "max": 0.34049270731214737
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.08713632277381465,
+          "p90": 0.1633297661324566,
+          "p99": 0.16829770054351695,
+          "max": 0.16868048633564858
+        }
+      },
+      "provider_context_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.035222535228524005,
+          "p90": 0.08871937487613016,
+          "p99": 0.1924339813809999,
+          "max": 0.1977377931153685
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.08780428974175522,
+          "p90": 0.14277604595264112,
+          "p99": 0.19243398138099982,
+          "max": 0.19773779311536843
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.04003837764919606,
+          "p90": 0.06137740238859308,
+          "p99": 0.06683983084232405,
+          "max": 0.06771810270733208
+        }
+      },
+      "oracle_total_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.22555762953391512,
+          "p90": 0.38417257238141506,
+          "p99": 0.39195985380651294,
+          "max": 0.3919809113308155
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.11277881476695757,
+          "p90": 0.19208628619070753,
+          "p99": 0.19597992690325647,
+          "max": 0.19599045566540774
+        }
+      },
+      "oracle_total_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.08007675529839214,
+          "p90": 0.12275480477718621,
+          "p99": 0.13367966168464807,
+          "max": 0.1354362054146641
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.04003837764919607,
+          "p90": 0.06137740238859311,
+          "p99": 0.06683983084232402,
+          "max": 0.06771810270733204
+        }
+      }
+    },
+    "lead_generation": {
+      "existing_vid": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.3571032080737584,
+          "p90": 0.759663489833427,
+          "p99": 0.7795077171012883,
+          "max": 0.7809187591561284
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.36735528068328116,
+          "p90": 0.7596634898334271,
+          "p99": 0.7795077171012883,
+          "max": 0.7809187591561284
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.030697587001832918,
+          "p90": 0.03424843188880021,
+          "p99": 0.06536903309623582,
+          "max": 0.06804276405640713
+        }
+      },
+      "direct_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.04736398268586261,
+          "p90": 0.11688950655881376,
+          "p99": 0.14394830219207497,
+          "max": 0.14596271932986474
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.08145875156985974,
+          "p90": 0.12509140343756786,
+          "p99": 0.14394830219207516,
+          "max": 0.14596271932986496
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.030697587001832925,
+          "p90": 0.0342484318888002,
+          "p99": 0.06536903309623583,
+          "max": 0.06804276405640715
+        }
+      },
+      "mixture_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.01847441643080217,
+          "p90": 0.03892663756592874,
+          "p99": 0.10025209176386922,
+          "max": 0.11350514793948903
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.06724541215852792,
+          "p90": 0.09638277470614937,
+          "p99": 0.13251476748608898,
+          "max": 0.13626350774767765
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.030697587001832925,
+          "p90": 0.034248431888800224,
+          "p99": 0.06536903309623583,
+          "max": 0.06804276405640716
+        }
+      },
+      "provider_reference_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.1103426118364781,
+          "p90": 0.2056947324732441,
+          "p99": 0.3543035698158338,
+          "max": 0.3567988926351079
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.13389585646133334,
+          "p90": 0.2116443867843275,
+          "p99": 0.3543035698158338,
+          "max": 0.3567988926351079
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03069758700183292,
+          "p90": 0.03424843188880022,
+          "p99": 0.06536903309623582,
+          "max": 0.06804276405640715
+        }
+      },
+      "provider_context_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0331238213547376,
+          "p90": 0.07345724677687146,
+          "p99": 0.24059557624155312,
+          "max": 0.2609464305056131
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.07835110271205746,
+          "p90": 0.1399853986430106,
+          "p99": 0.24123600230927883,
+          "max": 0.2609464305056131
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.030697587001832925,
+          "p90": 0.0342484318888002,
+          "p99": 0.06536903309623582,
+          "max": 0.06804276405640715
+        }
+      },
+      "provider_context_fixed_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0331238213547376,
+          "p90": 0.07345724677687146,
+          "p99": 0.24059557624155312,
+          "max": 0.2609464305056131
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.11992873631688189,
+          "p90": 0.16069704414077493,
+          "p99": 0.241978291131915,
+          "max": 0.2609464305056131
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.053163655495736664,
+          "p90": 0.05697628614016805,
+          "p99": 0.07741276096237355,
+          "max": 0.08064632395158665
+        }
+      },
+      "provider_context_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0331238213547376,
+          "p90": 0.07345724677687146,
+          "p99": 0.24059557624155312,
+          "max": 0.2609464305056131
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.06375740974649603,
+          "p90": 0.129488279269676,
+          "p99": 0.24059557624155287,
+          "max": 0.26094643050561284
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.022553684227781066,
+          "p90": 0.03696319932508125,
+          "p99": 0.05985308642410308,
+          "max": 0.060987039787819164
+        }
+      },
+      "oracle_total_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.061395174003665835,
+          "p90": 0.06849686377760042,
+          "p99": 0.13073806619247164,
+          "max": 0.13608552811281427
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.030697587001832925,
+          "p90": 0.03424843188880023,
+          "p99": 0.0653690330962358,
+          "max": 0.06804276405640712
+        }
+      },
+      "oracle_total_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.045107368455562125,
+          "p90": 0.07392639865016254,
+          "p99": 0.1197061728482062,
+          "max": 0.12197407957563837
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.022553684227781066,
+          "p90": 0.03696319932508127,
+          "p99": 0.05985308642410309,
+          "max": 0.06098703978781918
+        }
+      }
+    },
+    "sales_prospecting": {
+      "existing_vid": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.32985253529955266,
+          "p90": 0.6662679724032694,
+          "p99": 0.6734443738888125,
+          "max": 0.6745436426426568
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.3402698836926786,
+          "p90": 0.6662679724032695,
+          "p99": 0.673444373888813,
+          "max": 0.6745436426426572
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.06172706854999133,
+          "p90": 0.09816084494943102,
+          "p99": 0.10350543553004879,
+          "max": 0.10430842234770485
+        }
+      },
+      "direct_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.05697013361470789,
+          "p90": 0.1410201218073365,
+          "p99": 0.15773995082668377,
+          "max": 0.15948076723177057
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.12854581078497007,
+          "p90": 0.2333677523971948,
+          "p99": 0.2423546614613055,
+          "max": 0.2436593526984696
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.061727068549991354,
+          "p90": 0.09816084494943104,
+          "p99": 0.10350543553004878,
+          "max": 0.10430842234770485
+        }
+      },
+      "mixture_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.03473389785356964,
+          "p90": 0.07919105178812254,
+          "p99": 0.10268645117747657,
+          "max": 0.10271544843988704
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.1226613588700851,
+          "p90": 0.21644269590636978,
+          "p99": 0.2243464595572783,
+          "max": 0.2251250139636557
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.061727068549991354,
+          "p90": 0.09816084494943104,
+          "p99": 0.10350543553004879,
+          "max": 0.10430842234770486
+        }
+      },
+      "provider_reference_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.06869096797321897,
+          "p90": 0.16120470007335386,
+          "p99": 0.3257442763799247,
+          "max": 0.33519675085795414
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.16410744766199278,
+          "p90": 0.23458484353853537,
+          "p99": 0.3284878252340658,
+          "max": 0.33588938007993363
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.061727068549991354,
+          "p90": 0.09816084494943104,
+          "p99": 0.10350543553004879,
+          "max": 0.10430842234770485
+        }
+      },
+      "provider_context_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.025365408620739525,
+          "p90": 0.06806678715180957,
+          "p99": 0.1630575235340789,
+          "max": 0.16711763090845166
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.13328008283114354,
+          "p90": 0.20069021284195263,
+          "p99": 0.2083263629957109,
+          "max": 0.20833399924453297
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.06172706854999133,
+          "p90": 0.09816084494943104,
+          "p99": 0.10350543553004878,
+          "max": 0.10430842234770484
+        }
+      },
+      "provider_context_fixed_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.025365408620739525,
+          "p90": 0.06806678715180957,
+          "p99": 0.1630575235340789,
+          "max": 0.16711763090845166
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.09122742756287162,
+          "p90": 0.15173850104469916,
+          "p99": 0.17299124622895415,
+          "max": 0.1741660445144715
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03989105245538447,
+          "p90": 0.06937862257301182,
+          "p99": 0.0747232131536296,
+          "max": 0.07552619997128568
+        }
+      },
+      "provider_context_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.025365408620739525,
+          "p90": 0.06806678715180957,
+          "p99": 0.1630575235340789,
+          "max": 0.16711763090845166
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.05371307730837617,
+          "p90": 0.09606781011286711,
+          "p99": 0.16305752353407882,
+          "max": 0.16711763090845158
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.022673632326828504,
+          "p90": 0.036097934268257734,
+          "p99": 0.039310164866920926,
+          "max": 0.03933037792876159
+        }
+      },
+      "oracle_total_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.12345413709998267,
+          "p90": 0.1963216898988621,
+          "p99": 0.2070108710600976,
+          "max": 0.20861684469540973
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.06172706854999136,
+          "p90": 0.09816084494943103,
+          "p99": 0.10350543553004879,
+          "max": 0.10430842234770486
+        }
+      },
+      "oracle_total_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.04534726465365701,
+          "p90": 0.07219586853651547,
+          "p99": 0.07862032973384193,
+          "max": 0.07866075585752323
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.0226736323268285,
+          "p90": 0.036097934268257734,
+          "p99": 0.03931016486692095,
+          "max": 0.0393303779287616
+        }
+      }
+    },
+    "website_retargeting": {
+      "existing_vid": {
+        "total_error": {
+          "count": 27,
+          "mean": 1.0051862900616115,
+          "p90": 2.215251961417574,
+          "p99": 2.2684448518147975,
+          "max": 2.273802634999608
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 1.0273418747905392,
+          "p90": 2.215251961417574,
+          "p99": 2.268444851814798,
+          "max": 2.2738026349996083
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.16347548442109772,
+          "p90": 0.2884486639992032,
+          "p99": 0.3018008028168053,
+          "max": 0.30314586752068634
+        }
+      },
+      "direct_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.23466115755572226,
+          "p90": 0.5553399978210203,
+          "p99": 0.6070614511762374,
+          "max": 0.6117054683129708
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.3152884971729808,
+          "p90": 0.5583893940621949,
+          "p99": 0.6070614511762379,
+          "max": 0.6117054683129711
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.16347548442109783,
+          "p90": 0.2884486639992032,
+          "p99": 0.30180080281680544,
+          "max": 0.30314586752068645
+        }
+      },
+      "mixture_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.11729262880808243,
+          "p90": 0.21734492730011817,
+          "p99": 0.2289528542335476,
+          "max": 0.2320059528347435
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.28806851776104425,
+          "p90": 0.5275818238854746,
+          "p99": 0.5650270879734821,
+          "max": 0.5713955387958408
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.16347548442109783,
+          "p90": 0.2884486639992032,
+          "p99": 0.30180080281680544,
+          "max": 0.30314586752068645
+        }
+      },
+      "provider_reference_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.05478791550498866,
+          "p90": 0.10761341926735697,
+          "p99": 0.3289812722699627,
+          "max": 0.33614411781283604
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.34205494676249587,
+          "p90": 0.569056447703227,
+          "p99": 0.5991682691814156,
+          "max": 0.6012997667163585
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.1634754844210978,
+          "p90": 0.28844866399920327,
+          "p99": 0.3018008028168054,
+          "max": 0.3031458675206864
+        }
+      },
+      "provider_context_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.04895706384716281,
+          "p90": 0.11677506801201272,
+          "p99": 0.29923279603484015,
+          "max": 0.3206979773411159
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.3473705332140611,
+          "p90": 0.5736052746858196,
+          "p99": 0.5973393521201115,
+          "max": 0.5997027019035704
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.16347548442109783,
+          "p90": 0.28844866399920327,
+          "p99": 0.3018008028168053,
+          "max": 0.30314586752068634
+        }
+      },
+      "provider_context_fixed_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.04895706384716281,
+          "p90": 0.11677506801201272,
+          "p99": 0.29923279603484015,
+          "max": 0.3206979773411159
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.2952105124229178,
+          "p90": 0.5183801446319674,
+          "p99": 0.5413170464524203,
+          "max": 0.5435962849857829
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.13669205555040995,
+          "p90": 0.26124344570390806,
+          "p99": 0.27459558452151017,
+          "max": 0.27594064922539124
+        }
+      },
+      "provider_context_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.04895706384716281,
+          "p90": 0.11677506801201272,
+          "p99": 0.29923279603484015,
+          "max": 0.3206979773411159
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.11350703313861941,
+          "p90": 0.20778511192143181,
+          "p99": 0.29923279603484004,
+          "max": 0.32069797734111577
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.047628368067441626,
+          "p90": 0.10049113621567521,
+          "p99": 0.11342306627095557,
+          "max": 0.11450987319867931
+        }
+      },
+      "oracle_total_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.3269509688421956,
+          "p90": 0.5768973279984064,
+          "p99": 0.6036016056336108,
+          "max": 0.6062917350413728
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.1634754844210978,
+          "p90": 0.28844866399920327,
+          "p99": 0.3018008028168054,
+          "max": 0.3031458675206864
+        }
+      },
+      "oracle_total_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.09525673613488327,
+          "p90": 0.20098227243135044,
+          "p99": 0.22684613254191113,
+          "max": 0.2290197463973587
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.04762836806744163,
+          "p90": 0.10049113621567522,
+          "p99": 0.11342306627095558,
+          "max": 0.11450987319867936
+        }
+      }
+    },
+    "crm_customer_list": {
+      "existing_vid": {
+        "total_error": {
+          "count": 27,
+          "mean": 1.3318365569790767,
+          "p90": 2.988468649213493,
+          "p99": 3.062034547592199,
+          "max": 3.0651031862479314
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 1.3344548406801513,
+          "p90": 2.9884686492134938,
+          "p99": 3.0620345475921997,
+          "max": 3.0651031862479323
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03654726373541906,
+          "p90": 0.04420963161472747,
+          "p99": 0.045961238118300315,
+          "max": 0.04629562920235296
+        }
+      },
+      "direct_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.14600848730486676,
+          "p90": 0.24484083094147,
+          "p99": 0.25594993121064225,
+          "max": 0.25604810568996234
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.16122321357922717,
+          "p90": 0.24484083094146994,
+          "p99": 0.25594993121064225,
+          "max": 0.25604810568996234
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03654726373541906,
+          "p90": 0.04420963161472748,
+          "p99": 0.045961238118300315,
+          "max": 0.04629562920235297
+        }
+      },
+      "mixture_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.18492528996127966,
+          "p90": 0.27439213194162837,
+          "p99": 0.3214713949005735,
+          "max": 0.327590697809155
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.1945354068212209,
+          "p90": 0.2743921319416283,
+          "p99": 0.3214713949005734,
+          "max": 0.3275906978091549
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03654726373541906,
+          "p90": 0.04420963161472748,
+          "p99": 0.04596123811830032,
+          "max": 0.04629562920235297
+        }
+      },
+      "provider_reference_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.055026266682472784,
+          "p90": 0.14018416987188032,
+          "p99": 0.17999997113681776,
+          "max": 0.1834824478136358
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.09517988256681792,
+          "p90": 0.14593372832498652,
+          "p99": 0.1806103570363919,
+          "max": 0.18348244781363582
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03654726373541906,
+          "p90": 0.044209631614727476,
+          "p99": 0.045961238118300295,
+          "max": 0.04629562920235293
+        }
+      },
+      "provider_context_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.03482760991833882,
+          "p90": 0.0743868145709163,
+          "p99": 0.14904788363783206,
+          "max": 0.16568709903661996
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.08327745670461553,
+          "p90": 0.10349841068315013,
+          "p99": 0.16170011947369195,
+          "max": 0.17734042510763498
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03654726373541907,
+          "p90": 0.04420963161472749,
+          "p99": 0.04596123811830036,
+          "max": 0.046295629202353014
+        }
+      },
+      "provider_context_fixed_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.03482760991833882,
+          "p90": 0.0743868145709163,
+          "p99": 0.14904788363783206,
+          "max": 0.16568709903661996
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.06962882166612976,
+          "p90": 0.09113303593296439,
+          "p99": 0.15043567875767627,
+          "max": 0.1675624978472203
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.028931253719347374,
+          "p90": 0.032889178396598884,
+          "p99": 0.04163952951892913,
+          "max": 0.044344336965197705
+        }
+      },
+      "provider_context_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.03482760991833882,
+          "p90": 0.0743868145709163,
+          "p99": 0.14904788363783206,
+          "max": 0.16568709903661996
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.05670140008210769,
+          "p90": 0.09690834171512652,
+          "p99": 0.149047883637832,
+          "max": 0.16568709903661993
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.02030829145881736,
+          "p90": 0.03029204516722977,
+          "p99": 0.039318272521280284,
+          "max": 0.041695005521010374
+        }
+      },
+      "oracle_total_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.0730945274708381,
+          "p90": 0.08841926322945493,
+          "p99": 0.09192247623660064,
+          "max": 0.09259125840470593
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03654726373541907,
+          "p90": 0.044209631614727476,
+          "p99": 0.04596123811830036,
+          "max": 0.046295629202353014
+        }
+      },
+      "oracle_total_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.04061658291763473,
+          "p90": 0.06058409033445952,
+          "p99": 0.07863654504256058,
+          "max": 0.08339001104202076
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.02030829145881736,
+          "p90": 0.030292045167229758,
+          "p99": 0.0393182725212803,
+          "max": 0.04169500552101039
+        }
+      }
+    },
+    "catalog_retargeting": {
+      "existing_vid": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.40713008710023685,
+          "p90": 0.852715574408074,
+          "p99": 0.877077781522434,
+          "max": 0.8783888717416362
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.4343534668936474,
+          "p90": 0.8527155744080742,
+          "p99": 0.877077781522434,
+          "max": 0.8783888717416362
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.079715523300603,
+          "p90": 0.11588069620209526,
+          "p99": 0.14167611861732993,
+          "max": 0.14739010384122792
+        }
+      },
+      "direct_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.07439139007848501,
+          "p90": 0.20269330974301328,
+          "p99": 0.2226897184374567,
+          "max": 0.2262544104446061
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.17020685745938344,
+          "p90": 0.2273181581362394,
+          "p99": 0.281577933636058,
+          "max": 0.2929057181575393
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.07971552330060303,
+          "p90": 0.11588069620209536,
+          "p99": 0.14167611861732998,
+          "max": 0.14739010384122797
+        }
+      },
+      "mixture_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.01875196787597139,
+          "p90": 0.03001848990705594,
+          "p99": 0.04507380618191022,
+          "max": 0.04907571533591586
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.15627508774035478,
+          "p90": 0.22485292971586485,
+          "p99": 0.28222519597835016,
+          "max": 0.2931890653036534
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.079715523300603,
+          "p90": 0.11588069620209528,
+          "p99": 0.14167611861732995,
+          "max": 0.14739010384122797
+        }
+      },
+      "provider_reference_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.048487946535387155,
+          "p90": 0.14035795018975353,
+          "p99": 0.21917541201557617,
+          "max": 0.22264170900766492
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.17458458035657554,
+          "p90": 0.24675463828085933,
+          "p99": 0.28646930487320393,
+          "max": 0.29147260136214254
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.07971552330060303,
+          "p90": 0.1158806962020953,
+          "p99": 0.14167611861732998,
+          "max": 0.14739010384122797
+        }
+      },
+      "provider_context_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.03301603922447846,
+          "p90": 0.07938467878927902,
+          "p99": 0.18015704607789568,
+          "max": 0.18023786979255313
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.16644983301684407,
+          "p90": 0.24541555236771048,
+          "p99": 0.2807618034532003,
+          "max": 0.29147260136214254
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.07971552330060303,
+          "p90": 0.1158806962020953,
+          "p99": 0.14167611861732998,
+          "max": 0.14739010384122797
+        }
+      },
+      "provider_context_fixed_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.03301603922447846,
+          "p90": 0.07938467878927902,
+          "p99": 0.18015704607789568,
+          "max": 0.18023786979255313
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.11817632565086907,
+          "p90": 0.19340122059170278,
+          "p99": 0.23932936927453277,
+          "max": 0.24745735159239082
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.05351750767889736,
+          "p90": 0.08915622093903303,
+          "p99": 0.11927105452766712,
+          "max": 0.12572216430163885
+        }
+      },
+      "provider_context_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.03301603922447846,
+          "p90": 0.07938467878927902,
+          "p99": 0.18015704607789568,
+          "max": 0.18023786979255313
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.07416597683889956,
+          "p90": 0.14895881961748558,
+          "p99": 0.18808834255495968,
+          "max": 0.18979477929903857
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.0330077567137599,
+          "p90": 0.04966046727392204,
+          "p99": 0.0874165221818454,
+          "max": 0.09407647287274577
+        }
+      },
+      "oracle_total_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.15943104660120605,
+          "p90": 0.2317613924041906,
+          "p99": 0.2833522372346599,
+          "max": 0.29478020768245594
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.07971552330060303,
+          "p90": 0.1158806962020953,
+          "p99": 0.14167611861732993,
+          "max": 0.14739010384122794
+        }
+      },
+      "oracle_total_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.0660155134275198,
+          "p90": 0.0993209345478441,
+          "p99": 0.17483304436369074,
+          "max": 0.1881529457454915
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.033007756713759905,
+          "p90": 0.04966046727392204,
+          "p99": 0.0874165221818454,
+          "max": 0.09407647287274577
+        }
+      }
+    },
+    "lookalike_prospecting": {
+      "existing_vid": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.18179785487335745,
+          "p90": 0.33171244176808856,
+          "p99": 0.33488791503572735,
+          "max": 0.33560620817928993
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.1940075456552914,
+          "p90": 0.33171244176808856,
+          "p99": 0.33488791503572746,
+          "max": 0.33560620817929004
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.05284373071412297,
+          "p90": 0.07935018372954754,
+          "p99": 0.08107626380061225,
+          "max": 0.08117535767028593
+        }
+      },
+      "direct_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.07343867071440091,
+          "p90": 0.16671794079428423,
+          "p99": 0.16969510259622125,
+          "max": 0.16978369606974836
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.11823519319612084,
+          "p90": 0.2134754767900254,
+          "p99": 0.21963290579471054,
+          "max": 0.22105703530024148
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.05284373071412299,
+          "p90": 0.07935018372954754,
+          "p99": 0.08107626380061227,
+          "max": 0.08117535767028594
+        }
+      },
+      "mixture_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0671674855848335,
+          "p90": 0.12508958724657168,
+          "p99": 0.131693911474738,
+          "max": 0.1331889709251402
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.116324686870883,
+          "p90": 0.1964957679108188,
+          "p99": 0.20372914592442426,
+          "max": 0.20537820489218253
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.05284373071412297,
+          "p90": 0.07935018372954754,
+          "p99": 0.08107626380061222,
+          "max": 0.0811753576702859
+        }
+      },
+      "provider_reference_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.04026617753071369,
+          "p90": 0.10450248961362929,
+          "p99": 0.2810842025134657,
+          "max": 0.28433217103258934
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.12554530134602965,
+          "p90": 0.18564158101867068,
+          "p99": 0.281892183356919,
+          "max": 0.28433217103258934
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.05284373071412297,
+          "p90": 0.07935018372954754,
+          "p99": 0.08107626380061224,
+          "max": 0.08117535767028591
+        }
+      },
+      "provider_context_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.02275448775967051,
+          "p90": 0.06315517924275704,
+          "p99": 0.14884869368467246,
+          "max": 0.15051752051709102
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.11534124904840883,
+          "p90": 0.16399480338728029,
+          "p99": 0.17676910951033392,
+          "max": 0.1783354912469909
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.05284373071412299,
+          "p90": 0.07935018372954754,
+          "p99": 0.08107626380061222,
+          "max": 0.0811753576702859
+        }
+      },
+      "provider_context_fixed_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.02275448775967051,
+          "p90": 0.06315517924275704,
+          "p99": 0.14884869368467246,
+          "max": 0.15051752051709102
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.08062052526956241,
+          "p90": 0.12281392203419764,
+          "p99": 0.15307466852874516,
+          "max": 0.1547045987526858
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.035190336942111426,
+          "p90": 0.055274361892933346,
+          "p99": 0.05817452490808825,
+          "max": 0.05831404173600413
+        }
+      },
+      "provider_context_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.02275448775967051,
+          "p90": 0.06315517924275704,
+          "p99": 0.14884869368467246,
+          "max": 0.15051752051709102
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.05101058537340131,
+          "p90": 0.11150888331705039,
+          "p99": 0.14884869368467238,
+          "max": 0.15051752051709097
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.02137986120519917,
+          "p90": 0.03417008481839347,
+          "p99": 0.04440543275377091,
+          "max": 0.047225939963849516
+        }
+      },
+      "oracle_total_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.10568746142824594,
+          "p90": 0.15870036745909508,
+          "p99": 0.1621525276012245,
+          "max": 0.16235071534057186
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.05284373071412297,
+          "p90": 0.07935018372954752,
+          "p99": 0.08107626380061227,
+          "max": 0.08117535767028593
+        }
+      },
+      "oracle_total_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.042759722410398354,
+          "p90": 0.06834016963678698,
+          "p99": 0.08881086550754189,
+          "max": 0.09445187992769913
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.021379861205199174,
+          "p90": 0.03417008481839347,
+          "p99": 0.044405432753770936,
+          "max": 0.04722593996384956
+        }
+      }
+    },
+    "advantage_audience_expansion": {
+      "existing_vid": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.15602296968198034,
+          "p90": 0.26094747181882694,
+          "p99": 0.26431330623006855,
+          "max": 0.26435129385999684
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.16570281870918627,
+          "p90": 0.260947471818827,
+          "p99": 0.26431330623006866,
+          "max": 0.264351293859997
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03889427010672075,
+          "p90": 0.06008071518165269,
+          "p99": 0.062116156852330594,
+          "max": 0.0624289723521774
+        }
+      },
+      "direct_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.04785243365617798,
+          "p90": 0.10302570849920313,
+          "p99": 0.11038507359084374,
+          "max": 0.1108572445160008
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.08766156733632195,
+          "p90": 0.14484839795425028,
+          "p99": 0.15061814367464685,
+          "max": 0.15141098552836454
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03889427010672076,
+          "p90": 0.0600807151816527,
+          "p99": 0.06211615685233057,
+          "max": 0.062428972352177384
+        }
+      },
+      "mixture_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.05289181341923741,
+          "p90": 0.0909901760545985,
+          "p99": 0.09871774470528841,
+          "max": 0.0999360687652361
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.08847963502569962,
+          "p90": 0.13930539153719626,
+          "p99": 0.14637766096411176,
+          "max": 0.14824426810958904
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03889427010672075,
+          "p90": 0.06008071518165269,
+          "p99": 0.062116156852330594,
+          "max": 0.06242897235217741
+        }
+      },
+      "provider_reference_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.042052680924536456,
+          "p90": 0.09439265850782394,
+          "p99": 0.2892609809039218,
+          "max": 0.3043346938537476
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.09877829371346747,
+          "p90": 0.14430085933717296,
+          "p99": 0.2892609809039218,
+          "max": 0.3043346938537476
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03889427010672076,
+          "p90": 0.06008071518165273,
+          "p99": 0.06211615685233064,
+          "max": 0.06242897235217746
+        }
+      },
+      "provider_context_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.02076859335900733,
+          "p90": 0.04773801480276704,
+          "p99": 0.16679665710988048,
+          "max": 0.1822988265780417
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.08676498527489349,
+          "p90": 0.1238572224452753,
+          "p99": 0.1687898015379607,
+          "max": 0.18229882657804172
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03889427010672076,
+          "p90": 0.06008071518165268,
+          "p99": 0.06211615685233058,
+          "max": 0.062428972352177384
+        }
+      },
+      "provider_context_fixed_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.02076859335900733,
+          "p90": 0.04773801480276704,
+          "p99": 0.16679665710988048,
+          "max": 0.1822988265780417
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.06460114795522781,
+          "p90": 0.09670011619211724,
+          "p99": 0.16679665710988037,
+          "max": 0.18229882657804158
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.027421435863507777,
+          "p90": 0.03824209200556602,
+          "p99": 0.04832030760291204,
+          "max": 0.051309940771719825
+        }
+      },
+      "provider_context_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.02076859335900733,
+          "p90": 0.04773801480276704,
+          "p99": 0.16679665710988048,
+          "max": 0.1822988265780417
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.044028740582563855,
+          "p90": 0.10531047656492494,
+          "p99": 0.16707546978095755,
+          "max": 0.18229882657804172
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.01847426757009262,
+          "p90": 0.0374995859656588,
+          "p99": 0.05307427376165838,
+          "max": 0.05779329932892442
+        }
+      },
+      "oracle_total_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.0777885402134415,
+          "p90": 0.1201614303633054,
+          "p99": 0.12423231370466116,
+          "max": 0.12485794470435477
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03889427010672076,
+          "p90": 0.0600807151816527,
+          "p99": 0.06211615685233059,
+          "max": 0.0624289723521774
+        }
+      },
+      "oracle_total_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.03694853514018523,
+          "p90": 0.07499917193131755,
+          "p99": 0.10614854752331673,
+          "max": 0.11558659865784883
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.01847426757009262,
+          "p90": 0.03749958596565879,
+          "p99": 0.05307427376165837,
+          "max": 0.05779329932892442
+        }
+      }
+    },
+    "app_activity_retargeting": {
+      "existing_vid": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.7846282194384522,
+          "p90": 1.715029464324524,
+          "p99": 1.7474372389676034,
+          "max": 1.7485797341408673
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.7870133368501835,
+          "p90": 1.7150294643245247,
+          "p99": 1.747437238967603,
+          "max": 1.7485797341408669
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.035322311499400405,
+          "p90": 0.04105769953901123,
+          "p99": 0.04329549248626744,
+          "max": 0.04366695472589809
+        }
+      },
+      "direct_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.4400874313248045,
+          "p90": 1.0084025546474176,
+          "p99": 1.0240058553739408,
+          "max": 1.0266424284754236
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.4462614935178028,
+          "p90": 1.0084025546474178,
+          "p99": 1.024005855373941,
+          "max": 1.0266424284754239
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.0353223114994004,
+          "p90": 0.04105769953901123,
+          "p99": 0.043295492486267455,
+          "max": 0.043666954725898106
+        }
+      },
+      "mixture_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.39890650650212256,
+          "p90": 0.8751714262217881,
+          "p99": 0.8946818184142502,
+          "max": 0.8982207836244231
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.40531340875922905,
+          "p90": 0.8751714262217883,
+          "p99": 0.8946818184142504,
+          "max": 0.8982207836244234
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.035322311499400405,
+          "p90": 0.041057699539011235,
+          "p99": 0.043295492486267434,
+          "max": 0.043666954725898086
+        }
+      },
+      "provider_reference_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.132143485218978,
+          "p90": 0.22840103901578038,
+          "p99": 0.2703735667099576,
+          "max": 0.2734160080956498
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.14251503247245575,
+          "p90": 0.22840103901578046,
+          "p99": 0.2703735667099575,
+          "max": 0.2734160080956497
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.035322311499400405,
+          "p90": 0.04105769953901124,
+          "p99": 0.043295492486267476,
+          "max": 0.04366695472589813
+        }
+      },
+      "provider_context_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.058525539627331515,
+          "p90": 0.1362713497748079,
+          "p99": 0.26652262526971965,
+          "max": 0.2733645922077513
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.09672635906948998,
+          "p90": 0.15922809277357974,
+          "p99": 0.26652262526971965,
+          "max": 0.27336459220775133
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03532231149940041,
+          "p90": 0.04105769953901122,
+          "p99": 0.043295492486267455,
+          "max": 0.043666954725898106
+        }
+      },
+      "provider_context_fixed_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.058525539627331515,
+          "p90": 0.1362713497748079,
+          "p99": 0.26652262526971965,
+          "max": 0.2733645922077513
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.13433661468760488,
+          "p90": 0.190153322088823,
+          "p99": 0.26804057893794664,
+          "max": 0.27336459220775117
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.0579434017959763,
+          "p90": 0.06486095090441672,
+          "p99": 0.06824270602092732,
+          "max": 0.06857471454993141
+        }
+      },
+      "provider_context_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.058525539627331515,
+          "p90": 0.1362713497748079,
+          "p99": 0.26652262526971965,
+          "max": 0.2733645922077513
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.07221879533898708,
+          "p90": 0.13996813505360084,
+          "p99": 0.26652262526971954,
+          "max": 0.2733645922077511
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.01928521740244722,
+          "p90": 0.025558900160025582,
+          "p99": 0.033918764452789775,
+          "max": 0.0362648497708868
+        }
+      },
+      "oracle_total_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.07064462299880081,
+          "p90": 0.08211539907802244,
+          "p99": 0.08659098497253487,
+          "max": 0.08733390945179619
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.035322311499400405,
+          "p90": 0.041057699539011235,
+          "p99": 0.04329549248626745,
+          "max": 0.0436669547258981
+        }
+      },
+      "oracle_total_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.03857043480489444,
+          "p90": 0.051117800320051185,
+          "p99": 0.06783752890557956,
+          "max": 0.07252969954177363
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.019285217402447218,
+          "p90": 0.02555890016002558,
+          "p99": 0.033918764452789775,
+          "max": 0.0362648497708868
+        }
+      }
+    },
+    "unrelated_niche_control": {
+      "existing_vid": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.12442231206517035,
+          "p90": 0.39368845131700475,
+          "p99": 0.4042939609068315,
+          "max": 0.40453037301105005
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.197910931620715,
+          "p90": 0.39368845131700486,
+          "p99": 0.40429396090683173,
+          "max": 0.4045303730110502
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.057631161888520924,
+          "p90": 0.08199095789626736,
+          "p99": 0.11755999198191236,
+          "max": 0.12165272696181144
+        }
+      },
+      "direct_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.06811456898494785,
+          "p90": 0.2226519885704152,
+          "p99": 0.22840572990870822,
+          "max": 0.22919439084847407
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.15556629003240255,
+          "p90": 0.22450439003773132,
+          "p99": 0.24071969240985708,
+          "max": 0.24476912268818082
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.057631161888520945,
+          "p90": 0.08199095789626745,
+          "p99": 0.11755999198191237,
+          "max": 0.12165272696181144
+        }
+      },
+      "mixture_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.04148817402177314,
+          "p90": 0.1202975819115669,
+          "p99": 0.1278924381333336,
+          "max": 0.12937282722710242
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.133105932243629,
+          "p90": 0.1867419659063542,
+          "p99": 0.23647226345375236,
+          "max": 0.24476912761977976
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.05763116188852093,
+          "p90": 0.08199095789626745,
+          "p99": 0.11755999198191237,
+          "max": 0.12165272696181144
+        }
+      },
+      "provider_reference_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.03316299115587881,
+          "p90": 0.08332411943888937,
+          "p99": 0.18788379076782313,
+          "max": 0.19895430344021317
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.12884465572468104,
+          "p90": 0.19907583573814977,
+          "p99": 0.23511998396382464,
+          "max": 0.24330545392362274
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.057631161888520924,
+          "p90": 0.08199095789626737,
+          "p99": 0.11755999198191233,
+          "max": 0.12165272696181141
+        }
+      },
+      "provider_context_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.028644624440711173,
+          "p90": 0.06348167545199546,
+          "p99": 0.1462307006177312,
+          "max": 0.15196562243795797
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.12410458772206777,
+          "p90": 0.18376755089053579,
+          "p99": 0.23511998396382464,
+          "max": 0.24330545392362274
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.05763116188852094,
+          "p90": 0.08199095789626741,
+          "p99": 0.11755999198191233,
+          "max": 0.12165272696181141
+        }
+      },
+      "provider_context_fixed_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.028644624440711173,
+          "p90": 0.06348167545199546,
+          "p99": 0.1462307006177312,
+          "max": 0.15196562243795797
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.13923122563952114,
+          "p90": 0.1916324882833102,
+          "p99": 0.2337086416619151,
+          "max": 0.23570213009193886
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.06640396995016874,
+          "p90": 0.09102375551323039,
+          "p99": 0.11685432083095758,
+          "max": 0.11785106504596946
+        }
+      },
+      "provider_context_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.028644624440711173,
+          "p90": 0.06348167545199546,
+          "p99": 0.1462307006177312,
+          "max": 0.15196562243795797
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.0775993099065032,
+          "p90": 0.11897213617329461,
+          "p99": 0.18165884639811145,
+          "max": 0.19015257740569436
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03335609471130026,
+          "p90": 0.05085902881015079,
+          "p99": 0.08450809189005137,
+          "max": 0.09507628870284722
+        }
+      },
+      "oracle_total_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.11526232377704185,
+          "p90": 0.16398191579253468,
+          "p99": 0.23511998396382464,
+          "max": 0.24330545392362274
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.05763116188852093,
+          "p90": 0.08199095789626744,
+          "p99": 0.11755999198191233,
+          "max": 0.12165272696181141
+        }
+      },
+      "oracle_total_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.0667121894226005,
+          "p90": 0.10171805762030152,
+          "p99": 0.1690161837801027,
+          "max": 0.19015257740569436
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.03335609471130025,
+          "p90": 0.05085902881015077,
+          "p99": 0.08450809189005137,
+          "max": 0.09507628870284722
+        }
+      }
+    },
+    "mixed_funnel_portfolio": {
+      "existing_vid": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.019320192108764588,
+          "p90": 0.037493393116779385,
+          "p99": 0.04190072466590636,
+          "max": 0.041990919523278894
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.05020614392871511,
+          "p90": 0.053009774433975566,
+          "p99": 0.09876296707251368,
+          "max": 0.11213110356797837
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.024026132872036,
+          "p90": 0.026915663032392432,
+          "p99": 0.049625112916544596,
+          "max": 0.05645829102269966
+        }
+      },
+      "direct_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.05124922090439075,
+          "p90": 0.12061863468828658,
+          "p99": 0.12759635974143796,
+          "max": 0.12792117838695077
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.0706666874045638,
+          "p90": 0.12061863468828661,
+          "p99": 0.12759635974143804,
+          "max": 0.12792117838695083
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.022200996687393965,
+          "p90": 0.026915663032392463,
+          "p99": 0.04962511291654458,
+          "max": 0.05645829102269965
+        }
+      },
+      "mixture_pair_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0456953330872607,
+          "p90": 0.08113080051902592,
+          "p99": 0.0939614239208463,
+          "max": 0.09402980013237609
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.06446911358128787,
+          "p90": 0.08862159689000179,
+          "p99": 0.10794977520713245,
+          "max": 0.11284057726042523
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.02267439903537911,
+          "p90": 0.02691566303239243,
+          "p99": 0.04962511291654459,
+          "max": 0.056458291022699655
+        }
+      },
+      "provider_reference_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.03726310735039332,
+          "p90": 0.11243968295385431,
+          "p99": 0.23858345782497464,
+          "max": 0.24878476810379285
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.06845847292613357,
+          "p90": 0.13714254284075053,
+          "p99": 0.23858345782497448,
+          "max": 0.24878476810379263
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.024026132872035994,
+          "p90": 0.02691566303239241,
+          "p99": 0.04962511291654459,
+          "max": 0.05645829102269966
+        }
+      },
+      "provider_context_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.023703382650506415,
+          "p90": 0.06305799431217918,
+          "p99": 0.14103895939088532,
+          "max": 0.14296261348794337
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.05810640415527254,
+          "p90": 0.10856728644643615,
+          "p99": 0.14103895939088537,
+          "max": 0.14296261348794342
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.024026132872036,
+          "p90": 0.02691566303239245,
+          "p99": 0.04962511291654457,
+          "max": 0.05645829102269964
+        }
+      },
+      "provider_context_fixed_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.023703382650506415,
+          "p90": 0.06305799431217918,
+          "p99": 0.14103895939088532,
+          "max": 0.14296261348794337
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.09356027459210381,
+          "p90": 0.12995368126856358,
+          "p99": 0.15098849132364378,
+          "max": 0.151638939930376
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.043974602913767875,
+          "p90": 0.050469864476906066,
+          "p99": 0.06878189732315011,
+          "max": 0.074568580472278
+        }
+      },
+      "provider_context_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.023703382650506415,
+          "p90": 0.06305799431217918,
+          "p99": 0.14103895939088532,
+          "max": 0.14296261348794337
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.05034468173744431,
+          "p90": 0.09713613589740361,
+          "p99": 0.14590202085385498,
+          "max": 0.14895266534370377
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.020828111818785765,
+          "p90": 0.03840166088238744,
+          "p99": 0.04165358029302388,
+          "max": 0.04173609264303373
+        }
+      },
+      "oracle_total_proportional": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.04805226574407199,
+          "p90": 0.05383132606478483,
+          "p99": 0.09925022583308916,
+          "max": 0.1129165820453993
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.024026132872036008,
+          "p90": 0.026915663032392425,
+          "p99": 0.049625112916544575,
+          "max": 0.05645829102269964
+        }
+      },
+      "oracle_total_learned_demo": {
+        "total_error": {
+          "count": 27,
+          "mean": 0.0,
+          "p90": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "demographic_reach_error": {
+          "count": 27,
+          "mean": 0.0414218986908335,
+          "p90": 0.07680332176477485,
+          "p99": 0.08330716058604778,
+          "max": 0.08347218528606751
+        },
+        "demographic_distribution_error": {
+          "count": 27,
+          "mean": 0.020710949345416757,
+          "p90": 0.038401660882387445,
+          "p99": 0.0416535802930239,
+          "max": 0.041736092643033754
+        }
+      }
+    }
+  },
+  "consistency": {
+    "panel_holdout": {
+      "existing_vid": {
+        "checks": 104,
+        "violations": 0,
+        "maximum": 0.0
+      },
+      "direct_pair_proportional": {
+        "checks": 104,
+        "violations": 0,
+        "maximum": 0.0
+      },
+      "mixture_pair_proportional": {
+        "checks": 104,
+        "violations": 4,
+        "maximum": 175352.2066938281
+      },
+      "provider_reference_proportional": {
+        "checks": 104,
+        "violations": 5,
+        "maximum": 2058323.4571489953
+      },
+      "provider_context_proportional": {
+        "checks": 104,
+        "violations": 4,
+        "maximum": 168326.7931741923
+      },
+      "provider_context_fixed_demo": {
+        "checks": 104,
+        "violations": 4,
+        "maximum": 168326.7931741923
+      },
+      "provider_context_learned_demo": {
+        "checks": 104,
+        "violations": 4,
+        "maximum": 168326.7931741923
+      },
+      "oracle_total_proportional": {
+        "checks": 104,
+        "violations": 0,
+        "maximum": 0.0
+      },
+      "oracle_total_learned_demo": {
+        "checks": 104,
+        "violations": 0,
+        "maximum": 0.0
+      }
+    },
+    "evaluation": {
+      "existing_vid": {
+        "checks": 156,
+        "violations": 0,
+        "maximum": 0.0
+      },
+      "direct_pair_proportional": {
+        "checks": 156,
+        "violations": 2,
+        "maximum": 994216.532482177
+      },
+      "mixture_pair_proportional": {
+        "checks": 156,
+        "violations": 3,
+        "maximum": 391470.32529971004
+      },
+      "provider_reference_proportional": {
+        "checks": 156,
+        "violations": 10,
+        "maximum": 2212718.444621697
+      },
+      "provider_context_proportional": {
+        "checks": 156,
+        "violations": 10,
+        "maximum": 2723169.7244333625
+      },
+      "provider_context_fixed_demo": {
+        "checks": 156,
+        "violations": 10,
+        "maximum": 2723169.7244333625
+      },
+      "provider_context_learned_demo": {
+        "checks": 156,
+        "violations": 10,
+        "maximum": 2723169.7244333625
+      },
+      "oracle_total_proportional": {
+        "checks": 156,
+        "violations": 0,
+        "maximum": 0.0
+      },
+      "oracle_total_learned_demo": {
+        "checks": 156,
+        "violations": 0,
+        "maximum": 0.0
+      }
+    }
+  },
+  "provider_models": {
+    "reference_only_parameter_count": 32568,
+    "context_parameter_count": 41064,
+    "contextual_demographic_parameter_count": 1116
+  },
+  "production_method_count": 7
+}

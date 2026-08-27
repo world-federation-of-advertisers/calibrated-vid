@@ -6,6 +6,7 @@ from reference_calibration.sets import (
     decode_nonnegative_cells,
     enforce_marginals,
     inclusive_intersections,
+    project_to_bounded_sum,
     union_values,
 )
 
@@ -55,6 +56,17 @@ class SetMathTest(unittest.TestCase):
             atol=1e-3,
         )
         self.assertAlmostEqual(projected.sum(), population, places=4)
+
+    def test_bounded_sum_projection(self):
+        projected = project_to_bounded_sum(
+            np.array([8.0, 5.0, 1.0]),
+            total=10.0,
+            lower=np.array([2.0, 1.0, 0.0]),
+            upper=np.array([6.0, 5.0, 4.0]),
+        )
+        self.assertAlmostEqual(float(projected.sum()), 10.0, places=8)
+        self.assertTrue(np.all(projected >= np.array([2.0, 1.0, 0.0]) - 1e-8))
+        self.assertTrue(np.all(projected <= np.array([6.0, 5.0, 4.0]) + 1e-8))
 
 
 if __name__ == "__main__":
