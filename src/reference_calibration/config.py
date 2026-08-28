@@ -19,6 +19,9 @@ class SimulationConfig:
     ridge_penalty: float = 0.35
     material_holdout_improvement: float = 0.005
     review_movement_fraction: float = 0.05
+    panel_size: int = 5_000
+    panel_draws: int = 4
+    panel_activation_improvement: float = 0.005
 
     @property
     def person_weight(self) -> float:
@@ -36,5 +39,6 @@ class SimulationConfig:
                 stress_campaigns_per_scenario=6,
                 request_order_trials=12,
                 minimum_calibration_intersection=50_000.0,
+                panel_draws=12,
             )
         raise ValueError(f"unknown profile: {profile}")

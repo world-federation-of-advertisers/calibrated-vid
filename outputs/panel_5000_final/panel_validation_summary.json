@@ -1,0 +1,1321 @@
+{
+  "profile": "quick",
+  "config": {
+    "n_users": 12000,
+    "population_size": 120000000,
+    "n_edps": 10,
+    "n_weeks": 13,
+    "reference_pool_size": 5000000000,
+    "calibration_train_campaigns": 10,
+    "calibration_holdout_campaigns": 4,
+    "stress_campaigns_per_scenario": 2,
+    "request_order_trials": 4,
+    "seed": 20260825,
+    "minimum_calibration_intersection": 25000.0,
+    "ridge_penalty": 0.35,
+    "material_holdout_improvement": 0.005,
+    "review_movement_fraction": 0.05,
+    "panel_size": 5000,
+    "panel_draws": 4,
+    "panel_activation_improvement": 0.005
+  },
+  "panel_draws_per_design": 4,
+  "panel_designs": {
+    "representative": {
+      "raw_size": 5000,
+      "effective_size": {
+        "count": 4,
+        "mean": 5000.0,
+        "p90": 5000.0,
+        "p99": 5000.0,
+        "max": 5000.0
+      },
+      "label": "Representative panel",
+      "description": "A simple random panel. Its main limitation is sampling noise."
+    },
+    "low_effective_size": {
+      "raw_size": 5000,
+      "effective_size": {
+        "count": 4,
+        "mean": 1374.1250322258365,
+        "p90": 1490.4490988593,
+        "p99": 1528.162104976186,
+        "max": 1532.3524389891734
+      },
+      "label": "5,000 members, lower effective size",
+      "description": "The panel has 5,000 members but unequal survey weights reduce the information content."
+    },
+    "observable_bias_weighted": {
+      "raw_size": 5000,
+      "effective_size": {
+        "count": 4,
+        "mean": 4455.272911782861,
+        "p90": 4458.183988098413,
+        "p99": 4459.506342743846,
+        "max": 4459.653271037783
+      },
+      "label": "Observable bias, weighted",
+      "description": "Age and geography affect recruitment, and known selection weights correct most of the bias."
+    },
+    "hidden_matchability_bias": {
+      "raw_size": 5000,
+      "effective_size": {
+        "count": 4,
+        "mean": 4491.6463529984885,
+        "p90": 4495.690227387711,
+        "p99": 4495.7089866469305,
+        "max": 4495.711071009066
+      },
+      "label": "Hidden intent/matchability bias",
+      "description": "Recruitment also favors high-intent, email-matchable people; ordinary demographic weights cannot remove it."
+    }
+  },
+  "scenario_descriptions": {
+    "broad_awareness_control": {
+      "objective": "Awareness",
+      "audience": "Broad awareness delivery with few audience restrictions",
+      "chart_label": "Broad awareness",
+      "volume": "Large",
+      "cross_edp_similarity": "Low to moderate: each EDP reaches a broad but not identical audience",
+      "reference_matchability": "Typical for the general population",
+      "intuition": "Control case: broad delivery is closest to the campaigns on which a conventional reach model is expected to work well."
+    },
+    "traffic_optimization": {
+      "objective": "Traffic",
+      "audience": "Interest targeting with click or landing-page optimization",
+      "chart_label": "Traffic optimization",
+      "volume": "Medium",
+      "cross_edp_similarity": "Moderate: optimization can favor similar click-prone people",
+      "reference_matchability": "Typical; clicking does not require a shared email",
+      "intuition": "Tests a campaign that is more selected than awareness but is not a direct retargeting audience."
+    },
+    "video_engagement_retargeting": {
+      "objective": "Engagement",
+      "audience": "Engagement Custom Audience of prior video viewers or engagers",
+      "chart_label": "Engagement retargeting",
+      "volume": "Small to medium",
+      "cross_edp_similarity": "High: the same warm audience can be selected repeatedly",
+      "reference_matchability": "Slightly below typical; engagement does not require email",
+      "intuition": "Tests high true duplication without assuming that the duplicated people are especially easy to match by email."
+    },
+    "lead_generation": {
+      "objective": "Leads",
+      "audience": "Instant Form, call, message, or signup optimization",
+      "chart_label": "Lead generation",
+      "volume": "Small",
+      "cross_edp_similarity": "High: EDPs can converge on the same high-intent people",
+      "reference_matchability": "Above typical because lead actions often collect contact details",
+      "intuition": "Tests a small conversion-oriented audience with both elevated duplication and elevated email visibility."
+    },
+    "sales_prospecting": {
+      "objective": "Sales",
+      "audience": "Prospecting optimized toward likely purchasers",
+      "chart_label": "Sales prospecting",
+      "volume": "Small to medium",
+      "cross_edp_similarity": "High: optimization can converge on a shared pool of likely buyers",
+      "reference_matchability": "Moderately above typical",
+      "intuition": "Tests algorithmic convergence on likely buyers without using a direct first-party retargeting list."
+    },
+    "website_retargeting": {
+      "objective": "Sales",
+      "audience": "Website Custom Audience of recent visitors or cart viewers",
+      "chart_label": "Website retargeting",
+      "volume": "Small",
+      "cross_edp_similarity": "Very high: campaigns start from a similar first-party visitor pool",
+      "reference_matchability": "Above typical; some visitors log in, buy, or otherwise provide email",
+      "intuition": "Tests the classic small retargeting case in which true cross-EDP overlap is much higher than a population-rate model expects."
+    },
+    "crm_customer_list": {
+      "objective": "Sales",
+      "audience": "Customer-list Custom Audience uploaded from CRM records",
+      "chart_label": "Customer list",
+      "volume": "Very small",
+      "cross_edp_similarity": "Very high: each EDP receives substantially the same seed list",
+      "reference_matchability": "Very high because the source audience is already email-rich",
+      "intuition": "Tests the strongest upward matchability shift: a tiny audience selected from records that commonly include email."
+    },
+    "catalog_retargeting": {
+      "objective": "Sales",
+      "audience": "Catalog retargeting or dynamic product ads",
+      "chart_label": "Catalog retargeting",
+      "volume": "Small",
+      "cross_edp_similarity": "High, but some EDP pairs share more products and users than others",
+      "reference_matchability": "Above typical",
+      "intuition": "Tests stable pair-specific behavior rather than assuming every EDP combination matches equally well."
+    },
+    "lookalike_prospecting": {
+      "objective": "Sales",
+      "audience": "Lookalike audience built from a customer seed",
+      "chart_label": "Lookalike prospecting",
+      "volume": "Medium",
+      "cross_edp_similarity": "Moderate to high: the same seed influences delivery, but the audience expands",
+      "reference_matchability": "Slightly above typical",
+      "intuition": "Tests a middle ground between direct retargeting and broad prospecting."
+    },
+    "advantage_audience_expansion": {
+      "objective": "Sales",
+      "audience": "Advantage+ audience expansion beyond the starting audience",
+      "chart_label": "Audience expansion",
+      "volume": "Medium to large",
+      "cross_edp_similarity": "Moderate: the starting signal is shared, but delivery broadens",
+      "reference_matchability": "Near typical after expansion",
+      "intuition": "Tests whether a method handles a campaign that begins with a selected audience but expands toward broad delivery."
+    },
+    "app_activity_retargeting": {
+      "objective": "App promotion",
+      "audience": "App Activity Custom Audience of installers or in-app users",
+      "chart_label": "App retargeting",
+      "volume": "Small",
+      "cross_edp_similarity": "High: the same app users can be retargeted repeatedly",
+      "reference_matchability": "Below typical when app identity is stronger than email identity",
+      "intuition": "Tests high true duplication with a downward email-matchability shift\u2014the opposite of a customer-list campaign."
+    },
+    "unrelated_niche_control": {
+      "objective": "Traffic",
+      "audience": "Different niche interests or exclusions at each EDP",
+      "chart_label": "Unrelated niches",
+      "volume": "Small",
+      "cross_edp_similarity": "Low: the EDP audiences are intentionally different",
+      "reference_matchability": "Typical among the people who are reached",
+      "intuition": "Negative control: the calibration should not invent duplicate reach merely because the campaigns are small."
+    },
+    "mixed_funnel_portfolio": {
+      "objective": "Mixed",
+      "audience": "One report combining broad, traffic, lead, and retargeting campaigns",
+      "chart_label": "Mixed-funnel report",
+      "volume": "Mixed",
+      "cross_edp_similarity": "Mixed by EDP",
+      "reference_matchability": "Mixed by EDP and audience source",
+      "intuition": "Tests the realistic case in which a cross-media report combines campaigns with different objectives and audience construction."
+    }
+  },
+  "method_summary": {
+    "representative": {
+      "existing_vid": {
+        "count": 468,
+        "mean": 0.4079128121887536,
+        "p90": 1.0013400316149816,
+        "p99": 3.0849699995233957,
+        "max": 3.1540920958609195
+      },
+      "agnostic_vid": {
+        "count": 468,
+        "mean": 0.1332555073360313,
+        "p90": 0.26376920565989287,
+        "p99": 0.7319504212129615,
+        "max": 0.7566432041573394
+      },
+      "existing_plus_fixed": {
+        "count": 468,
+        "mean": 0.08555188833252492,
+        "p90": 0.170612430850907,
+        "p99": 0.9852262509895002,
+        "max": 1.0019621959000145
+      },
+      "existing_plus_fixed_log": {
+        "count": 468,
+        "mean": 0.09264331852824517,
+        "p90": 0.22433396708017794,
+        "p99": 1.0322542027283164,
+        "max": 1.0563040911644646
+      },
+      "existing_plus_mixture": {
+        "count": 468,
+        "mean": 0.11056427158266897,
+        "p90": 0.23862536802460535,
+        "p99": 1.0611479308856273,
+        "max": 1.0893704259414396
+      },
+      "agnostic_plus_fixed": {
+        "count": 468,
+        "mean": 0.08241308992423121,
+        "p90": 0.19233915566235985,
+        "p99": 0.6788627559202332,
+        "max": 0.7078428639223924
+      },
+      "agnostic_plus_fixed_log": {
+        "count": 468,
+        "mean": 0.07956437221162808,
+        "p90": 0.19701758498143093,
+        "p99": 0.7188441621146815,
+        "max": 0.7507579714228513
+      },
+      "agnostic_plus_mixture": {
+        "count": 468,
+        "mean": 0.09334937184415619,
+        "p90": 0.20017631490615995,
+        "p99": 0.7481862498800103,
+        "max": 0.7936602209543253
+      },
+      "existing_plus_selected_rid": {
+        "count": 468,
+        "mean": 0.08555188833252492,
+        "p90": 0.170612430850907,
+        "p99": 0.9852262509895002,
+        "max": 1.0019621959000145
+      },
+      "agnostic_plus_selected_rid": {
+        "count": 468,
+        "mean": 0.07956437221162808,
+        "p90": 0.19701758498143093,
+        "p99": 0.7188441621146815,
+        "max": 0.7507579714228513
+      },
+      "provider_recommended": {
+        "count": 468,
+        "mean": 0.07956437221162808,
+        "p90": 0.19701758498143093,
+        "p99": 0.7188441621146815,
+        "max": 0.7507579714228513
+      }
+    },
+    "low_effective_size": {
+      "existing_vid": {
+        "count": 468,
+        "mean": 0.4079128121887536,
+        "p90": 1.0013400316149816,
+        "p99": 3.0849699995233957,
+        "max": 3.1540920958609195
+      },
+      "agnostic_vid": {
+        "count": 468,
+        "mean": 0.1317235396093969,
+        "p90": 0.2611208837829533,
+        "p99": 0.7020723465624437,
+        "max": 0.7481453539333974
+      },
+      "existing_plus_fixed": {
+        "count": 468,
+        "mean": 0.08430147880956586,
+        "p90": 0.1760628643120676,
+        "p99": 0.9389898451974866,
+        "max": 1.028594283983279
+      },
+      "existing_plus_fixed_log": {
+        "count": 468,
+        "mean": 0.09071801789346438,
+        "p90": 0.21158201010647948,
+        "p99": 0.9878301479385644,
+        "max": 1.0724510068803832
+      },
+      "existing_plus_mixture": {
+        "count": 468,
+        "mean": 0.11319257795531207,
+        "p90": 0.2554217794204897,
+        "p99": 1.0563293653919401,
+        "max": 1.1328469205965799
+      },
+      "agnostic_plus_fixed": {
+        "count": 468,
+        "mean": 0.08417607143847068,
+        "p90": 0.19294965116329466,
+        "p99": 0.6536841042641433,
+        "max": 0.7203339858488677
+      },
+      "agnostic_plus_fixed_log": {
+        "count": 468,
+        "mean": 0.08154380538647442,
+        "p90": 0.19403140518858328,
+        "p99": 0.6881672301159956,
+        "max": 0.7563665557539611
+      },
+      "agnostic_plus_mixture": {
+        "count": 468,
+        "mean": 0.09528393714875784,
+        "p90": 0.20076390586731666,
+        "p99": 0.7415903616239006,
+        "max": 0.8104842431174262
+      },
+      "existing_plus_selected_rid": {
+        "count": 468,
+        "mean": 0.08430147880956586,
+        "p90": 0.1760628643120676,
+        "p99": 0.9389898451974866,
+        "max": 1.028594283983279
+      },
+      "agnostic_plus_selected_rid": {
+        "count": 468,
+        "mean": 0.12251578827829375,
+        "p90": 0.2497098099172656,
+        "p99": 0.7163192283666779,
+        "max": 0.7686099488677486
+      },
+      "provider_recommended": {
+        "count": 468,
+        "mean": 0.08430147880956586,
+        "p90": 0.1760628643120676,
+        "p99": 0.9389898451974866,
+        "max": 1.028594283983279
+      }
+    },
+    "observable_bias_weighted": {
+      "existing_vid": {
+        "count": 468,
+        "mean": 0.4079128121887536,
+        "p90": 1.0013400316149816,
+        "p99": 3.0849699995233957,
+        "max": 3.1540920958609195
+      },
+      "agnostic_vid": {
+        "count": 468,
+        "mean": 0.13149232157088428,
+        "p90": 0.26657349908640815,
+        "p99": 0.6829339679733785,
+        "max": 0.7462325053544461
+      },
+      "existing_plus_fixed": {
+        "count": 468,
+        "mean": 0.08293786448373718,
+        "p90": 0.16530072093255258,
+        "p99": 0.9558712744555135,
+        "max": 1.0034337591570455
+      },
+      "existing_plus_fixed_log": {
+        "count": 468,
+        "mean": 0.0916089328772766,
+        "p90": 0.199624279301129,
+        "p99": 1.0055165592539577,
+        "max": 1.0511663939611313
+      },
+      "existing_plus_mixture": {
+        "count": 468,
+        "mean": 0.10316237277227641,
+        "p90": 0.2128331003904539,
+        "p99": 1.0406405335567108,
+        "max": 1.0815641989125613
+      },
+      "agnostic_plus_fixed": {
+        "count": 468,
+        "mean": 0.08469743442678195,
+        "p90": 0.19824675891059745,
+        "p99": 0.6585512860248518,
+        "max": 0.7117939614309634
+      },
+      "agnostic_plus_fixed_log": {
+        "count": 468,
+        "mean": 0.08267556787896636,
+        "p90": 0.19627234140456815,
+        "p99": 0.6962705197782275,
+        "max": 0.7502931480106529
+      },
+      "agnostic_plus_mixture": {
+        "count": 468,
+        "mean": 0.08937486697365071,
+        "p90": 0.198500924068144,
+        "p99": 0.7350760374963656,
+        "max": 0.7917538194748299
+      },
+      "existing_plus_selected_rid": {
+        "count": 468,
+        "mean": 0.08293786448373718,
+        "p90": 0.16530072093255258,
+        "p99": 0.9558712744555135,
+        "max": 1.0034337591570455
+      },
+      "agnostic_plus_selected_rid": {
+        "count": 468,
+        "mean": 0.08484215323510745,
+        "p90": 0.19627234140456815,
+        "p99": 0.7326635161615396,
+        "max": 0.7677996322150087
+      },
+      "provider_recommended": {
+        "count": 468,
+        "mean": 0.07969436311581661,
+        "p90": 0.16769744823494492,
+        "p99": 0.9471741196237238,
+        "max": 0.9825258896944388
+      }
+    },
+    "hidden_matchability_bias": {
+      "existing_vid": {
+        "count": 468,
+        "mean": 0.4079128121887536,
+        "p90": 1.0013400316149816,
+        "p99": 3.0849699995233957,
+        "max": 3.1540920958609195
+      },
+      "agnostic_vid": {
+        "count": 468,
+        "mean": 0.12734226197190235,
+        "p90": 0.28111158760655336,
+        "p99": 0.652155239774687,
+        "max": 0.6644290796985203
+      },
+      "existing_plus_fixed": {
+        "count": 468,
+        "mean": 0.12791486999566506,
+        "p90": 0.2733899398843667,
+        "p99": 1.1071855370707737,
+        "max": 1.1325379645562192
+      },
+      "existing_plus_fixed_log": {
+        "count": 468,
+        "mean": 0.12584166661801274,
+        "p90": 0.26580143135871365,
+        "p99": 1.0988213076909474,
+        "max": 1.1265666766385232
+      },
+      "existing_plus_mixture": {
+        "count": 468,
+        "mean": 0.14452189859493833,
+        "p90": 0.3222014870292572,
+        "p99": 1.1455061784170837,
+        "max": 1.1751241955889509
+      },
+      "agnostic_plus_fixed": {
+        "count": 468,
+        "mean": 0.10602915868179694,
+        "p90": 0.2112905489064467,
+        "p99": 0.7819687276074422,
+        "max": 0.8208108434416126
+      },
+      "agnostic_plus_fixed_log": {
+        "count": 468,
+        "mean": 0.10551994240594399,
+        "p90": 0.20966977529674832,
+        "p99": 0.7775831332901401,
+        "max": 0.8178769533343535
+      },
+      "agnostic_plus_mixture": {
+        "count": 468,
+        "mean": 0.11855380678813877,
+        "p90": 0.22884863338648442,
+        "p99": 0.8194363124339693,
+        "max": 0.8630406194113819
+      },
+      "existing_plus_selected_rid": {
+        "count": 468,
+        "mean": 0.4079128121887536,
+        "p90": 1.0013400316149816,
+        "p99": 3.0849699995233957,
+        "max": 3.1540920958609195
+      },
+      "agnostic_plus_selected_rid": {
+        "count": 468,
+        "mean": 0.12734226197190235,
+        "p90": 0.28111158760655336,
+        "p99": 0.652155239774687,
+        "max": 0.6644290796985203
+      },
+      "provider_recommended": {
+        "count": 468,
+        "mean": 0.4079128121887536,
+        "p90": 1.0013400316149816,
+        "p99": 3.0849699995233957,
+        "max": 3.1540920958609195
+      }
+    }
+  },
+  "activation_summary": {
+    "representative": {
+      "draws": 4,
+      "existing_correction_active_rate": 1.0,
+      "agnostic_correction_active_rate": 1.0,
+      "existing_correction_harm_rate": 0.0,
+      "agnostic_correction_harm_rate": 0.0,
+      "mean_existing_correction_error_change": -0.3223609238562286,
+      "mean_agnostic_correction_error_change": -0.05369113512440321,
+      "mean_recommended_error_change_vs_existing": -0.3283484399771255,
+      "existing_correction_selection_counts": {
+        "existing_vid": 0,
+        "existing_plus_fixed": 4,
+        "existing_plus_fixed_log": 0,
+        "existing_plus_mixture": 0
+      },
+      "agnostic_correction_selection_counts": {
+        "agnostic_vid": 0,
+        "agnostic_plus_fixed": 0,
+        "agnostic_plus_fixed_log": 4,
+        "agnostic_plus_mixture": 0
+      },
+      "recommended_configuration_counts": {
+        "existing_vid": 0,
+        "agnostic_vid": 0,
+        "existing_plus_selected_rid": 0,
+        "agnostic_plus_selected_rid": 4
+      },
+      "raw_consistency_violation_rate": 0.004807692307692308
+    },
+    "low_effective_size": {
+      "draws": 4,
+      "existing_correction_active_rate": 1.0,
+      "agnostic_correction_active_rate": 0.25,
+      "existing_correction_harm_rate": 0.0,
+      "agnostic_correction_harm_rate": 0.0,
+      "mean_existing_correction_error_change": -0.3236113333791877,
+      "mean_agnostic_correction_error_change": -0.009207751331103142,
+      "mean_recommended_error_change_vs_existing": -0.3236113333791877,
+      "existing_correction_selection_counts": {
+        "existing_vid": 0,
+        "existing_plus_fixed": 4,
+        "existing_plus_fixed_log": 0,
+        "existing_plus_mixture": 0
+      },
+      "agnostic_correction_selection_counts": {
+        "agnostic_vid": 3,
+        "agnostic_plus_fixed": 0,
+        "agnostic_plus_fixed_log": 0,
+        "agnostic_plus_mixture": 1
+      },
+      "recommended_configuration_counts": {
+        "existing_vid": 0,
+        "agnostic_vid": 0,
+        "existing_plus_selected_rid": 4,
+        "agnostic_plus_selected_rid": 0
+      },
+      "raw_consistency_violation_rate": 0.019230769230769232
+    },
+    "observable_bias_weighted": {
+      "draws": 4,
+      "existing_correction_active_rate": 1.0,
+      "agnostic_correction_active_rate": 1.0,
+      "existing_correction_harm_rate": 0.0,
+      "agnostic_correction_harm_rate": 0.0,
+      "mean_existing_correction_error_change": -0.3249749477050164,
+      "mean_agnostic_correction_error_change": -0.04665016833577684,
+      "mean_recommended_error_change_vs_existing": -0.32821844907293696,
+      "existing_correction_selection_counts": {
+        "existing_vid": 0,
+        "existing_plus_fixed": 4,
+        "existing_plus_fixed_log": 0,
+        "existing_plus_mixture": 0
+      },
+      "agnostic_correction_selection_counts": {
+        "agnostic_vid": 0,
+        "agnostic_plus_fixed": 0,
+        "agnostic_plus_fixed_log": 1,
+        "agnostic_plus_mixture": 3
+      },
+      "recommended_configuration_counts": {
+        "existing_vid": 0,
+        "agnostic_vid": 0,
+        "existing_plus_selected_rid": 3,
+        "agnostic_plus_selected_rid": 1
+      },
+      "raw_consistency_violation_rate": 0.019230769230769232
+    },
+    "hidden_matchability_bias": {
+      "draws": 4,
+      "existing_correction_active_rate": 0.0,
+      "agnostic_correction_active_rate": 0.0,
+      "existing_correction_harm_rate": 0.0,
+      "agnostic_correction_harm_rate": 0.0,
+      "mean_existing_correction_error_change": 0.0,
+      "mean_agnostic_correction_error_change": 0.0,
+      "mean_recommended_error_change_vs_existing": 0.0,
+      "existing_correction_selection_counts": {
+        "existing_vid": 4,
+        "existing_plus_fixed": 0,
+        "existing_plus_fixed_log": 0,
+        "existing_plus_mixture": 0
+      },
+      "agnostic_correction_selection_counts": {
+        "agnostic_vid": 4,
+        "agnostic_plus_fixed": 0,
+        "agnostic_plus_fixed_log": 0,
+        "agnostic_plus_mixture": 0
+      },
+      "recommended_configuration_counts": {
+        "existing_vid": 4,
+        "agnostic_vid": 0,
+        "existing_plus_selected_rid": 0,
+        "agnostic_plus_selected_rid": 0
+      },
+      "raw_consistency_violation_rate": 0.0
+    }
+  },
+  "panel_truth_summary": {
+    "representative": {
+      "small_under_10_percent": {
+        "count": 96,
+        "mean": 0.03370302660986834,
+        "p90": 0.06882878151260505,
+        "p99": 0.15439999999999987,
+        "max": 0.2
+      },
+      "medium_10_to_30_percent": {
+        "count": 184,
+        "mean": 0.019635842016977857,
+        "p90": 0.03803076267966386,
+        "p99": 0.06274797620028441,
+        "max": 0.07092846270928463
+      },
+      "large_over_30_percent": {
+        "count": 188,
+        "mean": 0.0071827233060899375,
+        "p90": 0.017066332079290647,
+        "p99": 0.028305426390673995,
+        "max": 0.03269709543568465
+      }
+    },
+    "low_effective_size": {
+      "small_under_10_percent": {
+        "count": 96,
+        "mean": 0.1051666436375866,
+        "p90": 0.19600592564657557,
+        "p99": 0.40173683485336376,
+        "max": 0.43310185400138634
+      },
+      "medium_10_to_30_percent": {
+        "count": 184,
+        "mean": 0.05787269650816425,
+        "p90": 0.11032270040685152,
+        "p99": 0.15220682525529602,
+        "max": 0.24396026148500669
+      },
+      "large_over_30_percent": {
+        "count": 188,
+        "mean": 0.020471021194505116,
+        "p90": 0.05076905233690004,
+        "p99": 0.08032009917445197,
+        "max": 0.08782414362658433
+      }
+    },
+    "observable_bias_weighted": {
+      "small_under_10_percent": {
+        "count": 96,
+        "mean": 0.05655420760119175,
+        "p90": 0.11523460903841505,
+        "p99": 0.26757545125072696,
+        "max": 0.2722510083226959
+      },
+      "medium_10_to_30_percent": {
+        "count": 184,
+        "mean": 0.03399992007599958,
+        "p90": 0.07625230649095295,
+        "p99": 0.11482875508062049,
+        "max": 0.15243560845462606
+      },
+      "large_over_30_percent": {
+        "count": 188,
+        "mean": 0.016555710638719603,
+        "p90": 0.04017518524117814,
+        "p99": 0.0544933942939718,
+        "max": 0.055950645034866936
+      }
+    },
+    "hidden_matchability_bias": {
+      "small_under_10_percent": {
+        "count": 96,
+        "mean": 1.0816432322706964,
+        "p90": 1.6190214629476176,
+        "p99": 1.6836301748676832,
+        "max": 1.697628581891586
+      },
+      "medium_10_to_30_percent": {
+        "count": 184,
+        "mean": 0.5169519970449179,
+        "p90": 1.2607657211959038,
+        "p99": 1.334662074410168,
+        "max": 1.3739955543997797
+      },
+      "large_over_30_percent": {
+        "count": 188,
+        "mean": 0.19860701763929578,
+        "p90": 0.46022958402510694,
+        "p99": 0.5721046254920779,
+        "max": 0.5887199266248029
+      }
+    }
+  },
+  "scenario_summary": {
+    "broad_awareness_control": {
+      "existing_vid": {
+        "count": 36,
+        "mean": 0.003105339565392235,
+        "p90": 0.010726092250717353,
+        "p99": 0.01694977471771275,
+        "max": 0.01694977471771275
+      },
+      "agnostic_vid": {
+        "count": 36,
+        "mean": 0.08500409559792851,
+        "p90": 0.2242055674091078,
+        "p99": 0.2935636519504469,
+        "max": 0.2949780249874187
+      },
+      "existing_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.01749432467766039,
+        "p90": 0.0391749345848976,
+        "p99": 0.051105246631929994,
+        "max": 0.0521827734752046
+      },
+      "agnostic_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.04580446007117881,
+        "p90": 0.13800879595249244,
+        "p99": 0.20338394165502832,
+        "max": 0.20654830999550938
+      }
+    },
+    "traffic_optimization": {
+      "existing_vid": {
+        "count": 36,
+        "mean": 0.06367688178370451,
+        "p90": 0.11531385290063183,
+        "p99": 0.11563987563271136,
+        "max": 0.11563987563271136
+      },
+      "agnostic_vid": {
+        "count": 36,
+        "mean": 0.09888087991617851,
+        "p90": 0.1588449715958566,
+        "p99": 0.16488736281444658,
+        "max": 0.16493698596456682
+      },
+      "existing_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.02533269703821607,
+        "p90": 0.05433338762353356,
+        "p99": 0.05809786338805338,
+        "max": 0.05811691635925607
+      },
+      "agnostic_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.0249025703741293,
+        "p90": 0.08259215760319023,
+        "p99": 0.13912086806494628,
+        "max": 0.13921364273385745
+      }
+    },
+    "video_engagement_retargeting": {
+      "existing_vid": {
+        "count": 36,
+        "mean": 0.4084369010655017,
+        "p90": 0.8313759325123049,
+        "p99": 0.8428706251474739,
+        "max": 0.8428706251474739
+      },
+      "agnostic_vid": {
+        "count": 36,
+        "mean": 0.09367779015523683,
+        "p90": 0.20043102948332758,
+        "p99": 0.22052797964902207,
+        "max": 0.22173344231953296
+      },
+      "existing_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.16132767655624788,
+        "p90": 0.3583472873486697,
+        "p99": 0.36699240308662756,
+        "max": 0.3681778788768924
+      },
+      "agnostic_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.10442831963237281,
+        "p90": 0.255634758819296,
+        "p99": 0.2612088423114454,
+        "max": 0.26162516453066026
+      }
+    },
+    "lead_generation": {
+      "existing_vid": {
+        "count": 36,
+        "mean": 0.36676610856523384,
+        "p90": 0.7700220499080107,
+        "p99": 0.7806057101442383,
+        "max": 0.7806057101442383
+      },
+      "agnostic_vid": {
+        "count": 36,
+        "mean": 0.08400857836014908,
+        "p90": 0.1636011760806734,
+        "p99": 0.17846216109146046,
+        "max": 0.18327787394107764
+      },
+      "existing_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.045524154871668186,
+        "p90": 0.12693280572375729,
+        "p99": 0.13825783137744976,
+        "max": 0.1390010811209621
+      },
+      "agnostic_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.038001642750002666,
+        "p90": 0.0841100121775118,
+        "p99": 0.10399484251765503,
+        "max": 0.10483118797263066
+      }
+    },
+    "sales_prospecting": {
+      "existing_vid": {
+        "count": 36,
+        "mean": 0.3364944615280472,
+        "p90": 0.6563380806271746,
+        "p99": 0.6612511681839444,
+        "max": 0.6612511681839444
+      },
+      "agnostic_vid": {
+        "count": 36,
+        "mean": 0.09101461025115093,
+        "p90": 0.19360673777141452,
+        "p99": 0.21844116994312443,
+        "max": 0.21961301756658053
+      },
+      "existing_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.027881873239017634,
+        "p90": 0.06893206622626838,
+        "p99": 0.09207972467366747,
+        "max": 0.09295414661654494
+      },
+      "agnostic_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.04231075570675356,
+        "p90": 0.10940506628444555,
+        "p99": 0.15990222723981598,
+        "max": 0.1602874136591978
+      }
+    },
+    "website_retargeting": {
+      "existing_vid": {
+        "count": 36,
+        "mean": 1.0332712979323189,
+        "p90": 2.246558804753711,
+        "p99": 2.2905662288487907,
+        "max": 2.2905662288487907
+      },
+      "agnostic_vid": {
+        "count": 36,
+        "mean": 0.2786422936455788,
+        "p90": 0.710543952840778,
+        "p99": 0.7531373419929415,
+        "max": 0.7550206572526065
+      },
+      "existing_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.11948883390408158,
+        "p90": 0.24024731740003435,
+        "p99": 0.3103167712386991,
+        "max": 0.310969554078656
+      },
+      "agnostic_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.06820787154036093,
+        "p90": 0.17801160924417958,
+        "p99": 0.20941512021676204,
+        "max": 0.20960631631060442
+      }
+    },
+    "crm_customer_list": {
+      "existing_vid": {
+        "count": 36,
+        "mean": 1.4234862523334382,
+        "p90": 3.1195310476921576,
+        "p99": 3.1540920958609195,
+        "max": 3.1540920958609195
+      },
+      "agnostic_vid": {
+        "count": 36,
+        "mean": 0.30730652621962623,
+        "p90": 0.6903338639062386,
+        "p99": 0.7525686386646763,
+        "max": 0.7566432041573394
+      },
+      "existing_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.11066830750129653,
+        "p90": 0.16867044582855806,
+        "p99": 0.2288767651287176,
+        "max": 0.23441964770259985
+      },
+      "agnostic_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.1685514551203575,
+        "p90": 0.2515626708305559,
+        "p99": 0.3028279783237485,
+        "max": 0.30460138549541427
+      }
+    },
+    "catalog_retargeting": {
+      "existing_vid": {
+        "count": 36,
+        "mean": 0.40787765842090945,
+        "p90": 0.8605911633111247,
+        "p99": 0.8782484314521601,
+        "max": 0.8782484314521601
+      },
+      "agnostic_vid": {
+        "count": 36,
+        "mean": 0.12958022355506343,
+        "p90": 0.23405633666995385,
+        "p99": 0.2515202463544094,
+        "max": 0.25197486241252454
+      },
+      "existing_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.038949227769149275,
+        "p90": 0.07706788545399879,
+        "p99": 0.0913597650741924,
+        "max": 0.091367643081023
+      },
+      "agnostic_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.04543834085415909,
+        "p90": 0.12264677724514753,
+        "p99": 0.1682783791081308,
+        "max": 0.16992772949624876
+      }
+    },
+    "lookalike_prospecting": {
+      "existing_vid": {
+        "count": 36,
+        "mean": 0.17285580119442553,
+        "p90": 0.32371131557725324,
+        "p99": 0.32396141649423704,
+        "max": 0.32396141649423704
+      },
+      "agnostic_vid": {
+        "count": 36,
+        "mean": 0.08969469526890482,
+        "p90": 0.24344073176035214,
+        "p99": 0.2958306900066902,
+        "max": 0.29703172488092394
+      },
+      "existing_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.03880954966498375,
+        "p90": 0.0815326867680547,
+        "p99": 0.08611698121419652,
+        "max": 0.0867960553634359
+      },
+      "agnostic_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.04535077283742938,
+        "p90": 0.16008079480207732,
+        "p99": 0.24085591741607215,
+        "max": 0.2419611358819079
+      }
+    },
+    "advantage_audience_expansion": {
+      "existing_vid": {
+        "count": 36,
+        "mean": 0.15355393503837894,
+        "p90": 0.25883566316026685,
+        "p99": 0.2605325570687785,
+        "max": 0.2605325570687785
+      },
+      "agnostic_vid": {
+        "count": 36,
+        "mean": 0.08833337438001633,
+        "p90": 0.21814101498338004,
+        "p99": 0.25625944992266614,
+        "max": 0.2565815707620777
+      },
+      "existing_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.019734860600602398,
+        "p90": 0.042913941933102814,
+        "p99": 0.048178160125291136,
+        "max": 0.04847310379711105
+      },
+      "agnostic_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.04282375693653982,
+        "p90": 0.1094181305013042,
+        "p99": 0.15381129501823274,
+        "max": 0.1544035977597718
+      }
+    },
+    "app_activity_retargeting": {
+      "existing_vid": {
+        "count": 36,
+        "mean": 0.7946107407648046,
+        "p90": 1.719064266976196,
+        "p99": 1.756028654566765,
+        "max": 1.756028654566765
+      },
+      "agnostic_vid": {
+        "count": 36,
+        "mean": 0.18502704115852409,
+        "p90": 0.4597253200361827,
+        "p99": 0.4896176165826488,
+        "max": 0.49413316126375106
+      },
+      "existing_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.44332616788302576,
+        "p90": 0.9898983207523084,
+        "p99": 1.0013999128588096,
+        "max": 1.0019621959000145
+      },
+      "agnostic_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.2834653507820581,
+        "p90": 0.7259268666651646,
+        "p99": 0.7489110911448102,
+        "max": 0.7507579714228513
+      }
+    },
+    "unrelated_niche_control": {
+      "existing_vid": {
+        "count": 36,
+        "mean": 0.12035539633214186,
+        "p90": 0.3796576742398404,
+        "p99": 0.39094015079014416,
+        "max": 0.39094015079014416
+      },
+      "agnostic_vid": {
+        "count": 36,
+        "mean": 0.10243177112172777,
+        "p90": 0.14857120741521251,
+        "p99": 0.15666178219785498,
+        "max": 0.15756554781942173
+      },
+      "existing_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.0457482220827808,
+        "p90": 0.13720896994757625,
+        "p99": 0.14909333348589987,
+        "max": 0.1510549925885551
+      },
+      "agnostic_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.08505980565406585,
+        "p90": 0.14306795096773683,
+        "p99": 0.14770888462641804,
+        "max": 0.14797511893626897
+      }
+    },
+    "mixed_funnel_portfolio": {
+      "existing_vid": {
+        "count": 36,
+        "mean": 0.01837578392949946,
+        "p90": 0.039561271202375035,
+        "p99": 0.041073081740136574,
+        "max": 0.041073081740136574
+      },
+      "agnostic_vid": {
+        "count": 36,
+        "mean": 0.09871971573832158,
+        "p90": 0.22880748201476464,
+        "p99": 0.2717043004248924,
+        "max": 0.2719085140681218
+      },
+      "existing_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.017888652534093726,
+        "p90": 0.05222139350434833,
+        "p99": 0.05486971249239175,
+        "max": 0.05513829708430538
+      },
+      "agnostic_plus_selected_rid": {
+        "count": 36,
+        "mean": 0.03999173649175737,
+        "p90": 0.1286065969000636,
+        "p99": 0.21667495538896805,
+        "max": 0.2166868494999729
+      }
+    }
+  },
+  "methods": {
+    "existing_vid": "Existing demographic-ready VID architecture without Reference-ID correction.",
+    "agnostic_vid": "Panel-trained demographic-agnostic VID result without report-level Reference-ID correction.",
+    "existing_plus_fixed": "Existing VID plus the provider-fitted constant Reference-ID capture model.",
+    "existing_plus_fixed_log": "Existing VID plus the provider-fitted fixed-plus-log Reference-ID model.",
+    "existing_plus_mixture": "Existing VID plus the provider-fitted two-group matchability model.",
+    "agnostic_plus_fixed": "Demographic-agnostic VID plus the provider-fitted constant Reference-ID model.",
+    "agnostic_plus_fixed_log": "Demographic-agnostic VID plus the provider-fitted fixed-plus-log Reference-ID model.",
+    "agnostic_plus_mixture": "Demographic-agnostic VID plus the provider-fitted two-group matchability model.",
+    "existing_plus_selected_rid": "Existing VID plus the Reference-ID family selected by provider panel holdouts, or identity if none passes.",
+    "agnostic_plus_selected_rid": "Demographic-agnostic VID plus the Reference-ID family selected by provider panel holdouts, or identity if none passes.",
+    "provider_recommended": "The complete configuration selected by provider panel holdouts from the four operating configurations."
+  },
+  "report_specs": [
+    {
+      "label": "weeks_1_3__2_edps",
+      "weeks": [
+        1,
+        2,
+        3
+      ],
+      "edps": [
+        1,
+        2
+      ]
+    },
+    {
+      "label": "weeks_5_12__2_edps",
+      "weeks": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "edps": [
+        1,
+        2
+      ]
+    },
+    {
+      "label": "all_weeks__2_edps",
+      "weeks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "edps": [
+        1,
+        2
+      ]
+    },
+    {
+      "label": "weeks_7_13__5_edps",
+      "weeks": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "edps": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "label": "all_weeks__5_edps",
+      "weeks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "edps": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "label": "noncontiguous__5_edps",
+      "weeks": [
+        1,
+        3,
+        5,
+        8,
+        11,
+        13
+      ],
+      "edps": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "label": "weeks_1_3__10_edps",
+      "weeks": [
+        1,
+        2,
+        3
+      ],
+      "edps": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "label": "weeks_1_12__10_edps",
+      "weeks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "edps": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "label": "all_weeks__10_edps",
+      "weeks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "edps": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+panel_design,draw,raw_size,effective_size
+representative,0,5000,5000.0
+representative,1,5000,5000.0
+representative,2,5000,5000.0
+representative,3,5000,5000.0
+low_effective_size,0,5000,1381.0192587243496
+low_effective_size,1,5000,1532.3524389891734
+low_effective_size,2,5000,1190.4537926335613
+low_effective_size,3,5000,1392.674638556262
+observable_bias_weighted,0,5000,4454.755661239882
+observable_bias_weighted,1,5000,4452.558533447814
+observable_bias_weighted,2,5000,4459.653271037783
+observable_bias_weighted,3,5000,4454.124181405966
+hidden_matchability_bias,0,5000,4485.018312794034
+hidden_matchability_bias,1,5000,4495.711071009066
+hidden_matchability_bias,2,5000,4495.641592271218
+hidden_matchability_bias,3,5000,4490.214435919636

@@ -9,8 +9,10 @@ use Reference IDs to improve cross-EDP reach. It implements:
 - heterogeneous email availability and approximately 60% conditional email
   agreement, with stable pair-specific affinity;
 - complete pairwise-through-N intersection measurement for as many as 10 EDPs;
-- a panel-trained, demographic-agnostic total-reach model;
-- optional campaign-objective and audience-strategy inputs;
+- a distinct 5,000-person panel, separate from the synthetic evaluation truth;
+- representative, low-effective-size, observably biased, and hidden-bias panel designs;
+- a panel-trained, demographic-agnostic VID response using impression-available
+  campaign objective and audience strategy, without report-scale inputs;
 - an imperfect VID demographic model over 18 age × gender × geography cells;
 - proportional, fixed, and contextual demographic adjustment methods;
 - the pair-aware fixed-plus-log calibration family;
@@ -24,12 +26,15 @@ The simulation never links a VID to a Reference ID. Synthetic truth is retained
 only by the test harness so accuracy can be measured.
 
 `VALIDATION.md` documents the original measurement-layer calibration and
-stored-result reconciliation experiment. The two notebooks evaluate the newer
-provider-owned total-reach and demographic-adjustment architecture.
+stored-result reconciliation experiment. The two notebooks evaluate four
+configurations produced by two independent choices: whether to add a
+provider-trained demographic-agnostic VID model and whether to apply a frozen
+Reference-ID correction supplied by the provider.
 
 For a product-grounded walkthrough, open
-`notebooks/meta_campaign_scenarios.ipynb`. It compares the existing VID
-baseline, measurement-layer calibration, and the provider-model architecture
+`notebooks/meta_campaign_scenarios.ipynb`. It compares existing VID,
+demographic-agnostic VID, existing VID plus Reference-ID correction, and
+demographic-agnostic VID plus Reference-ID correction
 across plausible Meta campaign types:
 traffic, engagement retargeting, leads, sales, website and customer-list
 retargeting, catalog campaigns, lookalikes, Advantage+ audience expansion, app
@@ -41,19 +46,20 @@ with 2, 5, and 10 EDPs.
 Launch the notebook locally with:
 
 ```bash
-.venv/bin/jupyter lab notebooks/meta_campaign_scenarios.ipynb
+.venv/bin/python -m jupyterlab notebooks/meta_campaign_scenarios.ipynb
 ```
 
 The technical model comparison is in
-`notebooks/calibration_method_benchmark.ipynb`. It explains the synthetic
-panel, observable model inputs, objective/context ablation, demographic
-allocation choices, bounds, and raw cross-report consistency checks. Re-run
-the underlying experiment with:
+`notebooks/calibration_method_benchmark.ipynb`. It explains the distinct
+5,000-person panel; the provider-owned fitting and selection flow; sampling and
+selection error; the impression-level information boundary; separate
+Reference-ID selection for each VID base; demographic allocation; and raw
+cross-report consistency. Re-run the underlying experiment with:
 
 ```bash
-PYTHONPATH=src .venv/bin/python -m reference_calibration.provider_benchmark \
+PYTHONPATH=src .venv/bin/python -m reference_calibration.panel_validation \
   --profile full \
-  --output-dir outputs/provider_model_final
+  --output-dir outputs/panel_5000_final
 ```
 
 ## Quick start
@@ -73,12 +79,13 @@ simulation and notebook dependencies.
 
 ```bash
 .venv/bin/reference-calibration-sim --profile full --output-dir outputs/full
-.venv/bin/python -m reference_calibration.provider_benchmark \
-  --profile full --output-dir outputs/provider_model_final
+.venv/bin/python -m reference_calibration.panel_validation \
+  --profile full --output-dir outputs/panel_5000_final
 ```
 
 The first command reproduces the original measurement-layer experiment. The
-second reproduces the provider-model and demographic-allocation comparison.
+second reproduces the four-configuration provider-package and
+demographic-allocation comparison.
 The full profiles take longer because they use more campaigns, users, report
 shapes, and stress cases. The original experiment writes:
 
@@ -90,15 +97,20 @@ shapes, and stress cases. The original experiment writes:
 - `error_by_scenario.png`: baseline and calibrated error comparison.
 - `linkage_shift_sweep.png`: break-even behavior as audience matchability shifts.
 
-The provider benchmark writes `provider_summary.json`, `provider_metrics.csv`,
-and total-reach and demographic-error charts to `outputs/provider_model_final/`.
+The panel benchmark writes `panel_validation_summary.json`, detailed metrics,
+panel-draw and activation-decision files, and accuracy charts to
+`outputs/panel_5000_final/`.
 
 ## What is validated
 
 The original calibration experiment fits on large, broadly targeted campaigns.
-The provider experiment instead trains on a diverse synthetic panel containing
-all tested campaign objectives and audience strategies. In both cases, entire
-campaigns are assigned to fitting, holdout, or independent evaluation splits.
+The provider experiment trains on repeated 5,000-person panel draws containing
+all tested campaign objectives and audience strategies. Separate campaigns are
+used to train the demographic-agnostic model, fit Reference-ID response
+candidates, select corrections and the complete provider recommendation, and
+evaluate the frozen choice. It tests both sampling noise and panel-selection
+bias. In both experiments, entire campaigns are assigned to fitting, holdout,
+or independent evaluation splits.
 Stress and evaluation campaigns include:
 
 - a small non-reach campaign compared with larger reach campaigns;

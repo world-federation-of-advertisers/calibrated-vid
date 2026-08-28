@@ -1,4 +1,4 @@
-"""Build the technical provider-model and demographic-allocation notebook."""
+"""Build the technical 5,000-person provider-package validation notebook."""
 
 from pathlib import Path
 
@@ -20,21 +20,25 @@ def code(text: str):
 cells = [
     markdown(
         r"""
-# Technical benchmark: provider-calibrated total reach and demographic allocation
+# Technical validation of the four-configuration provider package
 
-This notebook evaluates a model-provider architecture in which two models run for every report:
+The proposed design has two independent choices:
 
-1. A **demographic-agnostic total-reach model** uses aggregate Reference-ID and campaign inputs to estimate calibrated union reach.
-2. The existing **VID demographic model** produces age, gender, and geography estimates. A provider-supplied adjustment makes those estimates agree with the calibrated total.
+1. **Total-reach model:** keep the current demographic-ready VID total or introduce a separate demographic-agnostic VID model.
+2. **Measurement correction:** leave total reach unchanged or apply a frozen Reference-ID correction supplied by the model provider.
 
-The measurement system runs both models. It does not fit a new calibration model for each report and does not need access to the provider's panel or internal model coefficients.
+Together they produce four configurations:
 
-The benchmark separates four questions:
+| Configuration | Base total | Optional second layer |
+|---|---|---|
+| Existing VID | Current demographic-ready VID model | None |
+| Agnostic VID | Panel-trained demographic-agnostic VID model | None |
+| Existing VID + RID | Existing VID | Frozen Reference-ID correction |
+| Agnostic VID + RID | Agnostic VID | Frozen Reference-ID correction |
 
-- Does a panel-trained total model improve union reach?
-- Does campaign objective and audience strategy add information beyond Reference-ID counts?
-- Is proportional demographic scaling sufficient, or does a panel-learned adjustment help?
-- Does the architecture preserve basic bounds and cross-report consistency?
+The provider can train, select, and validate the full package because it has panel-person truth. The measurement-system operator then runs the model or models required by the selected configuration, computes approved aggregate Reference-ID intersections inside the TEE when needed, applies the frozen instructions, and enforces output bounds. Operator-side fitting is possible if the operator later obtains adequate truth, but it is not required by this design.
+
+An **Event Data Provider (EDP)** is a publisher or other data source contributing campaign events. A **Reference ID** is one common join-key value per person and EDP: normalized email when available, otherwise that EDP's proprietary identifier, hashed into a shared 5-billion-value space. Shared emails can match across EDPs; proprietary fallbacks have no intended cross-EDP match. “RID” is used only as a compact label in tables and charts.
 """
     ),
     code(
@@ -44,7 +48,6 @@ import csv
 import json
 import sys
 
-import numpy as np
 from IPython.display import Image, Markdown, display
 
 
@@ -52,7 +55,7 @@ def find_project_root():
     for candidate in (Path.cwd(), Path.cwd().parent):
         if (candidate / "src" / "reference_calibration").exists():
             return candidate.resolve()
-    raise RuntimeError("Run from the repository root or notebooks/.")
+    raise RuntimeError("Run this notebook from the repository root or notebooks/.")
 
 
 def markdown_table(rows, columns):
@@ -67,329 +70,435 @@ def markdown_table(rows, columns):
 
 PROJECT_ROOT = find_project_root()
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
-OUTPUT_DIR = PROJECT_ROOT / "outputs" / "provider_model_final"
+OUTPUT_DIR = PROJECT_ROOT / "outputs" / "panel_5000_final"
 
 RUN_BENCHMARK = False
 if RUN_BENCHMARK:
-    from reference_calibration.provider_benchmark import run_provider_benchmark
-    run_provider_benchmark(OUTPUT_DIR, profile="full")
+    from reference_calibration.panel_validation import run_panel_validation
+    run_panel_validation(OUTPUT_DIR, profile="quick")
 
-summary = json.loads((OUTPUT_DIR / "provider_summary.json").read_text())
-with (OUTPUT_DIR / "provider_metrics.csv").open() as stream:
+summary = json.loads((OUTPUT_DIR / "panel_validation_summary.json").read_text())
+with (OUTPUT_DIR / "panel_validation_metrics.csv").open() as stream:
     metrics = list(csv.DictReader(stream))
-methods = {item["name"]: item for item in summary["methods"]}
-
-print("Project: repository root")
-print(f"Benchmark outputs: {OUTPUT_DIR.relative_to(PROJECT_ROOT)}")
-print(f"Detailed metric rows: {len(metrics):,}")
+with (OUTPUT_DIR / "panel_draws.csv").open() as stream:
+    panel_draws = list(csv.DictReader(stream))
+with (OUTPUT_DIR / "activation_decisions.csv").open() as stream:
+    decisions = list(csv.DictReader(stream))
 """
     ),
     markdown(
         r"""
-## 1. Runtime data flow
+## 1. Information boundary and frozen artifacts
 
-For a requested campaign, week set, and EDP set, the measurement system supplies the model provider's approved workload with:
+VID models are impression-level mappings. Depending on the model design, they can use fields available when an impression is labeled, including EDP, campaign objective, audience strategy, and the Reference ID derived from email or an EDP's proprietary fallback. They do not receive report-level campaign size or aggregate cross-EDP intersections.
 
-- each EDP's reach;
-- the aggregate Reference-ID overlap pattern, including pairwise and available higher-order counts;
-- the participating EDPs;
-- campaign objective and audience-strategy summaries; and
-- campaign scale and reporting-window information.
+The Reference-ID calibrator is not a third VID model. It is a frozen response function that consumes aggregate report measurements. The same candidate family may be proposed for both VID bases, but it must be selected and validated separately because it corrects the residual error left by that base.
 
-The total model returns one calibrated union-reach estimate (T). Separately, the VID demographic model returns an initial vector (v_1,ldots,v_D). The provider-packaged demographic method returns:
+A deployable provider package therefore contains whichever of the following are selected for a model line:
 
-\[
-(R_1,\ldots,R_D)=g(T,v_1,\ldots,v_D,\text{report context}).
-\]
-
-No Reference ID is assigned an age, gender, or geography, and no VID-to-Reference-ID crosswalk is constructed.
+- the current demographic-ready VID model;
+- the optional demographic-agnostic VID model;
+- the optional Reference-ID response and decoder for each supported base; and
+- the demographic-adjustment instructions that map the selected total to the demographic-ready VID distribution.
 """
     ),
     markdown(
         r"""
-## 2. Synthetic panel and holdout design
+## 2. Synthetic training, selection, and evaluation flow
 
-The population contains ten EDPs, thirteen weeks, and eighteen mutually exclusive age × gender × geography cells. The harness creates a true demographic label and a stable but imperfect VID demographic label for each synthetic person. VID labeling is somewhat more accurate for people who are easier to link, creating realistic interaction between audience selection, matchability, and demographic error.
+The experiment creates a large synthetic population with exact person-level truth. That truth is retained only by the test harness.
 
-The panel-training campaigns span all thirteen campaign scenarios rather than only broad reach. Every snapshot and report shape from one campaign remains in the same split. Separate campaign seeds are used for:
+For each 5,000-person panel draw:
 
-- provider-model fitting;
-- whole-campaign panel holdouts; and
-- independent scenario evaluation.
+1. Train the demographic-agnostic response on one group of campaigns.
+2. On a second group, fit candidate Reference-ID response functions from weighted panel-person truth and aggregate panel Reference-ID intersections.
+3. On a third group of whole campaigns, separately select a Reference-ID correction for the existing and agnostic bases, or select identity for either base.
+4. On the same held-out selection group, choose among the four complete configurations, retaining existing VID unless an alternative clears the guardrails.
+5. Freeze that choice and score it on a fourth, independent campaign group using full-population truth.
 
-This is deliberately favorable to a model provider with a diverse panel. It tests whether moving calibration upstream can work when the provider has representative examples of the intended campaign types. It does not establish that a real panel has this coverage.
+All splits are by campaign. Weekly snapshots from one campaign never appear in both fitting and validation data.
+"""
+    ),
+    markdown(
+        r"""
+## 3. What the synthetic agnostic model represents
+
+Reproducing a provider's proprietary impression-to-VID learner is outside this harness. Instead, the benchmark learns the aggregate pair-duplication response that a frozen agnostic model might produce.
+
+For each EDP pair, the fitted response uses only EDP identities, campaign objective, and audience strategy. At report time, those predicted pair relationships and the per-EDP reaches are combined into one valid multi-EDP audience. Ten EDPs require 45 pair responses plus pooled context effects, rather than 1,023 unrelated subset curves.
+
+This is a testable surrogate for the architecture. It does not claim that a production VID model must use this regression or that objective alone determines overlap.
+"""
+    ),
+    markdown(
+        r"""
+## 4. Campaign test matrix
+
+The benchmark uses stylized versions of campaign objectives and audience tools available in products such as Meta Ads Manager. They are designed to cover distinct measurement mechanisms, not to estimate Meta's production audiences or match rates.
+
+- **Campaign size** controls how much direct panel evidence is available.
+- **Audience overlap across EDPs** controls how many of the same people are truly reached by multiple publishers.
+- **Shared-email visibility** controls how much of that true duplication appears in the Reference-ID intersections.
+
+These properties are varied separately. This prevents the experiment from assuming that an objective name—such as “Sales”—automatically determines either true overlap or email matchability. Across the ten EDPs, base email availability ranges from 10% to 95% and the email-agreement parameter ranges from 52% to 72%, centered near 60%; the scenarios then select audiences with higher or lower matchability than that base population.
 """
     ),
     code(
         r"""
-design_rows = [
-    {"item": "Panel-training campaigns", "value": summary["panel_train_campaigns"]},
-    {"item": "Whole-campaign panel holdouts", "value": summary["panel_holdout_campaigns"]},
-    {"item": "Independent evaluation campaigns", "value": summary["evaluation_campaigns"]},
-    {"item": "Training report observations", "value": summary["training_observations"]},
-    {"item": "Demographic cells", "value": summary["demographic_cells"]},
-    {"item": "EDP counts tested", "value": "2, 5, and 10"},
-]
-display(Markdown(markdown_table(design_rows, [("item", "Design item"), ("value", "Value")])))
-"""
-    ),
-    markdown(
-        r"""
-## 3. Illustrative provider total model
-
-The provider model in this notebook is an implementation example, not a required production model family. It predicts the logarithmic correction to the existing VID total:
-
-\[
-\widehat T = T_{VID}\exp(f(x)).
-\]
-
-The result is clipped to the ordinary logical range: at least the largest individual EDP reach and no more than the summed EDP reaches or population.
-
-The observable feature vector includes:
-
-- individual EDP presence and reach;
-- pairwise Reference-ID overlap relative to the smaller EDP and to the VID pair estimate;
-- summary statistics for pairwise, three-way, and higher-order Reference-ID signals;
-- report size and the VID total; and, in the context-aware version,
-- objective and audience-strategy proportions, both unweighted and reach-weighted.
-
-A regularized radial-basis model is fitted against panel-truth total reach. The context-free and context-aware versions use the same fitting process, allowing the value of campaign metadata to be measured directly.
-"""
-    ),
-    code(
-        r"""
-parameter_rows = [
-    {
-        "model": "Provider total: Reference-ID inputs only",
-        "parameters": summary["provider_models"]["reference_only_parameter_count"],
-    },
-    {
-        "model": "Provider total: Reference ID + campaign context",
-        "parameters": summary["provider_models"]["context_parameter_count"],
-    },
-    {
-        "model": "Contextual demographic adjustment",
-        "parameters": summary["provider_models"]["contextual_demographic_parameter_count"],
-    },
-]
-display(Markdown(markdown_table(parameter_rows, [("model", "Model"), ("parameters", "Stored parameters")])) )
-"""
-    ),
-    markdown(
-        r"""
-## 4. Total-reach methods compared
-
-The benchmark also fits two measurement-layer approaches on representative reach campaigns in the same synthetic world:
-
-- direct pair calibration followed by maximum-entropy higher-order inference; and
-- two-group mixture pair calibration followed by the same inference step.
-
-This produces an apples-to-apples comparison with the provider models because every method is evaluated on the same campaigns and report requests.
-"""
-    ),
-    code(
-        r"""
-TOTAL_METHODS = [
-    "existing_vid",
-    "direct_pair_proportional",
-    "mixture_pair_proportional",
-    "provider_reference_proportional",
-    "provider_context_proportional",
-]
-rows = []
-for name in TOTAL_METHODS:
-    item = methods[name]
-    holdout = next(value for value in summary["holdout_methods"] if value["name"] == name)
-    rows.append({
-        "method": item["label"],
-        "evaluation": f"{item['total_error']['mean']:.2%}",
-        "holdout": f"{holdout['total_error']['mean']:.2%}",
-        "p90": f"{item['total_error']['p90']:.2%}",
-        "two": f"{item['total_error_by_edp_count']['2']['mean']:.2%}",
-        "five": f"{item['total_error_by_edp_count']['5']['mean']:.2%}",
-        "ten": f"{item['total_error_by_edp_count']['10']['mean']:.2%}",
+scenario_rows = []
+for item in summary["scenario_descriptions"].values():
+    scenario_rows.append({
+        "objective": item["objective"],
+        "setup": item["audience"],
+        "size": item["volume"],
+        "overlap": item["cross_edp_similarity"],
+        "email": item["reference_matchability"],
+        "purpose": item["intuition"],
     })
+display(Markdown(markdown_table(
+    scenario_rows,
+    [
+        ("objective", "Objective"),
+        ("setup", "Real-world campaign setup"),
+        ("size", "Relative size"),
+        ("overlap", "Expected audience overlap across EDPs"),
+        ("email", "Expected shared-email visibility"),
+        ("purpose", "What the scenario tests"),
+    ],
+)))
+"""
+    ),
+    markdown(
+        r"""
+## 5. Provider-fitted Reference-ID candidates
+
+The provider can observe, for panel campaigns, both weighted panel-person truth and aggregate Reference-ID intersections. That is enough to learn how much true overlap is visible through the common Reference ID without linking an existing VID to a Reference ID.
+
+The benchmark fits three candidate families:
+
+- **Fixed capture:** stable pair-specific visibility rates with no campaign-size term. This is easy to estimate and may transfer well when matching behavior is stable.
+- **Fixed plus log scale:** pair-specific rates plus a pre-fitted logarithmic campaign-size effect. This can capture a smooth size relationship but may overfit or transfer poorly.
+- **Two-group mixture:** a compact representation of people who are consistently easier or harder to match across EDPs. This can capture person-level correlation in email provision.
+
+Each candidate uses observed pairwise, three-way, four-way, and higher-order panel intersections during fitting. At runtime, the current implementation estimates pairwise targets and infers higher orders through one internally consistent audience reconstruction (implemented here with maximum entropy). The result is one set of non-overlapping Venn regions, none of which can contain a negative audience.
+"""
+    ),
+    markdown(
+        r"""
+## 6. Panel designs
+
+The raw panel size is fixed at 5,000. Effective size can be smaller when weights are unequal. Observable recruitment bias is corrected using known weights; hidden selection on intent and matchability is deliberately left uncorrected. The hidden-bias case is intentionally severe so the failure mode is visible, not a production prevalence estimate. This executed notebook uses four panel draws per condition, so its selection rates illustrate behavior rather than estimate stable production probabilities.
+"""
+    ),
+    code(
+        r"""
+panel_rows = []
+for design, item in summary["panel_designs"].items():
+    panel_rows.append({
+        "panel": item["label"],
+        "raw": item["raw_size"],
+        "mean_neff": f"{item['effective_size']['mean']:.0f}",
+        "min_neff": f"{min(float(row['effective_size']) for row in panel_draws if row['panel_design'] == design):.0f}",
+        "description": item["description"],
+    })
+display(Markdown(markdown_table(
+    panel_rows,
+    [("panel", "Panel"), ("raw", "Raw N"), ("mean_neff", "Mean effective N"), ("min_neff", "Minimum effective N"), ("description", "Purpose")],
+)))
+"""
+    ),
+    code(
+        r"""
+panel_truth_rows = []
+band_labels = {
+    "small_under_10_percent": "Small (<10%)",
+    "medium_10_to_30_percent": "Medium (10%–30%)",
+    "large_over_30_percent": "Large (>30%)",
+}
+for design, bands in summary["panel_truth_summary"].items():
+    for band, result in bands.items():
+        panel_truth_rows.append({
+            "panel": summary["panel_designs"][design]["label"],
+            "volume": band_labels[band],
+            "mean": f"{result['mean']:.2%}",
+            "p90": f"{result['p90']:.2%}",
+            "worst": f"{result['max']:.2%}",
+        })
+display(Markdown("### Panel-estimated truth versus full synthetic truth\n\n" + markdown_table(
+    panel_truth_rows,
+    [("panel", "Panel"), ("volume", "Volume"), ("mean", "Mean error"), ("p90", "p90"), ("worst", "Worst")],
+)))
+"""
+    ),
+    markdown(
+        r"""
+## 7. Selection rule
+
+Selection happens in two stages so the design answers two distinct questions.
+
+First, for each VID base, a Reference-ID family must:
+
+- improve mean absolute relative error by at least 0.5 percentage points;
+- avoid worsening p90 error by more than 0.5 percentage points; and
+- show, after accounting for campaign-to-campaign variability, at least 90% confidence that its average error is lower.
+
+If no family passes, that base uses identity—no Reference-ID correction.
+
+Second, the provider applies the same guardrails to the four complete configurations, always keeping existing VID as the fallback. This means the provider can recommend agnostic VID without RID, existing VID with RID, both improvements together, or neither.
+"""
+    ),
+    code(
+        r"""
+configuration_labels = {
+    "existing_vid": "Existing VID",
+    "agnostic_vid": "Agnostic VID",
+    "existing_plus_selected_rid": "Existing VID + selected RID",
+    "agnostic_plus_selected_rid": "Agnostic VID + selected RID",
+}
+activation_rows = []
+for design, item in summary["activation_summary"].items():
+    activation_rows.append({
+        "panel": summary["panel_designs"][design]["label"],
+        "existing_active": f"{item['existing_correction_active_rate']:.0%}",
+        "existing_harm": f"{item['existing_correction_harm_rate']:.0%}",
+        "agnostic_active": f"{item['agnostic_correction_active_rate']:.0%}",
+        "agnostic_harm": f"{item['agnostic_correction_harm_rate']:.0%}",
+        "recommendations": ", ".join(
+            f"{configuration_labels[name]}: {count}"
+            for name, count in item["recommended_configuration_counts"].items()
+            if count
+        ),
+    })
+display(Markdown(markdown_table(
+    activation_rows,
+    [
+        ("panel", "Panel"),
+        ("existing_active", "RID active on existing"),
+        ("existing_harm", "Existing-base activation harmed truth"),
+        ("agnostic_active", "RID active on agnostic"),
+        ("agnostic_harm", "Agnostic-base activation harmed truth"),
+        ("recommendations", "Complete configuration selected"),
+    ],
+)))
+"""
+    ),
+    markdown(
+        r"""
+## 8. Accuracy of the four configurations
+
+The table aggregates all independent evaluation campaigns and report shapes. The “selected RID” rows use the family chosen for that particular base architecture, or identity if no family passed. The provider-recommended row uses the complete configuration chosen on panel holdouts. The p90 and p99 columns are the error levels that 90% and 99% of tested reports are at or below. Relative error can exceed 100% when the true audience is small; a 140% error means the estimate missed by 1.4 times the true reach.
+
+The existing-VID baseline is intentionally generated from a population-rate overlap assumption. It is almost exact for the broad-awareness control and can be severely wrong for narrow, correlated campaigns. These errors are useful for comparing methods inside the synthetic world, but they are not estimates of production VID accuracy.
+
+“Provider recommended” is not a fifth configuration. It is the configuration selected from the four alternatives in each panel draw.
+"""
+    ),
+    code(
+        r"""
+METHODS = [
+    "existing_vid",
+    "agnostic_vid",
+    "existing_plus_selected_rid",
+    "agnostic_plus_selected_rid",
+    "provider_recommended",
+]
+method_labels = {
+    **configuration_labels,
+    "provider_recommended": "Provider recommended",
+}
+rows = []
+for design, values in summary["method_summary"].items():
+    for method in METHODS:
+        result = values[method]
+        rows.append({
+            "panel": summary["panel_designs"][design]["label"],
+            "method": method_labels[method],
+            "mean": f"{result['mean']:.2%}",
+            "p90": f"{result['p90']:.2%}",
+            "p99": f"{result['p99']:.2%}",
+            "max": f"{result['max']:.2%}",
+        })
 display(Markdown(markdown_table(
     rows,
-    [
-        ("method", "Method"),
-        ("evaluation", "Evaluation mean"),
-        ("holdout", "Panel holdout mean"),
-        ("p90", "Evaluation p90"),
-        ("two", "2 EDPs"),
-        ("five", "5 EDPs"),
-        ("ten", "10 EDPs"),
-    ],
+    [("panel", "Panel"), ("method", "Configuration"), ("mean", "Mean"), ("p90", "p90"), ("p99", "p99"), ("max", "Worst")],
 )))
-display(Image(filename=str(OUTPUT_DIR / "provider_total_error_by_scenario.png")))
-"""
-    ),
-    markdown(
-        r"""
-## 5. Demographic allocation methods
-
-The benchmark tests three provider choices:
-
-### Proportional scaling
-
-\[
-R_d=T\frac{v_d}{\sum_k v_k}.
-\]
-
-This fixes the total while preserving the VID demographic mix.
-
-### Fixed panel adjustment
-
-The provider learns one additive share correction for each demographic cell from panel campaigns. The correction is normalized so the resulting shares sum to one.
-
-### Contextual panel adjustment
-
-The provider learns how the VID share error changes with objective, audience strategy, participating EDPs, campaign scale, and the starting VID distribution. The model predicts changes to demographic shares rather than another total, preventing the two model components from competing over total reach.
-
-The final shares are projected onto the nonnegative demographic simplex and multiplied by (T). Population caps are enforced. The measurement system sees only the packaged adjustment function.
+display(Image(filename=str(OUTPUT_DIR / "error_by_panel_design.png")))
 """
     ),
     code(
         r"""
-DEMO_METHODS = [
+hidden = summary["method_summary"]["hidden_matchability_bias"]
+hidden_choice = summary["activation_summary"]["hidden_matchability_bias"]["recommended_configuration_counts"]
+draw_count = sum(hidden_choice.values())
+choice_text = ", ".join(
+    f"**{method_labels[name]}** in {count} of {draw_count} draws"
+    for name, count in hidden_choice.items()
+    if count
+)
+display(Markdown(
+    "**Hidden-bias stress result.** The panel selected "
+    f"{choice_text}. The recommended configuration's full-population mean error was "
+    f"**{hidden['provider_recommended']['mean']:.2%}**; for comparison, agnostic VID alone had "
+    f"**{hidden['agnostic_vid']['mean']:.2%}** error. The selection process behaved as designed; "
+    "the panel was missing an important trait that affected the full population."
+))
+"""
+    ),
+    markdown(
+        r"""
+### Which correction family was selected for each base?
+
+These counts are intentionally separate. A correction that helps the existing VID model can be redundant or harmful after the agnostic model has already removed part of the same error.
+"""
+    ),
+    code(
+        r"""
+family_rows = []
+family_labels = {
+    "existing_vid": "No correction",
+    "agnostic_vid": "No correction",
+    "existing_plus_fixed": "Fixed capture",
+    "agnostic_plus_fixed": "Fixed capture",
+    "existing_plus_fixed_log": "Fixed + log size",
+    "agnostic_plus_fixed_log": "Fixed + log size",
+    "existing_plus_mixture": "Two-group mixture",
+    "agnostic_plus_mixture": "Two-group mixture",
+}
+for design, item in summary["activation_summary"].items():
+    family_rows.append({
+        "panel": summary["panel_designs"][design]["label"],
+        "existing": ", ".join(
+            f"{family_labels[name]}: {count}" for name, count in item["existing_correction_selection_counts"].items() if count
+        ),
+        "agnostic": ", ".join(
+            f"{family_labels[name]}: {count}" for name, count in item["agnostic_correction_selection_counts"].items() if count
+        ),
+    })
+display(Markdown(markdown_table(
+    family_rows,
+    [("panel", "Panel"), ("existing", "Existing-base selection"), ("agnostic", "Agnostic-base selection")],
+)))
+"""
+    ),
+    markdown(
+        r"""
+## 9. Interpreting the 5,000-person limit
+
+For a simple random panel of effective size $N$, a rough relative 95% sampling interval for a reach proportion $p$ is:
+
+$$
+1.96\sqrt{p(1-p)/N}/p.
+$$
+
+This approximation ignores design effects and hidden selection bias, so it is optimistic for weighted or non-representative panels. Higher-order intersections are much sparser than single-EDP reach. If a true intersection is 0.02% of the population, a 5,000-person panel expects one matching person and has about a 37% chance of observing none.
+
+The practical implication is that the panel should train and validate pooled behavior across many campaigns. It should not be treated as precise ground truth for every individual low-volume campaign.
+"""
+    ),
+    code(
+        r"""
+sampling_rows = []
+for proportion in (0.20, 0.10, 0.05, 0.01, 0.005, 0.002, 0.0002):
+    expected = 5_000 * proportion
+    relative = 1.96 * ((proportion * (1 - proportion) / 5_000) ** 0.5) / proportion
+    zero = (1 - proportion) ** 5_000
+    sampling_rows.append({
+        "proportion": f"{proportion:.2%}",
+        "expected": f"{expected:.1f}",
+        "relative": f"±{relative:.0%}",
+        "zero": f"{zero:.0%}",
+    })
+display(Markdown(markdown_table(
+    sampling_rows,
+    [("proportion", "Reach/intersection"), ("expected", "Expected panel people"), ("relative", "Approx. relative 95% interval"), ("zero", "Chance of zero observed")],
+)))
+"""
+    ),
+    markdown(
+        r"""
+## 10. Demographic adjustment is downstream of total reach
+
+The measurement system always runs the demographic-ready model. When a different total is selected, the provider's demographic instruction adjusts that starting distribution so it adds to the selected total while respecting population limits.
+
+The benchmark compares proportional scaling with a panel-learned contextual adjustment. Demographic-distribution error measures how far the reported shares differ from the true shares. Per-cell reach error also penalizes getting the total size of each demographic bucket wrong. Lower is better for both. Reference-ID overlaps supply no age, gender, or geography labels, so they cannot directly determine which demographic bucket changes.
+"""
+    ),
+    code(
+        r"""
+demo_methods = (
     "existing_vid",
-    "provider_context_proportional",
-    "provider_context_fixed_demo",
-    "provider_context_learned_demo",
-    "oracle_total_proportional",
-    "oracle_total_learned_demo",
-]
-rows = []
-for name in DEMO_METHODS:
-    item = methods[name]
-    rows.append({
-        "method": item["label"],
-        "total": f"{item['total_error']['mean']:.2%}",
-        "demo_reach": f"{item['demographic_reach_error']['mean']:.2%}",
-        "demo_distribution": f"{item['demographic_distribution_error']['mean']:.2%}",
-    })
+    "agnostic_proportional_demo",
+    "agnostic_panel_demo",
+    "existing_rid_panel_demo",
+    "agnostic_rid_panel_demo",
+    "recommended_panel_demo",
+)
+demo_labels = {
+    "existing_vid": "Existing VID demographics",
+    "agnostic_proportional_demo": "Agnostic total + proportional scaling",
+    "agnostic_panel_demo": "Agnostic total + panel adjustment",
+    "existing_rid_panel_demo": "Existing + RID + panel adjustment",
+    "agnostic_rid_panel_demo": "Agnostic + RID + panel adjustment",
+    "recommended_panel_demo": "Recommended total + panel adjustment",
+}
+demo_rows = []
+for design in summary["panel_designs"]:
+    for method in demo_methods:
+        distribution_values = [
+            float(row["value"])
+            for row in metrics
+            if row["panel_design"] == design
+            and row["category"] == "demographic_distribution_error"
+            and row["method"] == method
+        ]
+        reach_values = [
+            float(row["value"])
+            for row in metrics
+            if row["panel_design"] == design
+            and row["category"] == "demographic_reach_error"
+            and row["method"] == method
+        ]
+        demo_rows.append({
+            "panel": summary["panel_designs"][design]["label"],
+            "method": demo_labels[method],
+            "distribution": f"{sum(distribution_values) / len(distribution_values):.2%}",
+            "reach": f"{sum(reach_values) / len(reach_values):.2%}",
+        })
 display(Markdown(markdown_table(
-    rows,
-    [
-        ("method", "Method"),
-        ("total", "Total-reach error"),
-        ("demo_reach", "Combined demographic reach error"),
-        ("demo_distribution", "Demographic distribution error"),
-    ],
-)))
-display(Image(filename=str(OUTPUT_DIR / "provider_demographic_error_by_scenario.png")))
-"""
-    ),
-    markdown(
-        r"""
-## 6. Interpreting the demographic metrics
-
-Combined demographic reach error includes both total-reach error and incorrect allocation among demographic cells. Demographic distribution error first normalizes both vectors to shares and then measures how much audience share must move between cells to match truth.
-
-The oracle-total rows are important. If proportional scaling still has material error with perfect total reach, the remaining problem is demographic allocation rather than deduplication. The difference between oracle proportional and oracle learned allocation measures the incremental value of the provider's panel-based demographic adjustment.
-"""
-    ),
-    markdown(
-        r"""
-## 7. Output validity
-
-Every demographic method is checked for:
-
-- negative values;
-- demographic values above their population;
-- failure to add exactly to the corresponding total estimate; and
-- behavior for 2-, 5-, and 10-EDP reports.
-"""
-    ),
-    code(
-        r"""
-validity_rows = []
-for name in DEMO_METHODS:
-    sum_errors = [
-        float(row["value"])
-        for row in metrics
-        if row["split"] == "evaluation"
-        and row["method"] == name
-        and row["category"] == "demographic_sum_error"
-    ]
-    population_errors = [
-        float(row["value"])
-        for row in metrics
-        if row["split"] == "evaluation"
-        and row["method"] == name
-        and row["category"] == "demographic_population_violation"
-    ]
-    validity_rows.append({
-        "method": methods[name]["label"],
-        "max_sum_error": f"{max(sum_errors, default=0.0):.3%}",
-        "max_population_violation": f"{max(population_errors, default=0.0):.3%}",
-    })
-display(Markdown(markdown_table(
-    validity_rows,
-    [
-        ("method", "Method"),
-        ("max_sum_error", "Largest total mismatch"),
-        ("max_population_violation", "Largest population violation"),
-    ],
+    demo_rows,
+    [("panel", "Panel"), ("method", "Demographic output"), ("distribution", "Distribution error"), ("reach", "Per-cell reach error")],
 )))
 """
     ),
     markdown(
         r"""
-## 8. Cross-report consistency
+## 11. Cross-report consistency
 
-The provider total model is a deterministic function of the requested report, but separate predictions for nested reports are not mathematically guaranteed to be monotone. The benchmark checks:
+Every configuration is tested on nested requests, including weeks 1–3 followed by weeks 1–12 and 2-, 5-, and 10-EDP subsets. The decoder guarantees a valid Venn diagram inside each report. It does not guarantee that reports calculated separately will agree wherever their weeks and EDPs overlap.
 
-- weeks 1–3 versus weeks 1–12;
-- weeks 1–12 versus the full flight;
-- two EDPs versus five EDPs; and
-- five EDPs versus ten EDPs.
-
-The stored-result reconciliation mechanism remains useful when published reports must never contradict earlier results.
+Freezing the model line and provider bundle makes a request reproducible without retrieving a prior result. Stored results are needed only when a new overlapping request must be checked against what has already been published. The raw violation rate below measures that remaining need for reconciliation.
 """
     ),
     code(
         r"""
 consistency_rows = []
-for name in TOTAL_METHODS:
-    result = summary["consistency"]["evaluation"][name]
+for design, item in summary["activation_summary"].items():
     consistency_rows.append({
-        "method": methods[name]["label"],
-        "checks": result["checks"],
-        "violations": result["violations"],
-        "maximum": f"{result['maximum'] / 1_000_000:.3f}M",
+        "panel": summary["panel_designs"][design]["label"],
+        "violation_rate": f"{item['raw_consistency_violation_rate']:.2%}",
     })
-display(Markdown(markdown_table(
-    consistency_rows,
-    [
-        ("method", "Method"),
-        ("checks", "Checks"),
-        ("violations", "Raw violations"),
-        ("maximum", "Largest violation"),
-    ],
-)))
+display(Markdown(markdown_table(consistency_rows, [("panel", "Panel"), ("violation_rate", "Raw nested-report violation rate")])))
 """
     ),
     markdown(
         r"""
-## 9. Conclusions and decision rule
+## 12. What this benchmark can and cannot establish
 
-The synthetic result favors the provider-model architecture in this test:
+It establishes that all four configurations can share one operator interface; that a provider can learn and select optional correction from panel-only truth and aggregate Reference-ID observations; and that the resulting frozen package can be tested across 2-, 5-, and 10-EDP reports and varied week windows. It also quantifies sampling variability, panel-selection risk, correction-selection error, demographic allocation, and raw cross-report consistency in a controlled world.
 
-1. A panel-trained total model performs better than the existing VID baseline and the two strongest measurement-layer calibration comparators.
-2. Objective and audience-strategy inputs improve the provider total model relative to the same model using Reference-ID inputs alone.
-3. Proportional scaling is a valid, simple demographic baseline, but it leaves demographic error even when total reach is known perfectly.
-4. The contextual panel adjustment reduces demographic error in both whole-campaign holdouts and independent evaluation campaigns.
-5. The provider model still creates occasional raw cross-report inconsistencies, so the existing reconciliation layer remains relevant.
+It does not reproduce a provider's full production VID learner, prove that a real 5,000-person panel represents small retargeting or conversion audiences, or show that the synthetic winner will be the production winner. The hidden-bias experiment also shows a key limitation: a provider can make a statistically disciplined choice using its panel and still select the wrong configuration for the full population if the panel omits an important selection mechanism.
 
-The exact radial-basis total model and linear demographic adjustment used here are examples, not prescribed production choices. The model provider should be free to select another total-reach or demographic-adjustment method, provided the packaged model accepts the agreed inputs, returns bounded outputs, and beats simpler alternatives on whole-campaign panel holdouts.
-
-The next validation should reproduce this comparison with real panel campaigns, including broad awareness, CRM, website retargeting, app activity, lead, sales, lookalike, and mixed-objective reports. The provider should compare at least:
-
-- total model without campaign context;
-- total model with campaign context;
-- proportional demographic scaling; and
-- its proposed panel-learned demographic adjustment.
+Production validation should therefore use repeated panel resampling, whole-campaign holdouts, results by campaign mechanism rather than one pooled score, and external truth where available. Shadow Reference-ID measurement remains useful for implementation checks and drift monitoring even when the provider supplies the initial bundle.
 """
     ),
 ]
