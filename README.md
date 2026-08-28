@@ -11,8 +11,9 @@ use Reference IDs to improve cross-EDP reach. It implements:
 - complete pairwise-through-N intersection measurement for as many as 10 EDPs;
 - a distinct 5,000-person panel, separate from the synthetic evaluation truth;
 - representative, low-effective-size, observably biased, and hidden-bias panel designs;
-- a panel-trained, demographic-agnostic VID response using impression-available
-  campaign objective and audience strategy, without report-scale inputs;
+- a panel-trained, email-first demographic-agnostic VID response that receives
+  email and proprietary identifiers separately, directly anchors shared-email
+  VIDs, and uses optional campaign context only for non-email behavior;
 - an imperfect VID demographic model over 18 age × gender × geography cells;
 - proportional, fixed, and contextual demographic adjustment methods;
 - the pair-aware fixed-plus-log calibration family;
@@ -22,7 +23,8 @@ use Reference IDs to improve cross-EDP reach. It implements:
 - production of a bounded `REVIEW_REQUIRED` result when prior results cannot be
   reconciled exactly.
 
-The simulation never links a VID to a Reference ID. Synthetic truth is retained
+The calibration Reference ID is never an input to either VID model. The
+simulation never links a VID to a Reference ID. Synthetic truth is retained
 only by the test harness so accuracy can be measured.
 
 `VALIDATION.md` documents the original measurement-layer calibration and
@@ -98,7 +100,8 @@ shapes, and stress cases. The original experiment writes:
 - `linkage_shift_sweep.png`: break-even behavior as audience matchability shifts.
 
 The panel benchmark writes `panel_validation_summary.json`, detailed metrics,
-panel-draw and activation-decision files, and accuracy charts to
+panel-draw and activation-decision files, an example set of frozen
+provider-to-measurement instructions in `provider_packages.json`, and accuracy charts to
 `outputs/panel_5000_final/`.
 
 ## What is validated
@@ -106,7 +109,7 @@ panel-draw and activation-decision files, and accuracy charts to
 The original calibration experiment fits on large, broadly targeted campaigns.
 The provider experiment trains on repeated 5,000-person panel draws containing
 all tested campaign objectives and audience strategies. Separate campaigns are
-used to train the demographic-agnostic model, fit Reference-ID response
+used to train the email-first demographic-agnostic model, fit Reference-ID response
 candidates, select corrections and the complete provider recommendation, and
 evaluate the frozen choice. It tests both sampling noise and panel-selection
 bias. In both experiments, entire campaigns are assigned to fitting, holdout,

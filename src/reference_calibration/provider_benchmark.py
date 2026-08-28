@@ -188,7 +188,7 @@ def _evaluate_campaigns(
     specs,
     direct_pair,
     mixture,
-    provider_reference,
+    provider_email,
     provider_context,
     proportional,
     fixed_allocator,
@@ -217,10 +217,10 @@ def _evaluate_campaigns(
             "description": "Use the matchability mixture for pair capture, infer higher orders, then scale demographics.",
         },
         {
-            "name": "provider_reference_proportional",
-            "label": "Provider total, Reference-ID inputs only + proportional demos",
+            "name": "provider_email_proportional",
+            "label": "Provider email-first total + proportional demos",
             "category": "provider total model",
-            "description": "Panel-trained total model without campaign objective or audience strategy.",
+            "description": "Panel-trained total model using email-derived VID overlap without campaign context.",
         },
         {
             "name": "provider_context_proportional",
@@ -277,8 +277,8 @@ def _evaluate_campaigns(
             ).full_union
             mixture_runtime = perf_counter() - started
             started = perf_counter()
-            provider_reference_total = provider_reference.predict(observation)
-            reference_runtime = perf_counter() - started
+            provider_email_total = provider_email.predict(observation)
+            email_runtime = perf_counter() - started
             started = perf_counter()
             provider_context_total = provider_context.predict(observation)
             context_runtime = perf_counter() - started
@@ -287,7 +287,7 @@ def _evaluate_campaigns(
                 "existing_vid": float(observation.baseline_unions[-1]),
                 "direct_pair_proportional": direct_total,
                 "mixture_pair_proportional": mixture_total,
-                "provider_reference_proportional": provider_reference_total,
+                "provider_email_proportional": provider_email_total,
                 "provider_context_proportional": provider_context_total,
                 "provider_context_fixed_demo": provider_context_total,
                 "provider_context_learned_demo": provider_context_total,
@@ -298,7 +298,7 @@ def _evaluate_campaigns(
                 "existing_vid": 0.0,
                 "direct_pair_proportional": direct_runtime,
                 "mixture_pair_proportional": mixture_runtime,
-                "provider_reference_proportional": reference_runtime,
+                "provider_email_proportional": email_runtime,
                 "provider_context_proportional": context_runtime,
                 "provider_context_fixed_demo": context_runtime,
                 "provider_context_learned_demo": context_runtime,
@@ -309,8 +309,8 @@ def _evaluate_campaigns(
                 "existing_vid": observation.baseline_demographic_union,
                 "direct_pair_proportional": proportional.allocate(direct_total, observation),
                 "mixture_pair_proportional": proportional.allocate(mixture_total, observation),
-                "provider_reference_proportional": proportional.allocate(
-                    provider_reference_total,
+                "provider_email_proportional": proportional.allocate(
+                    provider_email_total,
                     observation,
                 ),
                 "provider_context_proportional": proportional.allocate(
@@ -504,7 +504,7 @@ def run_provider_benchmark(
         training_specs,
     )
 
-    provider_reference = PanelTotalReachModel.fit(
+    provider_email = PanelTotalReachModel.fit(
         panel_train_observations,
         config.n_edps,
         include_context=False,
@@ -528,7 +528,7 @@ def run_provider_benchmark(
         evaluation_specs,
         direct_pair,
         mixture,
-        provider_reference,
+        provider_email,
         provider_context,
         proportional,
         fixed_allocator,
@@ -541,7 +541,7 @@ def run_provider_benchmark(
         evaluation_specs,
         direct_pair,
         mixture,
-        provider_reference,
+        provider_email,
         provider_context,
         proportional,
         fixed_allocator,
@@ -593,7 +593,7 @@ def run_provider_benchmark(
             "existing_vid",
             "direct_pair_proportional",
             "mixture_pair_proportional",
-            "provider_reference_proportional",
+            "provider_email_proportional",
             "provider_context_proportional",
         ),
     )
@@ -629,7 +629,7 @@ def run_provider_benchmark(
             "evaluation": evaluation_consistency,
         },
         "provider_models": {
-            "reference_only_parameter_count": provider_reference.parameter_count,
+            "email_only_parameter_count": provider_email.parameter_count,
             "context_parameter_count": provider_context.parameter_count,
             "contextual_demographic_parameter_count": contextual_allocator.parameter_count,
         },

@@ -4,8 +4,8 @@ import numpy as np
 
 from reference_calibration.config import SimulationConfig
 from reference_calibration.panel_validation import (
+    EmailFirstPanelVidModel,
     PANEL_DESIGNS,
-    PanelPairResponseModel,
     draw_panel,
     measure_panel_report,
 )
@@ -47,7 +47,7 @@ class PanelValidationTest(unittest.TestCase):
             self.assertGreater(panel.effective_size, 0)
             self.assertLessEqual(panel.effective_size, panel.raw_size + 1e-6)
 
-    def test_panel_pair_model_produces_bounded_report(self):
+    def test_email_first_panel_model_produces_bounded_report(self):
         panel = draw_panel(self.world, "representative", self.config.seed + 10)
         observations = [
             measure_panel_report(
@@ -59,7 +59,7 @@ class PanelValidationTest(unittest.TestCase):
             )
             for campaign in self.campaigns
         ]
-        model = PanelPairResponseModel.fit(observations, self.config.n_edps)
+        model = EmailFirstPanelVidModel.fit(observations, self.config.n_edps)
         full = measure_panel_report(
             self.world,
             self.campaigns[0],
@@ -77,6 +77,29 @@ class PanelValidationTest(unittest.TestCase):
             result.full_union,
             min(float(np.sum(marginals)), self.config.population_size) + 1e-5,
         )
+
+    def test_email_anchor_is_preserved_in_every_pair_target(self):
+        panel = draw_panel(self.world, "representative", self.config.seed + 11)
+        observations = [
+            measure_panel_report(
+                self.world,
+                campaign,
+                panel,
+                tuple(range(self.config.n_weeks)),
+                tuple(range(5)),
+            )
+            for campaign in self.campaigns
+        ]
+        model = EmailFirstPanelVidModel.fit(observations, self.config.n_edps)
+        observation = observations[0]
+        targets = model.predict_pair_targets(observation)
+        for left in range(5):
+            for right in range(left + 1, 5):
+                mask = (1 << left) | (1 << right)
+                self.assertGreaterEqual(
+                    targets[mask] + 1e-6,
+                    observation.email_intersections[mask],
+                )
 
 
 if __name__ == "__main__":

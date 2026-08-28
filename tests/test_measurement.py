@@ -37,8 +37,10 @@ class MeasurementTest(unittest.TestCase):
         pair_mask_in_full = (1 << 0) | (1 << 1)
         self.assertEqual(pair.truth_intersections[-1], full.truth_intersections[pair_mask_in_full])
         self.assertEqual(pair.baseline_intersections[-1], full.baseline_intersections[pair_mask_in_full])
+        self.assertEqual(pair.email_intersections[-1], full.email_intersections[pair_mask_in_full])
         self.assertEqual(pair.reference_intersections[-1], full.reference_intersections[pair_mask_in_full])
         self.assertEqual(pair.reference_signal[-1], full.reference_signal[pair_mask_in_full])
+        self.assertLessEqual(pair.email_intersections[-1], pair.truth_intersections[-1])
 
 
 if __name__ == "__main__":

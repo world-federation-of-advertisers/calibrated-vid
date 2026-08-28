@@ -29,6 +29,7 @@ class ReportObservation:
     truth_unions: np.ndarray
     baseline_intersections: np.ndarray
     baseline_unions: np.ndarray
+    email_intersections: np.ndarray
     reference_intersections: np.ndarray
     collision_floor: np.ndarray
     reference_signal: np.ndarray
@@ -118,7 +119,12 @@ def measure_report(
             1.0 - float(np.prod(1.0 - fractions))
         )
 
-    visible_membership = reached & world.linkable[np.array(edps)]
+    # The demographic-agnostic VID labeler receives email and proprietary IDs
+    # as separate inputs.  When the same email is present at several EDPs, the
+    # email-derived VID is a direct cross-EDP identity anchor.  These aggregate
+    # counts model the resulting VID overlap; they are not the downstream
+    # Reference-ID measurement and contain no 5B-pool collision contribution.
+    visible_membership = reached & world.email_linkable[np.array(edps)]
     visible_exact = exact_cells_from_membership(visible_membership, config.person_weight)
     visible_intersections = inclusive_intersections(visible_exact)
     reference = np.zeros(size, dtype=float)
@@ -186,6 +192,7 @@ def measure_report(
         truth_unions=truth_unions,
         baseline_intersections=baseline_intersections,
         baseline_unions=baseline_unions,
+        email_intersections=visible_intersections,
         reference_intersections=reference,
         collision_floor=collision_floor,
         reference_signal=reference - collision_floor,

@@ -215,7 +215,7 @@ def measure_panel_report(
             baseline_intersections[subset] = population * float(np.prod(fractions))
         baseline_unions[subset] = population * (1.0 - float(np.prod(1.0 - fractions)))
 
-    visible = reached & world.linkable[np.asarray(edps)][:, panel.indices]
+    visible = reached & world.email_linkable[np.asarray(edps)][:, panel.indices]
     visible_exact = _weighted_exact_cells(visible, panel.weights)
     reference_signal = inclusive_intersections(visible_exact)
     reference = reference_signal.copy()
@@ -275,6 +275,7 @@ def measure_panel_report(
         truth_unions=unions,
         baseline_intersections=baseline_intersections,
         baseline_unions=baseline_unions,
+        email_intersections=reference_signal.copy(),
         reference_intersections=reference,
         collision_floor=collision_floor,
         reference_signal=reference_signal,
@@ -316,12 +317,16 @@ def _pair_feature(
 
 
 @dataclass(frozen=True)
-class PanelPairResponseModel:
-    """Aggregate response of a frozen impression-level, demographic-free VID model.
+class EmailFirstPanelVidModel:
+    """Aggregate surrogate for an email-first, demographic-agnostic VID labeler.
 
-    The fitted response uses EDP identity and impression-available campaign
-    context. It deliberately does not use campaign reach, report scale, or
-    Reference-ID intersections as model features.
+    Email and proprietary identifiers are separate labeler inputs.  Shared
+    email deterministically anchors the same VID across EDPs.  The fitted
+    response estimates only the remaining overlap that must be assigned from
+    proprietary identifiers, co-viewing, and other non-email cases.  It may
+    use EDP identity and approved impression-level campaign context, but it
+    never consumes the downstream Reference-ID measurement, report scale, or
+    aggregate Reference-ID intersections.
     """
 
     n_edps: int
@@ -333,6 +338,23 @@ class PanelPairResponseModel:
     def parameter_count(self) -> int:
         return int(len(self.coefficients))
 
+    def describe(self) -> dict:
+        return {
+            "name": "email_first_demographic_agnostic_vid",
+            "model_type": "impression_level_vid_labeler_surrogate",
+            "identity_inputs": ["optional_normalized_email", "optional_edp_proprietary_id"],
+            "optional_context": (
+                ["campaign_objective", "audience_strategy", "co_viewing_or_other_context"]
+                if self.include_context
+                else []
+            ),
+            "uses_reference_id_calibration_input": False,
+            "n_edps": self.n_edps,
+            "parameter_count": self.parameter_count,
+            "ridge_penalty": self.ridge_penalty,
+            "coefficients": self.coefficients.tolist(),
+        }
+
     @classmethod
     def fit(
         cls,
@@ -340,7 +362,7 @@ class PanelPairResponseModel:
         n_edps: int,
         include_context: bool = True,
         ridge_penalty: float = 2.0,
-    ) -> "PanelPairResponseModel":
+    ) -> "EmailFirstPanelVidModel":
         features: list[np.ndarray] = []
         targets: list[float] = []
         weights: list[float] = []
@@ -348,17 +370,22 @@ class PanelPairResponseModel:
         for observation in observations:
             for left, right in combinations(range(len(observation.edps)), 2):
                 mask = (1 << left) | (1 << right)
-                marginal = min(
-                    float(observation.truth_intersections[1 << left]),
-                    float(observation.truth_intersections[1 << right]),
-                )
-                if marginal <= 0:
+                left_reach = float(observation.truth_intersections[1 << left])
+                right_reach = float(observation.truth_intersections[1 << right])
+                population = float(observation.truth_intersections[0])
+                lower = max(left_reach + right_reach - population, 0.0)
+                upper = min(left_reach, right_reach)
+                email_anchor = float(observation.email_intersections[mask])
+                anchor = float(np.clip(max(lower, email_anchor), lower, upper))
+                remaining_capacity = upper - anchor
+                if remaining_capacity <= 0:
                     continue
-                capture = float(observation.truth_intersections[mask]) / marginal
+                truth = float(observation.truth_intersections[mask])
+                capture = (truth - anchor) / remaining_capacity
                 capture = float(np.clip(capture, 1e-4, 1.0 - 1e-4))
                 features.append(_pair_feature(observation, left, right, n_edps, include_context))
                 targets.append(float(np.log(capture / (1.0 - capture))))
-                effective = marginal / max(observation.person_weight, 1.0)
+                effective = remaining_capacity / max(observation.person_weight, 1.0)
                 weights.append(float(np.sqrt(max(effective, 1.0))))
                 campaign_ids.append(observation.campaign_id)
         matrix = np.vstack(features)
@@ -404,7 +431,11 @@ class PanelPairResponseModel:
             right_reach = float(observation.truth_intersections[1 << right])
             lower = max(left_reach + right_reach - population, 0.0)
             upper = min(left_reach, right_reach)
-            target[mask] = float(np.clip(capture * upper, lower, upper))
+            email_anchor = float(observation.email_intersections[mask])
+            anchor = float(np.clip(max(lower, email_anchor), lower, upper))
+            target[mask] = float(
+                np.clip(anchor + capture * (upper - anchor), lower, upper)
+            )
         return target
 
     def predict_report(self, observation: ReportObservation) -> CalibratedReport:
@@ -413,7 +444,7 @@ class PanelPairResponseModel:
             UNIT_CAPTURE_MODEL,
             pair_ridge=1e-6,
             evidence_half_saturation=0.0,
-            name="panel_trained_demographic_agnostic_vid",
+            name="panel_trained_email_first_demographic_agnostic_vid",
             pair_target_intersections=self.predict_pair_targets(observation),
         )
 
@@ -524,7 +555,7 @@ def _fit_reference_models(
 
 def _method_totals(
     observation: ReportObservation,
-    provider: PanelPairResponseModel,
+    provider: EmailFirstPanelVidModel,
     reference_models: dict[str, CalibrationModel],
 ):
     agnostic_report = provider.predict_report(observation)
@@ -559,6 +590,43 @@ def _method_totals(
         },
     }
     return totals, agnostic_report, {"existing": existing_reports, "agnostic": agnostic_reports}
+
+
+def _calibration_instruction(
+    selected_method: str,
+    base_method: str,
+    prefix: str,
+    models: dict[str, CalibrationModel],
+) -> dict:
+    """Build the frozen instruction the provider sends to measurement."""
+    if selected_method == base_method:
+        return {
+            "mode": "identity",
+            "description": "Return the selected VID result without Reference-ID correction.",
+        }
+    family = selected_method.removeprefix(prefix)
+    return {
+        "mode": "active_reference_id_correction",
+        "model": models[family].describe(),
+        "runtime_inputs": [
+            "selected_base_vid_marginal_reaches",
+            "selected_base_vid_subset_intersections",
+            "reference_id_subset_intersections",
+            "reference_id_collision_floor",
+            "population_size",
+        ],
+        "steps": [
+            "subtract the approved collision floor from each Reference-ID intersection",
+            "apply the frozen capture-rate model to the matching EDP subset",
+            "decode one nonnegative audience for the requested report",
+            "return bounded reach plus diagnostics",
+        ],
+        "decoder": {
+            "family": "pairwise_maximum_entropy",
+            "pair_ridge": 1e-6,
+            "evidence_half_saturation": 20.0,
+        },
+    }
 
 
 def _select_active_method(
@@ -777,6 +845,7 @@ def run_panel_validation(
     rows: list[dict] = []
     panel_rows: list[dict] = []
     activation_rows: list[dict] = []
+    provider_packages: list[dict] = []
     raw_method_names = (
         "existing_vid",
         "agnostic_vid",
@@ -814,7 +883,7 @@ def run_panel_validation(
                 train_specs,
                 panel,
             )
-            provider = PanelPairResponseModel.fit(
+            provider = EmailFirstPanelVidModel.fit(
                 list(panel_training.values()),
                 config.n_edps,
                 include_context=True,
@@ -907,6 +976,41 @@ def run_panel_validation(
                     "agnostic_plus_selected_rid",
                 ),
                 config.panel_activation_improvement,
+            )
+            provider_packages.append(
+                {
+                    "panel_design": design,
+                    "draw": draw,
+                    "selected_configuration": recommended,
+                    "vid_models": {
+                        "existing": {
+                            "name": "existing_demographic_ready_vid",
+                            "role": "base total and demographic distribution",
+                        },
+                        "demographic_agnostic": provider.describe(),
+                    },
+                    "reference_id_instructions": {
+                        "existing_vid_base": _calibration_instruction(
+                            selected_existing,
+                            "existing_vid",
+                            "existing_plus_",
+                            reference_models,
+                        ),
+                        "demographic_agnostic_vid_base": _calibration_instruction(
+                            selected_agnostic,
+                            "agnostic_vid",
+                            "agnostic_plus_",
+                            reference_models,
+                        ),
+                    },
+                    "demographic_adjustment": {
+                        "name": contextual_demo.name,
+                        "instruction": (
+                            "Adjust the demographic VID distribution to the selected final total; "
+                            "use proportional scaling if the contextual adjustment is not validated."
+                        ),
+                    },
+                }
             )
 
             draw_truth_errors: dict[str, list[float]] = defaultdict(list)
@@ -1217,16 +1321,27 @@ def run_panel_validation(
         "scenario_summary": scenario_summary,
         "methods": {
             "existing_vid": "Existing demographic-ready VID architecture without Reference-ID correction.",
-            "agnostic_vid": "Panel-trained demographic-agnostic VID result without report-level Reference-ID correction.",
+            "agnostic_vid": "Panel-trained email-first demographic-agnostic VID result without report-level Reference-ID correction.",
             "existing_plus_fixed": "Existing VID plus the provider-fitted constant Reference-ID capture model.",
             "existing_plus_fixed_log": "Existing VID plus the provider-fitted fixed-plus-log Reference-ID model.",
             "existing_plus_mixture": "Existing VID plus the provider-fitted two-group matchability model.",
-            "agnostic_plus_fixed": "Demographic-agnostic VID plus the provider-fitted constant Reference-ID model.",
-            "agnostic_plus_fixed_log": "Demographic-agnostic VID plus the provider-fitted fixed-plus-log Reference-ID model.",
-            "agnostic_plus_mixture": "Demographic-agnostic VID plus the provider-fitted two-group matchability model.",
+            "agnostic_plus_fixed": "Email-first demographic-agnostic VID plus the provider-fitted constant Reference-ID model.",
+            "agnostic_plus_fixed_log": "Email-first demographic-agnostic VID plus the provider-fitted fixed-plus-log Reference-ID model.",
+            "agnostic_plus_mixture": "Email-first demographic-agnostic VID plus the provider-fitted two-group matchability model.",
             "existing_plus_selected_rid": "Existing VID plus the Reference-ID family selected by provider panel holdouts, or identity if none passes.",
             "agnostic_plus_selected_rid": "Demographic-agnostic VID plus the Reference-ID family selected by provider panel holdouts, or identity if none passes.",
             "provider_recommended": "The complete configuration selected by provider panel holdouts from the four operating configurations.",
+        },
+        "provider_package_contract": {
+            "provider_role": (
+                "Train the optional VID model, choose and validate any Reference-ID correction, "
+                "and publish frozen runtime instructions and fallback behavior."
+            ),
+            "measurement_service_role": (
+                "Run the supplied VID model or models, calculate aggregate Reference-ID overlaps "
+                "inside the approved workload, and apply the provider's frozen instructions."
+            ),
+            "reference_id_is_labeler_input": False,
         },
         "report_specs": [
             {"label": label, "weeks": [week + 1 for week in weeks], "edps": [edp + 1 for edp in edps]}
@@ -1236,6 +1351,10 @@ def run_panel_validation(
     _write_csv(output_dir / "panel_validation_metrics.csv", rows)
     _write_csv(output_dir / "panel_draws.csv", panel_rows)
     _write_csv(output_dir / "activation_decisions.csv", activation_rows)
+    (output_dir / "provider_packages.json").write_text(
+        json.dumps(provider_packages, indent=2),
+        encoding="utf-8",
+    )
     (output_dir / "panel_validation_summary.json").write_text(
         json.dumps(summary, indent=2),
         encoding="utf-8",

@@ -59,20 +59,20 @@ def _report_features(
         values.append(float(fractions[global_to_local[edp]]) if present else 0.0)
         names.extend((f"edp_{edp}_present", f"edp_{edp}_reach"))
 
-    pair_signal_to_min: list[float] = []
-    pair_signal_to_baseline: list[float] = []
+    pair_email_to_min: list[float] = []
+    pair_email_to_baseline: list[float] = []
     for left, right in combinations(range(n_edps), 2):
         if left not in global_to_local or right not in global_to_local:
             values.extend((0.0, 0.0))
             names.extend(
                 (
-                    f"pair_{left}_{right}_signal_to_min",
-                    f"pair_{left}_{right}_signal_to_baseline",
+                    f"pair_{left}_{right}_email_to_min",
+                    f"pair_{left}_{right}_email_to_baseline",
                 )
             )
             continue
         local_mask = (1 << global_to_local[left]) | (1 << global_to_local[right])
-        signal = max(float(observation.reference_signal[local_mask]), 0.0)
+        email_overlap = max(float(observation.email_intersections[local_mask]), 0.0)
         minimum = max(
             min(
                 float(observation.truth_intersections[1 << global_to_local[left]]),
@@ -84,21 +84,21 @@ def _report_features(
             float(observation.baseline_intersections[local_mask]),
             observation.person_weight,
         )
-        signal_to_min = signal / minimum
-        signal_to_baseline = np.log1p(signal / baseline_pair)
-        pair_signal_to_min.append(signal_to_min)
-        pair_signal_to_baseline.append(signal_to_baseline)
-        values.extend((signal_to_min, signal_to_baseline))
+        email_to_min = email_overlap / minimum
+        email_to_baseline = np.log1p(email_overlap / baseline_pair)
+        pair_email_to_min.append(email_to_min)
+        pair_email_to_baseline.append(email_to_baseline)
+        values.extend((email_to_min, email_to_baseline))
         names.extend(
             (
-                f"pair_{left}_{right}_signal_to_min",
-                f"pair_{left}_{right}_signal_to_baseline",
+                f"pair_{left}_{right}_email_to_min",
+                f"pair_{left}_{right}_email_to_baseline",
             )
         )
 
     for label, observed in (
-        ("pair_signal_to_min", pair_signal_to_min),
-        ("pair_signal_to_baseline", pair_signal_to_baseline),
+        ("pair_email_to_min", pair_email_to_min),
+        ("pair_email_to_baseline", pair_email_to_baseline),
     ):
         array = np.asarray(observed, dtype=float)
         if len(array):
@@ -127,28 +127,28 @@ def _report_features(
         ("four_plus", lambda order: order >= 4),
     ):
         ratios: list[float] = []
-        signal_fraction = 0.0
+        email_fraction = 0.0
         for local_mask in range(1, len(observation.global_masks)):
             order = local_mask.bit_count()
             if not selector(order):
                 continue
-            signal = max(float(observation.reference_signal[local_mask]), 0.0)
+            email_overlap = max(float(observation.email_intersections[local_mask]), 0.0)
             baseline_intersection = max(
                 float(observation.baseline_intersections[local_mask]),
                 observation.person_weight,
             )
-            ratios.append(np.log1p(signal / baseline_intersection))
-            signal_fraction += signal / population
+            ratios.append(np.log1p(email_overlap / baseline_intersection))
+            email_fraction += email_overlap / population
         values.extend(
             (
-                signal_fraction,
+                email_fraction,
                 float(np.mean(ratios)) if ratios else 0.0,
                 float(np.std(ratios)) if ratios else 0.0,
             )
         )
         names.extend(
             (
-                f"{order_label}_signal_fraction",
+                f"{order_label}_email_fraction",
                 f"{order_label}_ratio_mean",
                 f"{order_label}_ratio_std",
             )
@@ -188,7 +188,11 @@ def _report_features(
 
 @dataclass(frozen=True)
 class PanelTotalReachModel:
-    """Panel-trained, demographic-agnostic total-union model."""
+    """Aggregate surrogate for an email-first demographic-agnostic VID model.
+
+    The model uses email-derived VID overlap, per-EDP reach, and optional
+    campaign context.  It never uses the calibration-only Reference-ID counts.
+    """
 
     name: str
     n_edps: int
@@ -243,7 +247,7 @@ class PanelTotalReachModel:
             name=(
                 "provider_panel_total_with_context"
                 if include_context
-                else "provider_panel_total_reference_only"
+                else "provider_panel_total_email_only"
             ),
             n_edps=n_edps,
             include_context=include_context,

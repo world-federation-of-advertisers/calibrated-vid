@@ -216,7 +216,7 @@ class SyntheticWorld:
     broad_factor: np.ndarray
     segments: np.ndarray
     matchability: np.ndarray
-    linkable: np.ndarray
+    email_linkable: np.ndarray
     email_coverage: np.ndarray
     email_agreement: np.ndarray
     target_link_probability: np.ndarray
@@ -354,7 +354,7 @@ def make_world(config: SimulationConfig) -> SyntheticWorld:
     cluster_count = max(1, (config.n_edps + 1) // 2)
     cluster_factors = rng.normal(size=(cluster_count, config.n_users))
     edp_noise = rng.normal(size=(config.n_edps, config.n_users))
-    linkable = np.zeros((config.n_edps, config.n_users), dtype=bool)
+    email_linkable = np.zeros((config.n_edps, config.n_users), dtype=bool)
     for edp in range(config.n_edps):
         cluster = min(edp // 2, cluster_count - 1)
         linear = (
@@ -364,18 +364,18 @@ def make_world(config: SimulationConfig) -> SyntheticWorld:
         )
         intercept = _intercept_for_mean(linear, float(target_link[edp]))
         probability = _sigmoid(linear + intercept)
-        linkable[edp] = rng.random(config.n_users) < probability
+        email_linkable[edp] = rng.random(config.n_users) < probability
 
     return SyntheticWorld(
         config=config,
         broad_factor=broad,
         segments=segments,
         matchability=matchability,
-        linkable=linkable,
+        email_linkable=email_linkable,
         email_coverage=coverage,
         email_agreement=agreement,
         target_link_probability=target_link,
-        realized_link_probability=linkable.mean(axis=1),
+        realized_link_probability=email_linkable.mean(axis=1),
         true_demographic=true_demographic,
         vid_demographic=vid_demographic,
         demographic_labels=DEMOGRAPHIC_LABELS,
@@ -500,7 +500,9 @@ def _scenario_parameters(world: SyntheticWorld, scenario: str, rng: np.random.Ge
         timing_match_bias = 0.15
     elif scenario == "crm_customer_list":
         # A customer-list Custom Audience is intentionally both narrow and
-        # enriched for people whose email can be represented by Reference IDs.
+        # enriched for people with a usable common email.  The same email can
+        # anchor the agnostic VID and can separately generate matching
+        # calibration Reference IDs.
         reach = np.linspace(0.065, 0.012, n)
         scores = (
             1.10 * match[None, :]
@@ -630,9 +632,10 @@ def generate_campaign(
     shared_score = np.mean(scores, axis=0, keepdims=True)
     scores = similarity_multiplier * shared_score + (scores - shared_score)
 
-    # A positive shift makes the selected audience easier than usual to link
-    # with the common email-derived Reference ID; a negative shift makes it
-    # harder.  The base scenario's own matchability selection remains intact.
+    # A positive shift makes the selected audience more likely than usual to
+    # supply the same usable email across EDPs; a negative shift makes it less
+    # likely.  This affects both email-anchored VID behavior and the separate
+    # calibration signal, while the base scenario's selection remains intact.
     scores = scores + matchability_shift * world.matchability[None, :]
 
     n, weeks, users = world.config.n_edps, world.config.n_weeks, world.config.n_users

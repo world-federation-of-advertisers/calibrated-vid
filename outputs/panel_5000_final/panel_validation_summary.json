@@ -200,10 +200,10 @@
       },
       "agnostic_vid": {
         "count": 468,
-        "mean": 0.1332555073360313,
-        "p90": 0.26376920565989287,
-        "p99": 0.7319504212129615,
-        "max": 0.7566432041573394
+        "mean": 0.09908743484053045,
+        "p90": 0.24130900021873414,
+        "p99": 0.5510195718589733,
+        "max": 0.5931156237231231
       },
       "existing_plus_fixed": {
         "count": 468,
@@ -228,24 +228,24 @@
       },
       "agnostic_plus_fixed": {
         "count": 468,
-        "mean": 0.08241308992423121,
-        "p90": 0.19233915566235985,
-        "p99": 0.6788627559202332,
-        "max": 0.7078428639223924
+        "mean": 0.08031345079215435,
+        "p90": 0.17466853086064157,
+        "p99": 0.6764449620247016,
+        "max": 0.7045773268246436
       },
       "agnostic_plus_fixed_log": {
         "count": 468,
-        "mean": 0.07956437221162808,
-        "p90": 0.19701758498143093,
-        "p99": 0.7188441621146815,
-        "max": 0.7507579714228513
+        "mean": 0.07677250003391578,
+        "p90": 0.17983928561880586,
+        "p99": 0.7168015819100356,
+        "max": 0.7478892679655823
       },
       "agnostic_plus_mixture": {
         "count": 468,
-        "mean": 0.09334937184415619,
-        "p90": 0.20017631490615995,
-        "p99": 0.7481862498800103,
-        "max": 0.7936602209543253
+        "mean": 0.09016678299194887,
+        "p90": 0.18364544032457017,
+        "p99": 0.7455511543190737,
+        "max": 0.7904290189738399
       },
       "existing_plus_selected_rid": {
         "count": 468,
@@ -256,17 +256,17 @@
       },
       "agnostic_plus_selected_rid": {
         "count": 468,
-        "mean": 0.07956437221162808,
-        "p90": 0.19701758498143093,
-        "p99": 0.7188441621146815,
-        "max": 0.7507579714228513
+        "mean": 0.09366948538053707,
+        "p90": 0.21506053085059543,
+        "p99": 0.5562333996872498,
+        "max": 0.7478892679655823
       },
       "provider_recommended": {
         "count": 468,
-        "mean": 0.07956437221162808,
-        "p90": 0.19701758498143093,
-        "p99": 0.7188441621146815,
-        "max": 0.7507579714228513
+        "mean": 0.0831379927844545,
+        "p90": 0.171922465843592,
+        "p99": 0.9795468932884255,
+        "max": 1.0003556729251433
       }
     },
     "low_effective_size": {
@@ -279,10 +279,10 @@
       },
       "agnostic_vid": {
         "count": 468,
-        "mean": 0.1317235396093969,
-        "p90": 0.2611208837829533,
-        "p99": 0.7020723465624437,
-        "max": 0.7481453539333974
+        "mean": 0.09847555708268116,
+        "p90": 0.24015730945944663,
+        "p99": 0.5238393851835009,
+        "max": 0.5760419161455874
       },
       "existing_plus_fixed": {
         "count": 468,
@@ -307,24 +307,24 @@
       },
       "agnostic_plus_fixed": {
         "count": 468,
-        "mean": 0.08417607143847068,
-        "p90": 0.19294965116329466,
-        "p99": 0.6536841042641433,
-        "max": 0.7203339858488677
+        "mean": 0.08170767696241094,
+        "p90": 0.17551059390943108,
+        "p99": 0.6476168048477368,
+        "max": 0.7169404873494364
       },
       "agnostic_plus_fixed_log": {
         "count": 468,
-        "mean": 0.08154380538647442,
-        "p90": 0.19403140518858328,
-        "p99": 0.6881672301159956,
-        "max": 0.7563665557539611
+        "mean": 0.07850145596587262,
+        "p90": 0.17640644113041654,
+        "p99": 0.6836466648396953,
+        "max": 0.7532954123220721
       },
       "agnostic_plus_mixture": {
         "count": 468,
-        "mean": 0.09528393714875784,
-        "p90": 0.20076390586731666,
-        "p99": 0.7415903616239006,
-        "max": 0.8104842431174262
+        "mean": 0.09199356238380194,
+        "p90": 0.19632388128105258,
+        "p99": 0.7385755415485633,
+        "max": 0.8078325478234313
       },
       "existing_plus_selected_rid": {
         "count": 468,
@@ -335,10 +335,10 @@
       },
       "agnostic_plus_selected_rid": {
         "count": 468,
-        "mean": 0.12251578827829375,
-        "p90": 0.2497098099172656,
-        "p99": 0.7163192283666779,
-        "max": 0.7686099488677486
+        "mean": 0.09847555708268116,
+        "p90": 0.24015730945944663,
+        "p99": 0.5238393851835009,
+        "max": 0.5760419161455874
       },
       "provider_recommended": {
         "count": 468,
@@ -358,10 +358,10 @@
       },
       "agnostic_vid": {
         "count": 468,
-        "mean": 0.13149232157088428,
-        "p90": 0.26657349908640815,
-        "p99": 0.6829339679733785,
-        "max": 0.7462325053544461
+        "mean": 0.09843041803593397,
+        "p90": 0.24096068020965167,
+        "p99": 0.5417758506342847,
+        "max": 0.5887591651777124
       },
       "existing_plus_fixed": {
         "count": 468,
@@ -386,24 +386,24 @@
       },
       "agnostic_plus_fixed": {
         "count": 468,
-        "mean": 0.08469743442678195,
-        "p90": 0.19824675891059745,
-        "p99": 0.6585512860248518,
-        "max": 0.7117939614309634
+        "mean": 0.08259967539673314,
+        "p90": 0.17700384357860152,
+        "p99": 0.6547897894625603,
+        "max": 0.706823491911075
       },
       "agnostic_plus_fixed_log": {
         "count": 468,
-        "mean": 0.08267556787896636,
-        "p90": 0.19627234140456815,
-        "p99": 0.6962705197782275,
-        "max": 0.7502931480106529
+        "mean": 0.08041564777098996,
+        "p90": 0.18034549907633965,
+        "p99": 0.6921061895662017,
+        "max": 0.7456283368303086
       },
       "agnostic_plus_mixture": {
         "count": 468,
-        "mean": 0.08937486697365071,
-        "p90": 0.198500924068144,
-        "p99": 0.7350760374963656,
-        "max": 0.7917538194748299
+        "mean": 0.0864485965723066,
+        "p90": 0.17909788220504297,
+        "p99": 0.7314456204883918,
+        "max": 0.7871290377074489
       },
       "existing_plus_selected_rid": {
         "count": 468,
@@ -414,17 +414,17 @@
       },
       "agnostic_plus_selected_rid": {
         "count": 468,
-        "mean": 0.08484215323510745,
-        "p90": 0.19627234140456815,
-        "p99": 0.7326635161615396,
-        "max": 0.7677996322150087
+        "mean": 0.09843041803593397,
+        "p90": 0.24096068020965167,
+        "p99": 0.5417758506342847,
+        "max": 0.5887591651777124
       },
       "provider_recommended": {
         "count": 468,
-        "mean": 0.07969436311581661,
-        "p90": 0.16769744823494492,
-        "p99": 0.9471741196237238,
-        "max": 0.9825258896944388
+        "mean": 0.08293786448373718,
+        "p90": 0.16530072093255258,
+        "p99": 0.9558712744555135,
+        "max": 1.0034337591570455
       }
     },
     "hidden_matchability_bias": {
@@ -437,10 +437,10 @@
       },
       "agnostic_vid": {
         "count": 468,
-        "mean": 0.12734226197190235,
-        "p90": 0.28111158760655336,
-        "p99": 0.652155239774687,
-        "max": 0.6644290796985203
+        "mean": 0.09887678315863349,
+        "p90": 0.2393782876085541,
+        "p99": 0.4918229094001315,
+        "max": 0.5322076405419435
       },
       "existing_plus_fixed": {
         "count": 468,
@@ -465,24 +465,24 @@
       },
       "agnostic_plus_fixed": {
         "count": 468,
-        "mean": 0.10602915868179694,
-        "p90": 0.2112905489064467,
-        "p99": 0.7819687276074422,
-        "max": 0.8208108434416126
+        "mean": 0.1020544896371225,
+        "p90": 0.20421018044209785,
+        "p99": 0.7855628849261801,
+        "max": 0.8234476903957387
       },
       "agnostic_plus_fixed_log": {
         "count": 468,
-        "mean": 0.10551994240594399,
-        "p90": 0.20966977529674832,
-        "p99": 0.7775831332901401,
-        "max": 0.8178769533343535
+        "mean": 0.10147413717924943,
+        "p90": 0.20212543721955925,
+        "p99": 0.7811355959273977,
+        "max": 0.8204817441512795
       },
       "agnostic_plus_mixture": {
         "count": 468,
-        "mean": 0.11855380678813877,
-        "p90": 0.22884863338648442,
-        "p99": 0.8194363124339693,
-        "max": 0.8630406194113819
+        "mean": 0.11493981453070148,
+        "p90": 0.2072789197493167,
+        "p99": 0.8232752511404821,
+        "max": 0.8652087179718226
       },
       "existing_plus_selected_rid": {
         "count": 468,
@@ -493,10 +493,10 @@
       },
       "agnostic_plus_selected_rid": {
         "count": 468,
-        "mean": 0.12734226197190235,
-        "p90": 0.28111158760655336,
-        "p99": 0.652155239774687,
-        "max": 0.6644290796985203
+        "mean": 0.09887678315863349,
+        "p90": 0.2393782876085541,
+        "p99": 0.4918229094001315,
+        "max": 0.5322076405419435
       },
       "provider_recommended": {
         "count": 468,
@@ -511,41 +511,12 @@
     "representative": {
       "draws": 4,
       "existing_correction_active_rate": 1.0,
-      "agnostic_correction_active_rate": 1.0,
-      "existing_correction_harm_rate": 0.0,
-      "agnostic_correction_harm_rate": 0.0,
-      "mean_existing_correction_error_change": -0.3223609238562286,
-      "mean_agnostic_correction_error_change": -0.05369113512440321,
-      "mean_recommended_error_change_vs_existing": -0.3283484399771255,
-      "existing_correction_selection_counts": {
-        "existing_vid": 0,
-        "existing_plus_fixed": 4,
-        "existing_plus_fixed_log": 0,
-        "existing_plus_mixture": 0
-      },
-      "agnostic_correction_selection_counts": {
-        "agnostic_vid": 0,
-        "agnostic_plus_fixed": 0,
-        "agnostic_plus_fixed_log": 4,
-        "agnostic_plus_mixture": 0
-      },
-      "recommended_configuration_counts": {
-        "existing_vid": 0,
-        "agnostic_vid": 0,
-        "existing_plus_selected_rid": 0,
-        "agnostic_plus_selected_rid": 4
-      },
-      "raw_consistency_violation_rate": 0.004807692307692308
-    },
-    "low_effective_size": {
-      "draws": 4,
-      "existing_correction_active_rate": 1.0,
       "agnostic_correction_active_rate": 0.25,
       "existing_correction_harm_rate": 0.0,
       "agnostic_correction_harm_rate": 0.0,
-      "mean_existing_correction_error_change": -0.3236113333791877,
-      "mean_agnostic_correction_error_change": -0.009207751331103142,
-      "mean_recommended_error_change_vs_existing": -0.3236113333791877,
+      "mean_existing_correction_error_change": -0.3223609238562286,
+      "mean_agnostic_correction_error_change": -0.005417949459993382,
+      "mean_recommended_error_change_vs_existing": -0.3247748194042991,
       "existing_correction_selection_counts": {
         "existing_vid": 0,
         "existing_plus_fixed": 4,
@@ -555,8 +526,37 @@
       "agnostic_correction_selection_counts": {
         "agnostic_vid": 3,
         "agnostic_plus_fixed": 0,
+        "agnostic_plus_fixed_log": 1,
+        "agnostic_plus_mixture": 0
+      },
+      "recommended_configuration_counts": {
+        "existing_vid": 0,
+        "agnostic_vid": 0,
+        "existing_plus_selected_rid": 3,
+        "agnostic_plus_selected_rid": 1
+      },
+      "raw_consistency_violation_rate": 0.009615384615384616
+    },
+    "low_effective_size": {
+      "draws": 4,
+      "existing_correction_active_rate": 1.0,
+      "agnostic_correction_active_rate": 0.0,
+      "existing_correction_harm_rate": 0.0,
+      "agnostic_correction_harm_rate": 0.0,
+      "mean_existing_correction_error_change": -0.3236113333791877,
+      "mean_agnostic_correction_error_change": 0.0,
+      "mean_recommended_error_change_vs_existing": -0.3236113333791877,
+      "existing_correction_selection_counts": {
+        "existing_vid": 0,
+        "existing_plus_fixed": 4,
+        "existing_plus_fixed_log": 0,
+        "existing_plus_mixture": 0
+      },
+      "agnostic_correction_selection_counts": {
+        "agnostic_vid": 4,
+        "agnostic_plus_fixed": 0,
         "agnostic_plus_fixed_log": 0,
-        "agnostic_plus_mixture": 1
+        "agnostic_plus_mixture": 0
       },
       "recommended_configuration_counts": {
         "existing_vid": 0,
@@ -569,12 +569,12 @@
     "observable_bias_weighted": {
       "draws": 4,
       "existing_correction_active_rate": 1.0,
-      "agnostic_correction_active_rate": 1.0,
+      "agnostic_correction_active_rate": 0.0,
       "existing_correction_harm_rate": 0.0,
       "agnostic_correction_harm_rate": 0.0,
       "mean_existing_correction_error_change": -0.3249749477050164,
-      "mean_agnostic_correction_error_change": -0.04665016833577684,
-      "mean_recommended_error_change_vs_existing": -0.32821844907293696,
+      "mean_agnostic_correction_error_change": 0.0,
+      "mean_recommended_error_change_vs_existing": -0.3249749477050164,
       "existing_correction_selection_counts": {
         "existing_vid": 0,
         "existing_plus_fixed": 4,
@@ -582,16 +582,16 @@
         "existing_plus_mixture": 0
       },
       "agnostic_correction_selection_counts": {
-        "agnostic_vid": 0,
+        "agnostic_vid": 4,
         "agnostic_plus_fixed": 0,
-        "agnostic_plus_fixed_log": 1,
-        "agnostic_plus_mixture": 3
+        "agnostic_plus_fixed_log": 0,
+        "agnostic_plus_mixture": 0
       },
       "recommended_configuration_counts": {
         "existing_vid": 0,
         "agnostic_vid": 0,
-        "existing_plus_selected_rid": 3,
-        "agnostic_plus_selected_rid": 1
+        "existing_plus_selected_rid": 4,
+        "agnostic_plus_selected_rid": 0
       },
       "raw_consistency_violation_rate": 0.019230769230769232
     },
@@ -730,10 +730,10 @@
       },
       "agnostic_vid": {
         "count": 36,
-        "mean": 0.08500409559792851,
-        "p90": 0.2242055674091078,
-        "p99": 0.2935636519504469,
-        "max": 0.2949780249874187
+        "mean": 0.05898011649481491,
+        "p90": 0.18060642931901208,
+        "p99": 0.26194586062732944,
+        "max": 0.2630007413658198
       },
       "existing_plus_selected_rid": {
         "count": 36,
@@ -744,10 +744,10 @@
       },
       "agnostic_plus_selected_rid": {
         "count": 36,
-        "mean": 0.04580446007117881,
-        "p90": 0.13800879595249244,
-        "p99": 0.20338394165502832,
-        "max": 0.20654830999550938
+        "mean": 0.05881638014008231,
+        "p90": 0.152961630791547,
+        "p99": 0.26194586062732944,
+        "max": 0.2630007413658198
       }
     },
     "traffic_optimization": {
@@ -760,10 +760,10 @@
       },
       "agnostic_vid": {
         "count": 36,
-        "mean": 0.09888087991617851,
-        "p90": 0.1588449715958566,
-        "p99": 0.16488736281444658,
-        "max": 0.16493698596456682
+        "mean": 0.06828846404482677,
+        "p90": 0.12581891313322974,
+        "p99": 0.15121659555401037,
+        "max": 0.15150247128624345
       },
       "existing_plus_selected_rid": {
         "count": 36,
@@ -774,10 +774,10 @@
       },
       "agnostic_plus_selected_rid": {
         "count": 36,
-        "mean": 0.0249025703741293,
-        "p90": 0.08259215760319023,
-        "p99": 0.13912086806494628,
-        "max": 0.13921364273385745
+        "mean": 0.056606089989816616,
+        "p90": 0.11661870119091605,
+        "p99": 0.15121659555401037,
+        "max": 0.15150247128624345
       }
     },
     "video_engagement_retargeting": {
@@ -790,10 +790,10 @@
       },
       "agnostic_vid": {
         "count": 36,
-        "mean": 0.09367779015523683,
-        "p90": 0.20043102948332758,
-        "p99": 0.22052797964902207,
-        "max": 0.22173344231953296
+        "mean": 0.08401835501090478,
+        "p90": 0.18712223422700996,
+        "p99": 0.20543552546793664,
+        "max": 0.20776662831367163
       },
       "existing_plus_selected_rid": {
         "count": 36,
@@ -804,10 +804,10 @@
       },
       "agnostic_plus_selected_rid": {
         "count": 36,
-        "mean": 0.10442831963237281,
-        "p90": 0.255634758819296,
-        "p99": 0.2612088423114454,
-        "max": 0.26162516453066026
+        "mean": 0.08986606986588158,
+        "p90": 0.19777298767808613,
+        "p99": 0.2581216805304952,
+        "max": 0.2582891795372232
       }
     },
     "lead_generation": {
@@ -820,10 +820,10 @@
       },
       "agnostic_vid": {
         "count": 36,
-        "mean": 0.08400857836014908,
-        "p90": 0.1636011760806734,
-        "p99": 0.17846216109146046,
-        "max": 0.18327787394107764
+        "mean": 0.06869789573430443,
+        "p90": 0.1426782293845676,
+        "p99": 0.1522663403128106,
+        "max": 0.15373786483391869
       },
       "existing_plus_selected_rid": {
         "count": 36,
@@ -834,10 +834,10 @@
       },
       "agnostic_plus_selected_rid": {
         "count": 36,
-        "mean": 0.038001642750002666,
-        "p90": 0.0841100121775118,
-        "p99": 0.10399484251765503,
-        "max": 0.10483118797263066
+        "mean": 0.061111050143922103,
+        "p90": 0.14164369124681161,
+        "p99": 0.15032983860302399,
+        "max": 0.15373786483391869
       }
     },
     "sales_prospecting": {
@@ -850,10 +850,10 @@
       },
       "agnostic_vid": {
         "count": 36,
-        "mean": 0.09101461025115093,
-        "p90": 0.19360673777141452,
-        "p99": 0.21844116994312443,
-        "max": 0.21961301756658053
+        "mean": 0.07242703099951742,
+        "p90": 0.17907638148606236,
+        "p99": 0.21408883769457987,
+        "max": 0.2151610740016202
       },
       "existing_plus_selected_rid": {
         "count": 36,
@@ -864,10 +864,10 @@
       },
       "agnostic_plus_selected_rid": {
         "count": 36,
-        "mean": 0.04231075570675356,
-        "p90": 0.10940506628444555,
-        "p99": 0.15990222723981598,
-        "max": 0.1602874136591978
+        "mean": 0.0638386141730767,
+        "p90": 0.1501630388658854,
+        "p99": 0.21408883769457987,
+        "max": 0.2151610740016202
       }
     },
     "website_retargeting": {
@@ -880,10 +880,10 @@
       },
       "agnostic_vid": {
         "count": 36,
-        "mean": 0.2786422936455788,
-        "p90": 0.710543952840778,
-        "p99": 0.7531373419929415,
-        "max": 0.7550206572526065
+        "mean": 0.2050934728859737,
+        "p90": 0.5603938888912517,
+        "p99": 0.5918132310012091,
+        "max": 0.5931156237231231
       },
       "existing_plus_selected_rid": {
         "count": 36,
@@ -894,10 +894,10 @@
       },
       "agnostic_plus_selected_rid": {
         "count": 36,
-        "mean": 0.06820787154036093,
-        "p90": 0.17801160924417958,
-        "p99": 0.20941512021676204,
-        "max": 0.20960631631060442
+        "mean": 0.16867213248861013,
+        "p90": 0.5420970785996129,
+        "p99": 0.583993774141067,
+        "max": 0.5893945016605115
       }
     },
     "crm_customer_list": {
@@ -910,10 +910,10 @@
       },
       "agnostic_vid": {
         "count": 36,
-        "mean": 0.30730652621962623,
-        "p90": 0.6903338639062386,
-        "p99": 0.7525686386646763,
-        "max": 0.7566432041573394
+        "mean": 0.16112606959410264,
+        "p90": 0.3348480686255779,
+        "p99": 0.36325193154551494,
+        "max": 0.36343637840878634
       },
       "existing_plus_selected_rid": {
         "count": 36,
@@ -924,10 +924,10 @@
       },
       "agnostic_plus_selected_rid": {
         "count": 36,
-        "mean": 0.1685514551203575,
-        "p90": 0.2515626708305559,
-        "p99": 0.3028279783237485,
-        "max": 0.30460138549541427
+        "mean": 0.16279711769814809,
+        "p90": 0.31161361310105895,
+        "p99": 0.35531998402494525,
+        "max": 0.36343637840878634
       }
     },
     "catalog_retargeting": {
@@ -940,10 +940,10 @@
       },
       "agnostic_vid": {
         "count": 36,
-        "mean": 0.12958022355506343,
-        "p90": 0.23405633666995385,
-        "p99": 0.2515202463544094,
-        "max": 0.25197486241252454
+        "mean": 0.0991042409225982,
+        "p90": 0.2081600450378583,
+        "p99": 0.22709805747420742,
+        "max": 0.22872283925154277
       },
       "existing_plus_selected_rid": {
         "count": 36,
@@ -954,10 +954,10 @@
       },
       "agnostic_plus_selected_rid": {
         "count": 36,
-        "mean": 0.04543834085415909,
-        "p90": 0.12264677724514753,
-        "p99": 0.1682783791081308,
-        "max": 0.16992772949624876
+        "mean": 0.08329403160932397,
+        "p90": 0.19683297953869378,
+        "p99": 0.2257396696490795,
+        "max": 0.22872283925154277
       }
     },
     "lookalike_prospecting": {
@@ -970,10 +970,10 @@
       },
       "agnostic_vid": {
         "count": 36,
-        "mean": 0.08969469526890482,
-        "p90": 0.24344073176035214,
-        "p99": 0.2958306900066902,
-        "max": 0.29703172488092394
+        "mean": 0.0754613883739495,
+        "p90": 0.2344111194615454,
+        "p99": 0.3025948390765125,
+        "max": 0.3040489988236054
       },
       "existing_plus_selected_rid": {
         "count": 36,
@@ -984,10 +984,10 @@
       },
       "agnostic_plus_selected_rid": {
         "count": 36,
-        "mean": 0.04535077283742938,
-        "p90": 0.16008079480207732,
-        "p99": 0.24085591741607215,
-        "max": 0.2419611358819079
+        "mean": 0.06714796225623748,
+        "p90": 0.2058527922564804,
+        "p99": 0.3025948390765125,
+        "max": 0.3040489988236054
       }
     },
     "advantage_audience_expansion": {
@@ -1000,10 +1000,10 @@
       },
       "agnostic_vid": {
         "count": 36,
-        "mean": 0.08833337438001633,
-        "p90": 0.21814101498338004,
-        "p99": 0.25625944992266614,
-        "max": 0.2565815707620777
+        "mean": 0.06955014648612876,
+        "p90": 0.20328628833843937,
+        "p99": 0.24687137255361935,
+        "max": 0.24752022204239854
       },
       "existing_plus_selected_rid": {
         "count": 36,
@@ -1014,10 +1014,10 @@
       },
       "agnostic_plus_selected_rid": {
         "count": 36,
-        "mean": 0.04282375693653982,
-        "p90": 0.1094181305013042,
-        "p99": 0.15381129501823274,
-        "max": 0.1544035977597718
+        "mean": 0.06281911433682123,
+        "p90": 0.1610039981437951,
+        "p99": 0.24687137255361935,
+        "max": 0.24752022204239854
       }
     },
     "app_activity_retargeting": {
@@ -1030,10 +1030,10 @@
       },
       "agnostic_vid": {
         "count": 36,
-        "mean": 0.18502704115852409,
-        "p90": 0.4597253200361827,
-        "p99": 0.4896176165826488,
-        "max": 0.49413316126375106
+        "mean": 0.16827963790391517,
+        "p90": 0.4485713822147975,
+        "p99": 0.4734121129599925,
+        "max": 0.47694217549998874
       },
       "existing_plus_selected_rid": {
         "count": 36,
@@ -1044,10 +1044,10 @@
       },
       "agnostic_plus_selected_rid": {
         "count": 36,
-        "mean": 0.2834653507820581,
-        "p90": 0.7259268666651646,
-        "p99": 0.7489110911448102,
-        "max": 0.7507579714228513
+        "mean": 0.19879647177100523,
+        "p90": 0.4649671406221728,
+        "p99": 0.7380644887989646,
+        "max": 0.7478892679655823
       }
     },
     "unrelated_niche_control": {
@@ -1060,10 +1060,10 @@
       },
       "agnostic_vid": {
         "count": 36,
-        "mean": 0.10243177112172777,
-        "p90": 0.14857120741521251,
-        "p99": 0.15666178219785498,
-        "max": 0.15756554781942173
+        "mean": 0.08422014341409095,
+        "p90": 0.13285801540191755,
+        "p99": 0.14245117312473393,
+        "max": 0.14385623844716855
       },
       "existing_plus_selected_rid": {
         "count": 36,
@@ -1074,10 +1074,10 @@
       },
       "agnostic_plus_selected_rid": {
         "count": 36,
-        "mean": 0.08505980565406585,
-        "p90": 0.14306795096773683,
-        "p99": 0.14770888462641804,
-        "max": 0.14797511893626897
+        "mean": 0.0802530795063025,
+        "p90": 0.1320011403197357,
+        "p99": 0.14245117312473393,
+        "max": 0.14385623844716855
       }
     },
     "mixed_funnel_portfolio": {
@@ -1090,10 +1090,10 @@
       },
       "agnostic_vid": {
         "count": 36,
-        "mean": 0.09871971573832158,
-        "p90": 0.22880748201476464,
-        "p99": 0.2717043004248924,
-        "max": 0.2719085140681218
+        "mean": 0.07288969106176857,
+        "p90": 0.19104685018916667,
+        "p99": 0.245265916517618,
+        "max": 0.24563818520078853
       },
       "existing_plus_selected_rid": {
         "count": 36,
@@ -1104,25 +1104,30 @@
       },
       "agnostic_plus_selected_rid": {
         "count": 36,
-        "mean": 0.03999173649175737,
-        "p90": 0.1286065969000636,
-        "p99": 0.21667495538896805,
-        "max": 0.2166868494999729
+        "mean": 0.06368519596775382,
+        "p90": 0.17074782658038462,
+        "p99": 0.245265916517618,
+        "max": 0.24563818520078853
       }
     }
   },
   "methods": {
     "existing_vid": "Existing demographic-ready VID architecture without Reference-ID correction.",
-    "agnostic_vid": "Panel-trained demographic-agnostic VID result without report-level Reference-ID correction.",
+    "agnostic_vid": "Panel-trained email-first demographic-agnostic VID result without report-level Reference-ID correction.",
     "existing_plus_fixed": "Existing VID plus the provider-fitted constant Reference-ID capture model.",
     "existing_plus_fixed_log": "Existing VID plus the provider-fitted fixed-plus-log Reference-ID model.",
     "existing_plus_mixture": "Existing VID plus the provider-fitted two-group matchability model.",
-    "agnostic_plus_fixed": "Demographic-agnostic VID plus the provider-fitted constant Reference-ID model.",
-    "agnostic_plus_fixed_log": "Demographic-agnostic VID plus the provider-fitted fixed-plus-log Reference-ID model.",
-    "agnostic_plus_mixture": "Demographic-agnostic VID plus the provider-fitted two-group matchability model.",
+    "agnostic_plus_fixed": "Email-first demographic-agnostic VID plus the provider-fitted constant Reference-ID model.",
+    "agnostic_plus_fixed_log": "Email-first demographic-agnostic VID plus the provider-fitted fixed-plus-log Reference-ID model.",
+    "agnostic_plus_mixture": "Email-first demographic-agnostic VID plus the provider-fitted two-group matchability model.",
     "existing_plus_selected_rid": "Existing VID plus the Reference-ID family selected by provider panel holdouts, or identity if none passes.",
     "agnostic_plus_selected_rid": "Demographic-agnostic VID plus the Reference-ID family selected by provider panel holdouts, or identity if none passes.",
     "provider_recommended": "The complete configuration selected by provider panel holdouts from the four operating configurations."
+  },
+  "provider_package_contract": {
+    "provider_role": "Train the optional VID model, choose and validate any Reference-ID correction, and publish frozen runtime instructions and fallback behavior.",
+    "measurement_service_role": "Run the supplied VID model or models, calculate aggregate Reference-ID overlaps inside the approved workload, and apply the provider's frozen instructions.",
+    "reference_id_is_labeler_input": false
   },
   "report_specs": [
     {

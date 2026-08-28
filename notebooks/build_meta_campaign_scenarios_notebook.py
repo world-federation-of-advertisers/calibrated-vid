@@ -31,9 +31,9 @@ This notebook compares four ways to produce total reach. They come from two sepa
 | Existing VID + RID | Current VID total | Provider-supplied frozen correction |
 | Agnostic VID + RID | Agnostic VID total | Provider-supplied frozen correction |
 
-The provider may recommend any of the four after validation on whole held-out campaigns. If no extension proves better, the recommendation remains the existing VID model. The measurement-system operator runs the supplied models and instructions; it does not need to invent a calibration without truth.
+The provider may recommend any of the four after validation on whole held-out campaigns. If no extension proves better, the recommendation remains the existing VID model. The provider supplies the chosen models and explicit calibration instructions. The downstream measurement service runs them, calculates any required Reference-ID overlaps, and applies those frozen instructions; it does not have to invent a calibration without truth.
 
-An **Event Data Provider (EDP)** is a publisher or other data source contributing campaign events. A **Reference ID** is one common join-key value per person and EDP: normalized email when available, otherwise that EDP's proprietary identifier, hashed into a shared 5-billion-value space. Shared emails can match across EDPs; proprietary fallbacks have no intended cross-EDP match. “RID” is used only as a short chart and table label for Reference ID.
+An **Event Data Provider (EDP)** is a publisher or other data source contributing campaign events. The VID labeler receives email and EDP-proprietary identifiers as separate inputs. In the optional demographic-agnostic model, a shared email can anchor the same VID across EDPs; objective, audience strategy, co-viewing, and other permitted context can help with proprietary-ID or ambiguous cases. Separately, the calibration workload derives a **Reference ID** from normalized email when available and otherwise from that EDP's proprietary identifier, hashed into a shared 5-billion-value space. Reference ID is a calibration input, not a VID-labeler field. “RID” is used only as a short chart and table label for Reference ID.
 
 The synthetic harness uses exact population truth only to score the alternatives. The reporting workflow never links an existing VID to a Reference ID.
 """
@@ -95,7 +95,7 @@ An objective label alone does not determine who is reached. Each scenario theref
 
 - **Campaign volume:** how much of the population is reached and therefore how many panel members are observed.
 - **Audience overlap across EDPs:** how strongly different publishers select the same underlying people.
-- **Shared-email visibility:** how often a person reached at several publishers uses a common email-derived Reference ID at those publishers.
+- **Shared-email visibility:** how often a person reached at several publishers supplies the same usable email. In the agnostic VID model this directly anchors matching VIDs; in the separate calibration layer it also makes the same hashed Reference ID visible across EDPs.
 
 For example, website and app retargeting can both reach many of the same people across publishers, while the website audience may expose a shared email more often. The generator represents audience overlap with shared-versus-EDP-specific selection factors and represents matchability with a separate email-availability factor. Across the ten EDPs, base email availability ranges from 10% to 95% and the email-agreement parameter ranges from 52% to 72%, centered near the roughly 60% assumption discussed in the design. Weekly delivery is intentionally bursty rather than a smooth growth curve.
 """
@@ -131,8 +131,8 @@ display(Markdown(markdown_table(
 
 For each simulated panel, the provider:
 
-1. trains the demographic-agnostic VID response on one group of campaigns;
-2. fits candidate Reference-ID corrections on a separate calibration group, using weighted panel-person reach as truth and aggregate panel Reference-ID intersections as the observable signal;
+1. trains the demographic-agnostic VID response on one group of campaigns, using email and proprietary IDs as separate identity inputs and optional campaign context for non-email cases;
+2. separately derives aggregate Reference-ID intersections for another campaign group and fits candidate corrections using weighted panel-person reach as truth;
 3. tests each correction separately on the existing and agnostic VID totals using a third group of whole-campaign holdouts;
 4. uses those holdouts to choose a complete configuration; and
 5. freezes the selected model line, correction bundle, and demographic-adjustment instructions before scoring a fourth, independent group of campaigns.
@@ -204,11 +204,13 @@ display(Markdown(markdown_table(
 ## Methods represented in the results
 
 - **Existing VID** is the current demographic-ready model and its total reach.
-- **Agnostic VID** is the separate panel-trained total-reach model. The production version would still be an impression-to-VID model; this harness uses a compact aggregate surrogate that learns how campaign objective, audience strategy, and EDP identity affect duplication.
+- **Agnostic VID** is the separate panel-trained, demographic-agnostic impression-to-VID model. Shared email directly anchors matching VIDs across EDPs. For proprietary-ID, co-viewing, and other non-email cases, the provider may use EDP identity and permitted context such as objective or audience strategy. The harness represents that behavior with a compact aggregate surrogate and never feeds the 5B Reference-ID measurement into the VID model.
 - **Existing VID + RID** and **Agnostic VID + RID** use the same approved aggregate Reference-ID interface, but the provider selects and validates a correction separately for each base. A correction may be constant, fixed-plus-log-size, or a two-group matchability mixture. If no family clears the holdout rule, that path falls back to its uncorrected base.
 - **Provider recommended** is the complete configuration that clears the provider's holdout rule and performs best there, with existing VID retained as the fallback.
 
 The Reference-ID layer corrects total overlap at report time. It is not an impression-level VID model, and it does not assign demographics.
+
+For either “+ RID” configuration, the provider also publishes the frozen runtime recipe: required aggregate inputs, collision treatment, fitted capture-rate coefficients, decoder settings, supported range, diagnostics, and fallback. The measurement service calculates the requested report's Reference-ID overlaps inside the approved workload and follows that recipe.
 """
     ),
     code(
