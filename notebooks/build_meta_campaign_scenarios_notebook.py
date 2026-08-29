@@ -20,18 +20,16 @@ def code(text: str):
 cells = [
     markdown(
         r"""
-# Campaign scenarios for panel-trained VID and Reference-ID calibration
+# Campaign scenarios for provider-finalized VID and Reference-ID calibration
 
-This notebook compares four ways to produce total reach. They come from two separate choices: whether to add a demographic-agnostic VID model, and whether to apply a provider-supplied Reference-ID correction.
+This notebook compares four ways to produce total reach. They come from two separate choices: whether the provider supplies only the demographic VID output or both demographic and demographic-agnostic VID outputs, and whether the provider's finalization instructions may use aggregate Reference-ID overlap.
 
-| Configuration | Total-reach source | Reference-ID correction |
+| VID outputs supplied | Without Reference-ID overlap | With Reference-ID overlap |
 |---|---|---|
-| Existing VID | Current demographic-ready VID model | None |
-| Agnostic VID | Separate panel-trained model that does not assign demographics | None |
-| Existing VID + RID | Current VID total | Provider-supplied frozen correction |
-| Agnostic VID + RID | Agnostic VID total | Provider-supplied frozen correction |
+| Demographic VID only | Provider instructions return the existing VID result | Provider instructions combine demographic VID aggregates with Reference-ID overlaps |
+| Demographic and demographic-agnostic VID | Provider instructions may use either or both VID aggregate outputs | Provider instructions may use either or both VID aggregate outputs and Reference-ID overlaps |
 
-The provider may recommend any of the four after validation on whole held-out campaigns. If no extension proves better, the recommendation remains the existing VID model. The provider supplies the chosen models and explicit calibration instructions. The downstream measurement service runs them, calculates any required Reference-ID overlaps, and applies those frozen instructions; it does not have to invent a calibration without truth.
+The provider may recommend any of the four input combinations after validation on whole held-out campaigns. If no extension proves better, the recommendation remains the existing VID model. The provider supplies the chosen models and one explicit finalization function. The downstream measurement service runs the required VID models, calculates any required Reference-ID overlaps, and applies that frozen function; it does not have to invent a calibration without truth.
 
 An **Event Data Provider (EDP)** is a publisher or other data source contributing campaign events. The VID labeler receives email and EDP-proprietary identifiers as separate inputs. In the optional demographic-agnostic model, a shared email can anchor the same VID across EDPs; objective, audience strategy, co-viewing, and other permitted context can help with proprietary-ID or ambiguous cases. Separately, the calibration workload derives a **Reference ID** from normalized email when available and otherwise from that EDP's proprietary identifier, hashed into a shared 5-billion-value space. Reference ID is a calibration input, not a VID-labeler field. “RID” is used only as a short chart and table label for Reference ID.
 
@@ -133,9 +131,10 @@ For each simulated panel, the provider:
 
 1. trains the demographic-agnostic VID response on one group of campaigns, using email and proprietary IDs as separate identity inputs and optional campaign context for non-email cases;
 2. separately derives aggregate Reference-ID intersections for another campaign group and fits candidate corrections using weighted panel-person reach as truth;
-3. tests each correction separately on the existing and agnostic VID totals using a third group of whole-campaign holdouts;
-4. uses those holdouts to choose a complete configuration; and
-5. freezes the selected model line, correction bundle, and demographic-adjustment instructions before scoring a fourth, independent group of campaigns.
+3. learns a simple aggregate function that can combine the demographic and demographic-agnostic VID outputs, without linking their person-level VIDs;
+4. tests Reference-ID correction separately for the demographic-only and two-VID functions using a third group of whole-campaign holdouts;
+5. uses those holdouts to choose a complete input combination and one finalization function; and
+6. freezes the selected model line, finalization function, and demographic-adjustment instructions before scoring a fourth, independent group of campaigns.
 
 Campaigns—not weekly snapshots—are held out. This prevents several cumulative observations from one campaign from masquerading as independent validation examples.
 """
@@ -204,22 +203,23 @@ display(Markdown(markdown_table(
 ## Methods represented in the results
 
 - **Existing VID** is the current demographic-ready model and its total reach.
-- **Agnostic VID** is the separate panel-trained, demographic-agnostic impression-to-VID model. Shared email directly anchors matching VIDs across EDPs. For proprietary-ID, co-viewing, and other non-email cases, the provider may use EDP identity and permitted context such as objective or audience strategy. The harness represents that behavior with a compact aggregate surrogate and never feeds the 5B Reference-ID measurement into the VID model.
-- **Existing VID + RID** and **Agnostic VID + RID** use the same approved aggregate Reference-ID interface, but the provider selects and validates a correction separately for each base. A correction may be constant, fixed-plus-log-size, or a two-group matchability mixture. If no family clears the holdout rule, that path falls back to its uncorrected base.
+- **Agnostic VID diagnostic** shows the separate panel-trained, demographic-agnostic model by itself so its contribution can be understood. It is not one of the four deployment configurations in this notebook.
+- **Both VID models** uses a provider-trained aggregate function to combine the demographic and demographic-agnostic VID results into one total. The synthetic implementation learns one bounded blend of their pairwise intersection estimates and then reconstructs one valid audience. It never links person-level VIDs across the two models.
+- **Existing VID + RID** and **Both VID models + RID** use the approved aggregate Reference-ID interface. A correction may be constant, fixed-plus-log-size, or a two-group matchability mixture. If no family clears the holdout rule, that path falls back to its VID-only function.
 - **Provider recommended** is the complete configuration that clears the provider's holdout rule and performs best there, with existing VID retained as the fallback.
 
 The Reference-ID layer corrects total overlap at report time. It is not an impression-level VID model, and it does not assign demographics.
 
-For either “+ RID” configuration, the provider also publishes the frozen runtime recipe: required aggregate inputs, collision treatment, fitted capture-rate coefficients, decoder settings, supported range, diagnostics, and fallback. The measurement service calculates the requested report's Reference-ID overlaps inside the approved workload and follows that recipe.
+The provider publishes one frozen runtime recipe for the selected configuration: required VID aggregate outputs, whether Reference-ID overlap is used, any fitted coefficients, decoder settings, supported range, diagnostics, and fallback. The measurement service follows that recipe.
 """
     ),
     code(
         r"""
 headline_labels = {
     "existing_vid": "Existing VID",
-    "agnostic_vid": "Agnostic VID",
+    "two_vid": "Both VID models",
     "existing_plus_selected_rid": "Existing VID + selected RID",
-    "agnostic_plus_selected_rid": "Agnostic VID + selected RID",
+    "two_vid_plus_selected_rid": "Both VID models + selected RID",
     "provider_recommended": "Provider recommended",
 }
 method_rows = [
@@ -231,29 +231,29 @@ display(Markdown(markdown_table(method_rows, [("method", "Configuration"), ("des
     ),
     markdown(
         r"""
-## Accuracy of the four configurations
+## Accuracy of the four input combinations
 
-This is the main comparison. Mean error summarizes average performance; p90 and worst-case error show whether a configuration remains dependable for difficult reports. “+ selected RID” means the provider used only a correction that passed its whole-campaign validation for that base architecture.
+This is the main comparison. Mean error summarizes average performance; p90 and worst-case error show whether an input combination remains dependable for difficult reports. “+ selected RID” means the provider used only a correction that passed whole-campaign validation for that VID path.
 
 The synthetic existing-VID baseline deliberately assumes that campaign overlap follows the average population pattern. It is therefore very accurate for the broad-awareness control and can be dramatically wrong for narrow, correlated audiences. The aggregate error percentages below illustrate the intended stress test; they are not estimates of current production VID accuracy. The p90 column is the error level that 90% of tested reports are at or below.
 
-“Provider recommended” is not a fifth configuration. It reports whichever one of the four configurations the panel holdouts selected in each draw.
+“Provider recommended” is not a fifth alternative. It reports whichever one of the four input combinations the panel holdouts selected in each draw.
 """
     ),
     code(
         r"""
 CONFIGURATIONS = [
     "existing_vid",
-    "agnostic_vid",
+    "two_vid",
     "existing_plus_selected_rid",
-    "agnostic_plus_selected_rid",
+    "two_vid_plus_selected_rid",
     "provider_recommended",
 ]
 configuration_labels = {
     "existing_vid": "Existing VID",
-    "agnostic_vid": "Agnostic VID",
+    "two_vid": "Both VID models",
     "existing_plus_selected_rid": "Existing VID + selected RID",
-    "agnostic_plus_selected_rid": "Agnostic VID + selected RID",
+    "two_vid_plus_selected_rid": "Both VID models + selected RID",
     "provider_recommended": "Provider recommended",
 }
 accuracy_rows = []
@@ -276,6 +276,34 @@ display(Image(filename=str(OUTPUT_DIR / "error_by_panel_design.png")))
     ),
     markdown(
         r"""
+### Diagnostic: the demographic-agnostic model by itself
+
+The deployment choice “both VID models” lets the provider use either or both aggregate outputs. The synthetic candidate above learns one blend weight from separate calibration campaigns. The table below also shows the demographic-agnostic model alone. If it beats the learned blend, the second model is useful but this simple combining rule did not use it optimally; that is evidence to test a richer provider finalization function, not evidence that the two VID spaces should be linked person by person.
+"""
+    ),
+    code(
+        r"""
+agnostic_rows = []
+for design, design_summary in summary["method_summary"].items():
+    agnostic_rows.append({
+        "panel": summary["panel_designs"][design]["label"],
+        "agnostic": f"{design_summary['agnostic_vid_diagnostic']['mean']:.1%}",
+        "two_vid": f"{design_summary['two_vid']['mean']:.1%}",
+        "weight": f"{summary['activation_summary'][design]['two_vid_agnostic_weight']['mean']:.0%}",
+    })
+display(Markdown(markdown_table(
+    agnostic_rows,
+    [
+        ("panel", "Panel"),
+        ("agnostic", "Agnostic-only diagnostic error"),
+        ("two_vid", "Learned two-VID error"),
+        ("weight", "Agnostic weight"),
+    ],
+)))
+"""
+    ),
+    markdown(
+        r"""
 ## Which campaign mechanisms remain hard?
 
 The chart uses representative-panel draws and includes broad-awareness and unrelated-niche controls. A configuration that helps narrow retargeting but degrades broad reach should not be recommended universally. Error can exceed 100% for a small true audience; for example, 140% relative error means the estimate missed by 1.4 times the true reach.
@@ -288,18 +316,18 @@ for scenario, results in summary["scenario_summary"].items():
     scenario_result_rows.append({
         "scenario": summary["scenario_descriptions"][scenario]["audience"],
         "existing": f"{results['existing_vid']['mean']:.1%}",
-        "agnostic": f"{results['agnostic_vid']['mean']:.1%}",
+        "two_vid": f"{results['two_vid']['mean']:.1%}",
         "existing_rid": f"{results['existing_plus_selected_rid']['mean']:.1%}",
-        "agnostic_rid": f"{results['agnostic_plus_selected_rid']['mean']:.1%}",
+        "two_vid_rid": f"{results['two_vid_plus_selected_rid']['mean']:.1%}",
     })
 display(Markdown(markdown_table(
     scenario_result_rows,
     [
         ("scenario", "Scenario"),
         ("existing", "Existing VID"),
-        ("agnostic", "Agnostic VID"),
+        ("two_vid", "Both VID models"),
         ("existing_rid", "Existing + RID"),
-        ("agnostic_rid", "Agnostic + RID"),
+        ("two_vid_rid", "Both VID models + RID"),
     ],
 )))
 display(Image(filename=str(OUTPUT_DIR / "error_by_campaign_scenario.png")))
@@ -312,8 +340,8 @@ display(Image(filename=str(OUTPUT_DIR / "error_by_campaign_scenario.png")))
 Each panel draw makes three related decisions:
 
 1. whether a Reference-ID correction improves the existing VID base;
-2. whether a Reference-ID correction improves the agnostic VID base; and
-3. which of the four complete configurations should be recommended.
+2. whether a Reference-ID correction improves the two-VID function; and
+3. which of the four input combinations and finalization functions should be recommended.
 
 The holdout rule requires a meaningful average improvement, no material p90 regression, and campaign-level evidence that the improvement is unlikely to be sampling noise. The truth-error-change column uses hidden synthetic truth to audit whether the provider's panel-based choice generalized. A raw nested-report violation means that, before reconciliation, a smaller week or EDP scope reported more reach than a larger scope containing it.
 """
@@ -330,7 +358,8 @@ for design, item in summary["activation_summary"].items():
     activation_rows.append({
         "panel": summary["panel_designs"][design]["label"],
         "existing_active": f"{item['existing_correction_active_rate']:.0%}",
-        "agnostic_active": f"{item['agnostic_correction_active_rate']:.0%}",
+        "two_vid_active": f"{item['two_vid_correction_active_rate']:.0%}",
+        "agnostic_weight": f"{item['two_vid_agnostic_weight']['mean']:.0%}",
         "recommended": recommended,
         "change": f"{item['mean_recommended_error_change_vs_existing']:+.1%}",
         "violations": f"{item['raw_consistency_violation_rate']:.1%}",
@@ -340,7 +369,8 @@ display(Markdown(markdown_table(
     [
         ("panel", "Panel"),
         ("existing_active", "RID active on existing"),
-        ("agnostic_active", "RID active on agnostic"),
+        ("two_vid_active", "RID active on two-VID function"),
+        ("agnostic_weight", "Mean agnostic weight in two-VID blend"),
         ("recommended", "Provider recommendation(s)"),
         ("change", "Truth-error change vs existing"),
         ("violations", "Raw nested-report violations"),
@@ -361,8 +391,9 @@ choice_text = ", ".join(
 display(Markdown(
     "**Important stress result.** Under hidden intent/matchability bias, the provider's "
     f"panel selected {choice_text}. The recommended configuration's full-population mean "
-    f"error was **{hidden['provider_recommended']['mean']:.1%}**; for comparison, agnostic VID alone "
-    f"had **{hidden['agnostic_vid']['mean']:.1%}** error. This is a deliberate demonstration "
+    f"error was **{hidden['provider_recommended']['mean']:.1%}**; for comparison, the two-VID function "
+    f"had **{hidden['two_vid']['mean']:.1%}** error and the agnostic-only diagnostic had "
+    f"**{hidden['agnostic_vid_diagnostic']['mean']:.1%}** error. This is a deliberate demonstration "
     "that disciplined holdout selection cannot repair a panel that systematically misses the audience trait driving delivery."
 ))
 """
@@ -397,7 +428,7 @@ display(Markdown(markdown_table(
         r"""
 ## Demographic output is a separate provider instruction
 
-The measurement system always runs the demographic-ready VID model. When the selected total comes from the agnostic model or a Reference-ID correction, a provider-supplied demographic adjustment maps the existing VID demographic distribution to that total.
+The measurement system always runs the demographic-ready VID model. When the selected total is produced by the two-VID function or a Reference-ID correction, a provider-supplied demographic adjustment maps the existing VID demographic distribution to that total.
 
 The benchmark compares simple proportional scaling with a panel-learned contextual adjustment. “Distribution error” measures how far the reported shares across demographic buckets differ from truth; lower is better. The Reference-ID layer itself does not identify which age, gender, or geography bucket should change. It only changes total union reach.
 """
@@ -406,18 +437,18 @@ The benchmark compares simple proportional scaling with a panel-learned contextu
         r"""
 demo_methods = (
     "existing_vid",
-    "agnostic_proportional_demo",
-    "agnostic_panel_demo",
+    "two_vid_proportional_demo",
+    "two_vid_panel_demo",
     "existing_rid_panel_demo",
-    "agnostic_rid_panel_demo",
+    "two_vid_rid_panel_demo",
     "recommended_panel_demo",
 )
 demo_labels = {
     "existing_vid": "Existing VID demographics",
-    "agnostic_proportional_demo": "Agnostic total + proportional scaling",
-    "agnostic_panel_demo": "Agnostic total + panel adjustment",
+    "two_vid_proportional_demo": "Two-VID total + proportional scaling",
+    "two_vid_panel_demo": "Two-VID total + panel adjustment",
     "existing_rid_panel_demo": "Existing + RID total + panel adjustment",
-    "agnostic_rid_panel_demo": "Agnostic + RID total + panel adjustment",
+    "two_vid_rid_panel_demo": "Two-VID + RID total + panel adjustment",
     "recommended_panel_demo": "Recommended total + panel adjustment",
 }
 demo_rows = []
@@ -475,8 +506,9 @@ display(Markdown(markdown_table(report_rows, [("report", "Report"), ("weeks", "W
         r"""
 ## Interpretation
 
-- The two architecture choices should be evaluated separately. A useful agnostic model does not prove that Reference-ID correction is needed, and a useful Reference-ID correction does not require an agnostic model.
-- The same correction family can be proposed for both base architectures, but its activation and complete bundle must be validated separately because the residual errors differ.
+- The two architecture choices should be evaluated separately. A useful two-VID finalization function does not prove that Reference-ID correction is needed, and a useful Reference-ID correction does not require a demographic-agnostic model.
+- The provider may use either or both VID aggregate outputs. The learned blend weight shows whether the second model contributes on holdouts; an endpoint weight is a valid result, not a failure.
+- The same correction family can be proposed for the demographic-only and two-VID functions, but its activation must be validated separately because the residual errors differ.
 - A 5,000-person panel can support pooled training across many campaigns, but individual small-campaign labels and high-order intersections remain noisy.
 - Observable weighting does not solve hidden selection related to intent or email matchability.
 - A provider can publish an identity correction when no Reference-ID family proves incremental value. Shadow measurement can still monitor implementation and drift.

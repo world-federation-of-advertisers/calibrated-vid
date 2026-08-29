@@ -6,6 +6,7 @@ from reference_calibration.config import SimulationConfig
 from reference_calibration.panel_validation import (
     EmailFirstPanelVidModel,
     PANEL_DESIGNS,
+    TwoVidAggregateCombiner,
     draw_panel,
     measure_panel_report,
 )
@@ -100,6 +101,48 @@ class PanelValidationTest(unittest.TestCase):
                     targets[mask] + 1e-6,
                     observation.email_intersections[mask],
                 )
+
+    def test_two_vid_combiner_uses_only_bounded_aggregate_blend(self):
+        panel = draw_panel(self.world, "representative", self.config.seed + 12)
+        observations = [
+            measure_panel_report(
+                self.world,
+                campaign,
+                panel,
+                tuple(range(self.config.n_weeks)),
+                tuple(range(5)),
+            )
+            for campaign in self.campaigns
+        ]
+        agnostic = EmailFirstPanelVidModel.fit(observations, self.config.n_edps)
+        combiner = TwoVidAggregateCombiner.fit(observations, agnostic)
+        self.assertGreaterEqual(combiner.agnostic_weight, 0.0)
+        self.assertLessEqual(combiner.agnostic_weight, 1.0)
+        self.assertFalse(combiner.describe()["uses_person_level_crosswalk"])
+
+        observation = observations[0]
+        agnostic_targets = agnostic.predict_pair_targets(observation)
+        combined_targets = combiner.predict_pair_targets(observation, agnostic)
+        for left in range(5):
+            for right in range(left + 1, 5):
+                mask = (1 << left) | (1 << right)
+                endpoints = (
+                    observation.baseline_intersections[mask],
+                    agnostic_targets[mask],
+                )
+                self.assertGreaterEqual(combined_targets[mask], min(endpoints) - 1e-6)
+                self.assertLessEqual(combined_targets[mask], max(endpoints) + 1e-6)
+
+        result = combiner.predict_report(observation, agnostic)
+        marginals = np.asarray(
+            [observation.truth_intersections[1 << index] for index in range(5)],
+            dtype=float,
+        )
+        self.assertGreaterEqual(result.full_union, float(np.max(marginals)) - 1e-5)
+        self.assertLessEqual(
+            result.full_union,
+            min(float(np.sum(marginals)), self.config.population_size) + 1e-5,
+        )
 
 
 if __name__ == "__main__":

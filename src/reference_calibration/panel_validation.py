@@ -449,6 +449,104 @@ class EmailFirstPanelVidModel:
         )
 
 
+@dataclass(frozen=True)
+class TwoVidAggregateCombiner:
+    """Provider-trained combination of two VID models' aggregate overlaps.
+
+    The combiner never links identifiers across the two VID spaces.  It learns
+    one bounded weight from panel campaigns and applies that weight to the two
+    models' pair-intersection estimates before decoding one valid audience.
+    Weight zero returns the demographic VID overlap model; weight one returns
+    the demographic-agnostic model; an interior value uses both.
+    """
+
+    agnostic_weight: float
+
+    @property
+    def parameter_count(self) -> int:
+        return 1
+
+    def describe(self) -> dict:
+        return {
+            "name": "two_vid_aggregate_combiner",
+            "model_type": "aggregate_pair_intersection_blend",
+            "agnostic_weight": self.agnostic_weight,
+            "demographic_vid_weight": 1.0 - self.agnostic_weight,
+            "uses_person_level_crosswalk": False,
+            "parameter_count": self.parameter_count,
+        }
+
+    @classmethod
+    def fit(
+        cls,
+        observations: list[ReportObservation],
+        agnostic_model: EmailFirstPanelVidModel,
+    ) -> "TwoVidAggregateCombiner":
+        deltas: list[float] = []
+        residuals: list[float] = []
+        weights: list[float] = []
+        campaign_ids: list[str] = []
+        for observation in observations:
+            agnostic = agnostic_model.predict_pair_targets(observation)
+            for left, right in combinations(range(len(observation.edps)), 2):
+                mask = (1 << left) | (1 << right)
+                existing = float(observation.baseline_intersections[mask])
+                truth = float(observation.truth_intersections[mask])
+                deltas.append(float(agnostic[mask]) - existing)
+                residuals.append(truth - existing)
+                effective = truth / max(observation.person_weight, 1.0)
+                weights.append(float(np.sqrt(max(effective, 1.0))))
+                campaign_ids.append(observation.campaign_id)
+        delta = np.asarray(deltas, dtype=float)
+        residual = np.asarray(residuals, dtype=float)
+        fit_weight = np.asarray(weights, dtype=float)
+        fit_weight /= max(float(np.median(fit_weight)), 1.0)
+        fit_weight = np.clip(fit_weight, 0.25, 4.0)
+        for campaign_id in set(campaign_ids):
+            selected = np.asarray([value == campaign_id for value in campaign_ids])
+            norm = float(np.linalg.norm(fit_weight[selected]))
+            if norm > 0:
+                fit_weight[selected] /= norm
+        weighted_delta = fit_weight * delta
+        denominator = float(weighted_delta @ weighted_delta)
+        if denominator <= 1e-12:
+            return cls(agnostic_weight=0.0)
+        numerator = float(weighted_delta @ (fit_weight * residual))
+        return cls(agnostic_weight=float(np.clip(numerator / denominator, 0.0, 1.0)))
+
+    def predict_pair_targets(
+        self,
+        observation: ReportObservation,
+        agnostic_model: EmailFirstPanelVidModel,
+    ) -> np.ndarray:
+        agnostic = agnostic_model.predict_pair_targets(observation)
+        target = observation.baseline_intersections.copy()
+        for left, right in combinations(range(len(observation.edps)), 2):
+            mask = (1 << left) | (1 << right)
+            existing = float(observation.baseline_intersections[mask])
+            target[mask] = existing + self.agnostic_weight * (
+                float(agnostic[mask]) - existing
+            )
+        return target
+
+    def predict_report(
+        self,
+        observation: ReportObservation,
+        agnostic_model: EmailFirstPanelVidModel,
+    ) -> CalibratedReport:
+        return calibrate_report_pairwise_maximum_entropy(
+            observation,
+            UNIT_CAPTURE_MODEL,
+            pair_ridge=1e-6,
+            evidence_half_saturation=0.0,
+            name="provider_combined_two_vid_result",
+            pair_target_intersections=self.predict_pair_targets(
+                observation,
+                agnostic_model,
+            ),
+        )
+
+
 def _with_baseline(
     observation: ReportObservation,
     provider_report: CalibratedReport,
@@ -556,12 +654,14 @@ def _fit_reference_models(
 def _method_totals(
     observation: ReportObservation,
     provider: EmailFirstPanelVidModel,
+    combiner: TwoVidAggregateCombiner,
     reference_models: dict[str, CalibrationModel],
 ):
     agnostic_report = provider.predict_report(observation)
-    agnostic_observation = _with_baseline(observation, agnostic_report)
+    two_vid_report = combiner.predict_report(observation, provider)
+    two_vid_observation = _with_baseline(observation, two_vid_report)
     existing_reports = {}
-    agnostic_reports = {}
+    two_vid_reports = {}
     for name, model in reference_models.items():
         existing_reports[name] = calibrate_report_pairwise_maximum_entropy(
             observation,
@@ -570,26 +670,30 @@ def _method_totals(
             evidence_half_saturation=20.0,
             name=f"existing_plus_{name}",
         )
-        agnostic_reports[name] = calibrate_report_pairwise_maximum_entropy(
-            agnostic_observation,
+        two_vid_reports[name] = calibrate_report_pairwise_maximum_entropy(
+            two_vid_observation,
             model,
             pair_ridge=1e-6,
             evidence_half_saturation=20.0,
-            name=f"agnostic_plus_{name}",
+            name=f"two_vid_plus_{name}",
         )
     totals = {
         "existing_vid": float(observation.baseline_unions[-1]),
-        "agnostic_vid": agnostic_report.full_union,
+        "agnostic_vid_diagnostic": agnostic_report.full_union,
+        "two_vid": two_vid_report.full_union,
         **{
             f"existing_plus_{name}": report.full_union
             for name, report in existing_reports.items()
         },
         **{
-            f"agnostic_plus_{name}": report.full_union
-            for name, report in agnostic_reports.items()
+            f"two_vid_plus_{name}": report.full_union
+            for name, report in two_vid_reports.items()
         },
     }
-    return totals, agnostic_report, {"existing": existing_reports, "agnostic": agnostic_reports}
+    return totals, agnostic_report, two_vid_report, {
+        "existing": existing_reports,
+        "two_vid": two_vid_reports,
+    }
 
 
 def _calibration_instruction(
@@ -627,6 +731,50 @@ def _calibration_instruction(
             "evidence_half_saturation": 20.0,
         },
     }
+
+
+def _selected_total_reach_instruction(
+    recommended: str,
+    selected_existing: str,
+    selected_two_vid: str,
+    provider: EmailFirstPanelVidModel,
+    combiner: TwoVidAggregateCombiner,
+    models: dict[str, CalibrationModel],
+) -> dict:
+    uses_two_vids = recommended in {"two_vid", "two_vid_plus_selected_rid"}
+    uses_reference_id = recommended in {
+        "existing_plus_selected_rid",
+        "two_vid_plus_selected_rid",
+    }
+    instruction = {
+        "name": recommended,
+        "vid_inputs": (
+            ["demographic_vid", "demographic_agnostic_vid"]
+            if uses_two_vids
+            else ["demographic_vid"]
+        ),
+        "uses_reference_id": uses_reference_id,
+        "uses_person_level_crosswalk": False,
+    }
+    if uses_two_vids:
+        instruction["demographic_agnostic_vid"] = provider.describe()
+        instruction["vid_output_combiner"] = combiner.describe()
+    if uses_reference_id:
+        selected = selected_two_vid if uses_two_vids else selected_existing
+        prefix = "two_vid_plus_" if uses_two_vids else "existing_plus_"
+        base = "two_vid" if uses_two_vids else "existing_vid"
+        instruction["reference_id_instruction"] = _calibration_instruction(
+            selected,
+            base,
+            prefix,
+            models,
+        )
+    else:
+        instruction["reference_id_instruction"] = {
+            "mode": "disabled",
+            "description": "Use the provider's VID-only finalization function.",
+        }
+    return instruction
 
 
 def _select_active_method(
@@ -718,15 +866,15 @@ def _write_csv(path: Path, rows: list[dict]) -> None:
 def _plot_panel_designs(rows: list[dict], path: Path) -> None:
     methods = (
         "existing_vid",
-        "agnostic_vid",
+        "two_vid",
         "existing_plus_selected_rid",
-        "agnostic_plus_selected_rid",
+        "two_vid_plus_selected_rid",
     )
     labels = {
         "existing_vid": "Existing VID",
-        "agnostic_vid": "Agnostic VID",
+        "two_vid": "Both VID models",
         "existing_plus_selected_rid": "Existing VID + RID",
-        "agnostic_plus_selected_rid": "Agnostic VID + RID",
+        "two_vid_plus_selected_rid": "Both VID models + RID",
     }
     designs = tuple(PANEL_DESIGNS)
     matrix = np.zeros((len(methods), len(designs)), dtype=float)
@@ -759,15 +907,15 @@ def _plot_panel_designs(rows: list[dict], path: Path) -> None:
 def _plot_scenarios(rows: list[dict], path: Path) -> None:
     methods = (
         "existing_vid",
-        "agnostic_vid",
+        "two_vid",
         "existing_plus_selected_rid",
-        "agnostic_plus_selected_rid",
+        "two_vid_plus_selected_rid",
     )
     labels = {
         "existing_vid": "Existing VID",
-        "agnostic_vid": "Agnostic VID",
+        "two_vid": "Both VID models",
         "existing_plus_selected_rid": "Existing VID + RID",
-        "agnostic_plus_selected_rid": "Agnostic VID + RID",
+        "two_vid_plus_selected_rid": "Both VID models + RID",
     }
     scenarios = tuple(META_CAMPAIGN_SCENARIOS)
     matrix = np.zeros((len(methods), len(scenarios)), dtype=float)
@@ -848,17 +996,18 @@ def run_panel_validation(
     provider_packages: list[dict] = []
     raw_method_names = (
         "existing_vid",
-        "agnostic_vid",
+        "agnostic_vid_diagnostic",
+        "two_vid",
         "existing_plus_fixed",
         "existing_plus_fixed_log",
         "existing_plus_mixture",
-        "agnostic_plus_fixed",
-        "agnostic_plus_fixed_log",
-        "agnostic_plus_mixture",
+        "two_vid_plus_fixed",
+        "two_vid_plus_fixed_log",
+        "two_vid_plus_mixture",
     )
     method_names = raw_method_names + (
         "existing_plus_selected_rid",
-        "agnostic_plus_selected_rid",
+        "two_vid_plus_selected_rid",
         "provider_recommended",
     )
 
@@ -899,6 +1048,10 @@ def run_panel_validation(
                 train_specs,
                 panel,
             )
+            combiner = TwoVidAggregateCombiner.fit(
+                list(panel_calibration.values()),
+                provider,
+            )
             reference_models = _fit_reference_models(
                 config,
                 list(panel_calibration.values()),
@@ -921,7 +1074,12 @@ def run_panel_validation(
             holdout_totals = []
             for key, full_observation in full_holdout.items():
                 panel_truth = float(panel_holdout[key].truth_unions[-1])
-                totals, _, _ = _method_totals(full_observation, provider, reference_models)
+                totals, _, _, _ = _method_totals(
+                    full_observation,
+                    provider,
+                    combiner,
+                    reference_models,
+                )
                 holdout_totals.append((key[0], panel_truth, totals))
                 for method, estimate in totals.items():
                     holdout_decisions.append(
@@ -941,25 +1099,25 @@ def run_panel_validation(
                 ),
                 config.panel_activation_improvement,
             )
-            selected_agnostic = _select_active_method(
+            selected_two_vid = _select_active_method(
                 holdout_decisions,
-                "agnostic_vid",
+                "two_vid",
                 (
-                    "agnostic_plus_fixed",
-                    "agnostic_plus_fixed_log",
-                    "agnostic_plus_mixture",
+                    "two_vid_plus_fixed",
+                    "two_vid_plus_fixed_log",
+                    "two_vid_plus_mixture",
                 ),
                 config.panel_activation_improvement,
             )
             configuration_decisions = []
             for campaign_id, panel_truth, totals in holdout_totals:
                 totals["existing_plus_selected_rid"] = totals[selected_existing]
-                totals["agnostic_plus_selected_rid"] = totals[selected_agnostic]
+                totals["two_vid_plus_selected_rid"] = totals[selected_two_vid]
                 for method in (
                     "existing_vid",
-                    "agnostic_vid",
+                    "two_vid",
                     "existing_plus_selected_rid",
-                    "agnostic_plus_selected_rid",
+                    "two_vid_plus_selected_rid",
                 ):
                     configuration_decisions.append(
                         {
@@ -971,9 +1129,9 @@ def run_panel_validation(
             recommended = _select_configuration(
                 configuration_decisions,
                 (
-                    "agnostic_vid",
+                    "two_vid",
                     "existing_plus_selected_rid",
-                    "agnostic_plus_selected_rid",
+                    "two_vid_plus_selected_rid",
                 ),
                 config.panel_activation_improvement,
             )
@@ -985,23 +1143,21 @@ def run_panel_validation(
                     "vid_models": {
                         "existing": {
                             "name": "existing_demographic_ready_vid",
-                            "role": "base total and demographic distribution",
+                            "role": "demographic output plus candidate total and overlap inputs",
                         },
                         "demographic_agnostic": provider.describe(),
                     },
-                    "reference_id_instructions": {
-                        "existing_vid_base": _calibration_instruction(
-                            selected_existing,
-                            "existing_vid",
-                            "existing_plus_",
-                            reference_models,
-                        ),
-                        "demographic_agnostic_vid_base": _calibration_instruction(
-                            selected_agnostic,
-                            "agnostic_vid",
-                            "agnostic_plus_",
-                            reference_models,
-                        ),
+                    "selected_total_reach_function": _selected_total_reach_instruction(
+                        recommended,
+                        selected_existing,
+                        selected_two_vid,
+                        provider,
+                        combiner,
+                        reference_models,
+                    ),
+                    "validated_candidate_choices": {
+                        "demographic_vid_plus_reference_id": selected_existing,
+                        "two_vid_plus_reference_id": selected_two_vid,
                     },
                     "demographic_adjustment": {
                         "name": contextual_demo.name,
@@ -1019,13 +1175,14 @@ def run_panel_validation(
                 for report_label, _, _ in eval_specs:
                     observation = full_evaluation[(campaign.campaign_id, report_label)]
                     panel_observation = panel_evaluation[(campaign.campaign_id, report_label)]
-                    totals, agnostic_report, _ = _method_totals(
+                    totals, _, two_vid_report, _ = _method_totals(
                         observation,
                         provider,
+                        combiner,
                         reference_models,
                     )
                     totals["existing_plus_selected_rid"] = totals[selected_existing]
-                    totals["agnostic_plus_selected_rid"] = totals[selected_agnostic]
+                    totals["two_vid_plus_selected_rid"] = totals[selected_two_vid]
                     totals["provider_recommended"] = totals[recommended]
                     truth_total = float(observation.truth_unions[-1])
                     truth_fraction = truth_total / float(config.population_size)
@@ -1055,20 +1212,20 @@ def run_panel_validation(
                             "volume_band": volume_band,
                         }
                     )
-                    agnostic_proportional = proportional.allocate(
-                        agnostic_report.full_union,
+                    two_vid_proportional = proportional.allocate(
+                        two_vid_report.full_union,
                         observation,
                     )
-                    agnostic_contextual = contextual_demo.allocate(
-                        agnostic_report.full_union,
+                    two_vid_contextual = contextual_demo.allocate(
+                        two_vid_report.full_union,
                         observation,
                     )
                     existing_rid_contextual = contextual_demo.allocate(
                         totals["existing_plus_selected_rid"],
                         observation,
                     )
-                    agnostic_rid_contextual = contextual_demo.allocate(
-                        totals["agnostic_plus_selected_rid"],
+                    two_vid_rid_contextual = contextual_demo.allocate(
+                        totals["two_vid_plus_selected_rid"],
                         observation,
                     )
                     recommended_contextual = (
@@ -1098,10 +1255,10 @@ def run_panel_validation(
                         consistency[(campaign.campaign_id, method)][report_label] = totals[method]
                     for method, demographic in (
                         ("existing_vid", observation.baseline_demographic_union),
-                        ("agnostic_proportional_demo", agnostic_proportional),
-                        ("agnostic_panel_demo", agnostic_contextual),
+                        ("two_vid_proportional_demo", two_vid_proportional),
+                        ("two_vid_panel_demo", two_vid_contextual),
                         ("existing_rid_panel_demo", existing_rid_contextual),
-                        ("agnostic_rid_panel_demo", agnostic_rid_contextual),
+                        ("two_vid_rid_panel_demo", two_vid_rid_contextual),
                         ("recommended_panel_demo", recommended_contextual),
                     ):
                         rows.append(
@@ -1159,9 +1316,9 @@ def run_panel_validation(
                 np.mean(draw_truth_errors["existing_plus_selected_rid"])
                 - np.mean(draw_truth_errors["existing_vid"])
             )
-            agnostic_rid_change = float(
-                np.mean(draw_truth_errors["agnostic_plus_selected_rid"])
-                - np.mean(draw_truth_errors["agnostic_vid"])
+            two_vid_rid_change = float(
+                np.mean(draw_truth_errors["two_vid_plus_selected_rid"])
+                - np.mean(draw_truth_errors["two_vid"])
             )
             recommendation_change = float(
                 np.mean(draw_truth_errors["provider_recommended"])
@@ -1172,16 +1329,18 @@ def run_panel_validation(
                     "panel_design": design,
                     "draw": draw,
                     "selected_existing_correction": selected_existing,
-                    "selected_agnostic_correction": selected_agnostic,
+                    "selected_two_vid_correction": selected_two_vid,
                     "recommended_configuration": recommended,
                     "existing_correction_active": selected_existing != "existing_vid",
-                    "agnostic_correction_active": selected_agnostic != "agnostic_vid",
+                    "two_vid_correction_active": selected_two_vid != "two_vid",
                     "existing_correction_harmed_truth": existing_rid_change > 1e-9,
-                    "agnostic_correction_harmed_truth": agnostic_rid_change > 1e-9,
+                    "two_vid_correction_harmed_truth": two_vid_rid_change > 1e-9,
                     "existing_correction_error_change": existing_rid_change,
-                    "agnostic_correction_error_change": agnostic_rid_change,
+                    "two_vid_correction_error_change": two_vid_rid_change,
                     "recommended_error_change_vs_existing": recommendation_change,
-                    "provider_parameter_count": provider.parameter_count,
+                    "agnostic_model_parameter_count": provider.parameter_count,
+                    "two_vid_combiner_parameter_count": combiner.parameter_count,
+                    "two_vid_agnostic_weight": combiner.agnostic_weight,
                     "consistency_checks": consistency_counts["provider_recommended"][0],
                     "consistency_violations": consistency_counts["provider_recommended"][1],
                 }
@@ -1208,23 +1367,26 @@ def run_panel_validation(
             "existing_correction_active_rate": float(
                 np.mean([row["existing_correction_active"] for row in selected_rows])
             ),
-            "agnostic_correction_active_rate": float(
-                np.mean([row["agnostic_correction_active"] for row in selected_rows])
+            "two_vid_correction_active_rate": float(
+                np.mean([row["two_vid_correction_active"] for row in selected_rows])
             ),
             "existing_correction_harm_rate": float(
                 np.mean([row["existing_correction_harmed_truth"] for row in selected_rows])
             ),
-            "agnostic_correction_harm_rate": float(
-                np.mean([row["agnostic_correction_harmed_truth"] for row in selected_rows])
+            "two_vid_correction_harm_rate": float(
+                np.mean([row["two_vid_correction_harmed_truth"] for row in selected_rows])
             ),
             "mean_existing_correction_error_change": float(
                 np.mean([row["existing_correction_error_change"] for row in selected_rows])
             ),
-            "mean_agnostic_correction_error_change": float(
-                np.mean([row["agnostic_correction_error_change"] for row in selected_rows])
+            "mean_two_vid_correction_error_change": float(
+                np.mean([row["two_vid_correction_error_change"] for row in selected_rows])
             ),
             "mean_recommended_error_change_vs_existing": float(
                 np.mean([row["recommended_error_change_vs_existing"] for row in selected_rows])
+            ),
+            "two_vid_agnostic_weight": summarize(
+                [float(row["two_vid_agnostic_weight"]) for row in selected_rows]
             ),
             "existing_correction_selection_counts": {
                 method: sum(row["selected_existing_correction"] == method for row in selected_rows)
@@ -1235,22 +1397,22 @@ def run_panel_validation(
                     "existing_plus_mixture",
                 )
             },
-            "agnostic_correction_selection_counts": {
-                method: sum(row["selected_agnostic_correction"] == method for row in selected_rows)
+            "two_vid_correction_selection_counts": {
+                method: sum(row["selected_two_vid_correction"] == method for row in selected_rows)
                 for method in (
-                    "agnostic_vid",
-                    "agnostic_plus_fixed",
-                    "agnostic_plus_fixed_log",
-                    "agnostic_plus_mixture",
+                    "two_vid",
+                    "two_vid_plus_fixed",
+                    "two_vid_plus_fixed_log",
+                    "two_vid_plus_mixture",
                 )
             },
             "recommended_configuration_counts": {
                 method: sum(row["recommended_configuration"] == method for row in selected_rows)
                 for method in (
                     "existing_vid",
-                    "agnostic_vid",
+                    "two_vid",
                     "existing_plus_selected_rid",
-                    "agnostic_plus_selected_rid",
+                    "two_vid_plus_selected_rid",
                 )
             },
             "raw_consistency_violation_rate": float(
@@ -1293,9 +1455,10 @@ def run_panel_validation(
             )
             for method in (
                 "existing_vid",
-                "agnostic_vid",
+                "agnostic_vid_diagnostic",
+                "two_vid",
                 "existing_plus_selected_rid",
-                "agnostic_plus_selected_rid",
+                "two_vid_plus_selected_rid",
             )
         }
 
@@ -1321,21 +1484,22 @@ def run_panel_validation(
         "scenario_summary": scenario_summary,
         "methods": {
             "existing_vid": "Existing demographic-ready VID architecture without Reference-ID correction.",
-            "agnostic_vid": "Panel-trained email-first demographic-agnostic VID result without report-level Reference-ID correction.",
+            "agnostic_vid_diagnostic": "Diagnostic total from the email-first demographic-agnostic VID model by itself.",
+            "two_vid": "Provider-trained aggregate combination of the demographic and demographic-agnostic VID outputs, without Reference-ID input.",
             "existing_plus_fixed": "Existing VID plus the provider-fitted constant Reference-ID capture model.",
             "existing_plus_fixed_log": "Existing VID plus the provider-fitted fixed-plus-log Reference-ID model.",
             "existing_plus_mixture": "Existing VID plus the provider-fitted two-group matchability model.",
-            "agnostic_plus_fixed": "Email-first demographic-agnostic VID plus the provider-fitted constant Reference-ID model.",
-            "agnostic_plus_fixed_log": "Email-first demographic-agnostic VID plus the provider-fitted fixed-plus-log Reference-ID model.",
-            "agnostic_plus_mixture": "Email-first demographic-agnostic VID plus the provider-fitted two-group matchability model.",
+            "two_vid_plus_fixed": "Both VID outputs plus the provider-fitted constant Reference-ID model.",
+            "two_vid_plus_fixed_log": "Both VID outputs plus the provider-fitted fixed-plus-log Reference-ID model.",
+            "two_vid_plus_mixture": "Both VID outputs plus the provider-fitted two-group matchability model.",
             "existing_plus_selected_rid": "Existing VID plus the Reference-ID family selected by provider panel holdouts, or identity if none passes.",
-            "agnostic_plus_selected_rid": "Demographic-agnostic VID plus the Reference-ID family selected by provider panel holdouts, or identity if none passes.",
-            "provider_recommended": "The complete configuration selected by provider panel holdouts from the four operating configurations.",
+            "two_vid_plus_selected_rid": "Both VID outputs plus the Reference-ID family selected by provider panel holdouts, or the VID-only function if none passes.",
+            "provider_recommended": "The complete input combination and finalization function selected by provider panel holdouts.",
         },
         "provider_package_contract": {
             "provider_role": (
-                "Train the optional VID model, choose and validate any Reference-ID correction, "
-                "and publish frozen runtime instructions and fallback behavior."
+                "Train the optional VID model, choose how available VID outputs are combined, "
+                "validate any Reference-ID input, and publish one frozen finalization function."
             ),
             "measurement_service_role": (
                 "Run the supplied VID model or models, calculate aggregate Reference-ID overlaps "
@@ -1366,7 +1530,10 @@ def run_panel_validation(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Validate a 5,000-person panel-trained VID model and optional Reference-ID correction"
+        description=(
+            "Validate provider-finalized demographic VID, two-VID, and optional "
+            "Reference-ID configurations with a 5,000-person panel"
+        )
     )
     parser.add_argument("--profile", choices=("quick", "full"), default="quick")
     parser.add_argument("--panel-draws", type=int)

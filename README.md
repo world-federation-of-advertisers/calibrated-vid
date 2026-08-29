@@ -14,6 +14,8 @@ use Reference IDs to improve cross-EDP reach. It implements:
 - a panel-trained, email-first demographic-agnostic VID response that receives
   email and proprietary identifiers separately, directly anchors shared-email
   VIDs, and uses optional campaign context only for non-email behavior;
+- a provider-trained aggregate combiner that can use both VID outputs without
+  linking their person-level VIDs;
 - an imperfect VID demographic model over 18 age × gender × geography cells;
 - proportional, fixed, and contextual demographic adjustment methods;
 - the pair-aware fixed-plus-log calibration family;
@@ -29,14 +31,14 @@ only by the test harness so accuracy can be measured.
 
 `VALIDATION.md` documents the original measurement-layer calibration and
 stored-result reconciliation experiment. The two notebooks evaluate four
-configurations produced by two independent choices: whether to add a
-provider-trained demographic-agnostic VID model and whether to apply a frozen
-Reference-ID correction supplied by the provider.
+input combinations produced by two independent choices: whether the provider
+supplies only the demographic VID output or both VID outputs, and whether its
+finalization function may use aggregate Reference-ID overlap.
 
 For a product-grounded walkthrough, open
-`notebooks/meta_campaign_scenarios.ipynb`. It compares existing VID,
-demographic-agnostic VID, existing VID plus Reference-ID correction, and
-demographic-agnostic VID plus Reference-ID correction
+`notebooks/meta_campaign_scenarios.ipynb`. It compares demographic VID only,
+both VID models, demographic VID plus Reference-ID correction, and both VID
+models plus Reference-ID correction
 across plausible Meta campaign types:
 traffic, engagement retargeting, leads, sales, website and customer-list
 retargeting, catalog campaigns, lookalikes, Advantage+ audience expansion, app
@@ -55,7 +57,8 @@ The technical model comparison is in
 `notebooks/calibration_method_benchmark.ipynb`. It explains the distinct
 5,000-person panel; the provider-owned fitting and selection flow; sampling and
 selection error; the impression-level information boundary; separate
-Reference-ID selection for each VID base; demographic allocation; and raw
+Reference-ID selection for the demographic-only and two-VID functions;
+demographic allocation; and raw
 cross-report consistency. Re-run the underlying experiment with:
 
 ```bash
@@ -86,7 +89,7 @@ simulation and notebook dependencies.
 ```
 
 The first command reproduces the original measurement-layer experiment. The
-second reproduces the four-configuration provider-package and
+second reproduces the four-input-combination provider package and
 demographic-allocation comparison.
 The full profiles take longer because they use more campaigns, users, report
 shapes, and stress cases. The original experiment writes:
@@ -109,11 +112,14 @@ provider-to-measurement instructions in `provider_packages.json`, and accuracy c
 The original calibration experiment fits on large, broadly targeted campaigns.
 The provider experiment trains on repeated 5,000-person panel draws containing
 all tested campaign objectives and audience strategies. Separate campaigns are
-used to train the email-first demographic-agnostic model, fit Reference-ID response
-candidates, select corrections and the complete provider recommendation, and
-evaluate the frozen choice. It tests both sampling noise and panel-selection
-bias. In both experiments, entire campaigns are assigned to fitting, holdout,
-or independent evaluation splits.
+used to train the email-first demographic-agnostic model, learn the aggregate
+two-VID combiner, fit Reference-ID response candidates, select corrections and
+the complete provider recommendation, and evaluate the frozen choice. The
+agnostic-only output is retained as a diagnostic, while the deployment
+comparison asks whether making both VID outputs available improves the final
+provider function. It tests both sampling noise and panel-selection bias. In
+both experiments, entire campaigns are assigned to fitting, holdout, or
+independent evaluation splits.
 Stress and evaluation campaigns include:
 
 - a small non-reach campaign compared with larger reach campaigns;

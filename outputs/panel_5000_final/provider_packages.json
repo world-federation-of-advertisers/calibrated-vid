@@ -2,11 +2,11 @@
   {
     "panel_design": "representative",
     "draw": 0,
-    "selected_configuration": "existing_plus_selected_rid",
+    "selected_configuration": "two_vid_plus_selected_rid",
     "vid_models": {
       "existing": {
         "name": "existing_demographic_ready_vid",
-        "role": "base total and demographic distribution"
+        "role": "demographic output plus candidate total and overlap inputs"
       },
       "demographic_agnostic": {
         "name": "email_first_demographic_agnostic_vid",
@@ -89,8 +89,103 @@
         ]
       }
     },
-    "reference_id_instructions": {
-      "existing_vid_base": {
+    "selected_total_reach_function": {
+      "name": "two_vid_plus_selected_rid",
+      "vid_inputs": [
+        "demographic_vid",
+        "demographic_agnostic_vid"
+      ],
+      "uses_reference_id": true,
+      "uses_person_level_crosswalk": false,
+      "demographic_agnostic_vid": {
+        "name": "email_first_demographic_agnostic_vid",
+        "model_type": "impression_level_vid_labeler_surrogate",
+        "identity_inputs": [
+          "optional_normalized_email",
+          "optional_edp_proprietary_id"
+        ],
+        "optional_context": [
+          "campaign_objective",
+          "audience_strategy",
+          "co_viewing_or_other_context"
+        ],
+        "uses_reference_id_calibration_input": false,
+        "n_edps": 10,
+        "parameter_count": 61,
+        "ridge_penalty": 2.0,
+        "coefficients": [
+          -0.9220745338737704,
+          -0.44647695813890637,
+          -0.2675669865780097,
+          0.030456113770031573,
+          0.030365402560566634,
+          0.2016521244369034,
+          0.09386083796259692,
+          0.3320894407968988,
+          0.18993248995374157,
+          -0.5076555444983624,
+          -0.3012427484000471,
+          -0.3832598994479355,
+          0.1811200371068068,
+          -0.006566421609591644,
+          0.04510955564190047,
+          0.1939872229390756,
+          0.385987322205808,
+          -0.6255419144615126,
+          -0.3639598917797151,
+          -0.16392151722570314,
+          0.14715149582401854,
+          -0.08950067397395696,
+          0.11335732511444313,
+          0.10156158699940449,
+          -0.33965035102770536,
+          -0.1665387514548267,
+          -0.1413942957847148,
+          0.1875954546734568,
+          0.049767254219580136,
+          0.20723326023456967,
+          -0.30525201954634373,
+          -0.12497097399205248,
+          -0.08560697258332722,
+          0.13596186040682026,
+          0.06516614603193505,
+          -0.20467752363581926,
+          -0.14853510785440383,
+          -0.07838459558588978,
+          0.25820414929595703,
+          -0.2782533300298462,
+          -0.10544752510075636,
+          -0.05371084485450367,
+          -0.1622943602055849,
+          -0.08015125545673304,
+          -0.15399437638823404,
+          -0.019861813986022422,
+          -1.2768953295271026,
+          -0.009842243964604161,
+          -0.1861189503054863,
+          0.20761227860885245,
+          -0.01986181398602256,
+          0.16379781693968848,
+          -0.009842243964603925,
+          -0.18611895030548667,
+          -0.111539077411122,
+          0.33902484623850304,
+          0.9277968972608241,
+          -0.4204612633788233,
+          -0.10752880523160685,
+          -0.053400596966159924,
+          0.20761227860885278
+        ]
+      },
+      "vid_output_combiner": {
+        "name": "two_vid_aggregate_combiner",
+        "model_type": "aggregate_pair_intersection_blend",
+        "agnostic_weight": 0.8345519103083145,
+        "demographic_vid_weight": 0.16544808969168545,
+        "uses_person_level_crosswalk": false,
+        "parameter_count": 1
+      },
+      "reference_id_instruction": {
         "mode": "active_reference_id_correction",
         "model": {
           "name": "pair_aware_fixed",
@@ -173,11 +268,11 @@
           "pair_ridge": 1e-06,
           "evidence_half_saturation": 20.0
         }
-      },
-      "demographic_agnostic_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
       }
+    },
+    "validated_candidate_choices": {
+      "demographic_vid_plus_reference_id": "existing_plus_fixed",
+      "two_vid_plus_reference_id": "two_vid_plus_fixed"
     },
     "demographic_adjustment": {
       "name": "contextual_panel_demographic_adjustment",
@@ -187,11 +282,11 @@
   {
     "panel_design": "representative",
     "draw": 1,
-    "selected_configuration": "existing_plus_selected_rid",
+    "selected_configuration": "two_vid_plus_selected_rid",
     "vid_models": {
       "existing": {
         "name": "existing_demographic_ready_vid",
-        "role": "base total and demographic distribution"
+        "role": "demographic output plus candidate total and overlap inputs"
       },
       "demographic_agnostic": {
         "name": "email_first_demographic_agnostic_vid",
@@ -274,70 +369,166 @@
         ]
       }
     },
-    "reference_id_instructions": {
-      "existing_vid_base": {
+    "selected_total_reach_function": {
+      "name": "two_vid_plus_selected_rid",
+      "vid_inputs": [
+        "demographic_vid",
+        "demographic_agnostic_vid"
+      ],
+      "uses_reference_id": true,
+      "uses_person_level_crosswalk": false,
+      "demographic_agnostic_vid": {
+        "name": "email_first_demographic_agnostic_vid",
+        "model_type": "impression_level_vid_labeler_surrogate",
+        "identity_inputs": [
+          "optional_normalized_email",
+          "optional_edp_proprietary_id"
+        ],
+        "optional_context": [
+          "campaign_objective",
+          "audience_strategy",
+          "co_viewing_or_other_context"
+        ],
+        "uses_reference_id_calibration_input": false,
+        "n_edps": 10,
+        "parameter_count": 61,
+        "ridge_penalty": 2.0,
+        "coefficients": [
+          -0.8984505466497934,
+          -0.47991090698858946,
+          -0.308846541802136,
+          0.019005577928083384,
+          -0.07790943171783543,
+          0.028882719935973467,
+          0.09622546682069621,
+          0.372220658953486,
+          0.20429974896332206,
+          -0.5586781206223145,
+          -0.35651184021709803,
+          -0.46353885730400907,
+          0.16224709542747692,
+          -0.03474494307854359,
+          0.08988715781804604,
+          0.18994642667701486,
+          0.3827396533430573,
+          -0.6367137196422888,
+          -0.32313980947066356,
+          -0.1509357890466977,
+          0.17098071830530653,
+          -0.04943429037583569,
+          0.13044602603420247,
+          0.11869357762032817,
+          -0.3351627796748575,
+          -0.17430111469800855,
+          -0.19382071006411833,
+          0.20244311100556792,
+          0.017527079557849046,
+          0.19659461153987662,
+          -0.25905096933956184,
+          -0.13423959755559645,
+          -0.05301695436900527,
+          0.13083831904368567,
+          0.07762502287806142,
+          -0.22400186794005655,
+          -0.13485982513795725,
+          -0.09330489980865465,
+          0.1445902105767653,
+          -0.2685686024869686,
+          -0.11799340448502621,
+          -0.035275202958660545,
+          -0.15735510709251413,
+          -0.07136869396338345,
+          -0.1306112871146225,
+          -0.019521383546820273,
+          -1.2595870125100153,
+          -0.01929193120660283,
+          -0.1530542581586858,
+          0.2283733620631296,
+          -0.019521383546820897,
+          0.16222981372779532,
+          -0.019291931206602844,
+          -0.15305425815868548,
+          -0.11900471718391593,
+          0.31122075676717065,
+          0.8520655624943153,
+          -0.45624418991640553,
+          -0.11713305103942487,
+          -0.04513366399794291,
+          0.22837336206312933
+        ]
+      },
+      "vid_output_combiner": {
+        "name": "two_vid_aggregate_combiner",
+        "model_type": "aggregate_pair_intersection_blend",
+        "agnostic_weight": 0.8589995436698391,
+        "demographic_vid_weight": 0.1410004563301609,
+        "uses_person_level_crosswalk": false,
+        "parameter_count": 1
+      },
+      "reference_id_instruction": {
         "mode": "active_reference_id_correction",
         "model": {
-          "name": "pair_aware_fixed",
+          "name": "pair_aware_fixed_plus_shared_log",
           "family": "pair_aware_fixed_plus_log",
           "n_edps": 10,
-          "slope_mode": "none",
-          "parameter_count": 53,
+          "slope_mode": "shared",
+          "parameter_count": 54,
           "ridge_penalty": 0.35,
           "coefficients": [
-            -1.9390969264126439,
-            -2.69309738798854,
-            -3.2194841424364378,
-            -3.5200272174497913,
-            -3.5536979558917126,
-            -3.41791452852271,
-            -3.3984505476319873,
-            -3.551780044365665,
-            -3.6681258620164408,
-            1.994609791929406,
-            1.628999462928803,
-            1.327588194387124,
-            1.1476089919344572,
-            0.7620984974591196,
-            0.5401699670919866,
-            0.0864834487427576,
-            -0.317347456630456,
-            -0.9050644064294254,
-            1.4594088847552817,
-            1.189494169811871,
-            1.071433199798073,
-            0.5564595925053397,
-            0.471553871175296,
-            -0.01625934051417391,
-            -0.3852495560333812,
-            -0.9258468175114002,
-            1.139137186986611,
-            0.9221165272122644,
-            0.5401949445495187,
-            0.3363709119180953,
-            -0.06730072179016933,
-            -0.2522510230621502,
-            -0.9576598745577978,
-            0.6250829887467733,
-            0.2861867719533447,
-            0.10158235860717169,
-            -0.2279767648330545,
-            -0.4830370563241553,
-            -0.9415473393762741,
-            0.33203431419839036,
-            0.038435482213169836,
-            -0.237186367573474,
-            -0.8356938080604996,
-            -1.1043250138225347,
-            -0.19360864446576986,
-            -0.35548275556754616,
-            -0.7606284405098742,
-            -1.3135390638731388,
-            -0.2626686129588598,
-            -0.9096762241696825,
-            -1.0881429914854084,
-            -0.9310542770190136,
-            -1.0098212518772494
+            -2.3611457076612314,
+            -3.114459956749224,
+            -3.6472618009808855,
+            -3.961486072199005,
+            -4.027216547367477,
+            -3.9443441518116296,
+            -3.9750692755908044,
+            -4.150898963151523,
+            -4.26570129238687,
+            2.055203646959177,
+            1.681209730909637,
+            1.3681256840959617,
+            1.16637101152749,
+            0.7997024988543773,
+            0.5653371966327656,
+            0.09667400696234674,
+            -0.307212225441859,
+            -0.8857651895650023,
+            1.4990458466458296,
+            1.213561091325935,
+            1.1027121963365156,
+            0.5237237823064727,
+            0.47594279014543756,
+            -0.027767169602886832,
+            -0.38065624980669127,
+            -0.9892026342337141,
+            1.1503790981044575,
+            0.9475363013821316,
+            0.5551191938893597,
+            0.28553028983105344,
+            -0.09285782305441703,
+            -0.2675885034903568,
+            -0.9678424970525903,
+            0.6366509868256319,
+            0.29073159215161065,
+            0.08219047244938865,
+            -0.3100386760037942,
+            -0.5129304170813345,
+            -0.9598291991995997,
+            0.35017487085919474,
+            0.04176517917030287,
+            -0.24504635104334793,
+            -0.8276330832468207,
+            -1.0784100251949236,
+            -0.20256076740404572,
+            -0.3771548305334324,
+            -0.761148975202617,
+            -1.3900264334018084,
+            -0.31372856705810115,
+            -0.9290242536689436,
+            -1.0832913489319582,
+            -0.9447160912035444,
+            -0.9821531135168682,
+            -0.1920056382055927
           ]
         },
         "runtime_inputs": [
@@ -358,11 +549,11 @@
           "pair_ridge": 1e-06,
           "evidence_half_saturation": 20.0
         }
-      },
-      "demographic_agnostic_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
       }
+    },
+    "validated_candidate_choices": {
+      "demographic_vid_plus_reference_id": "existing_plus_fixed",
+      "two_vid_plus_reference_id": "two_vid_plus_fixed_log"
     },
     "demographic_adjustment": {
       "name": "contextual_panel_demographic_adjustment",
@@ -372,11 +563,11 @@
   {
     "panel_design": "representative",
     "draw": 2,
-    "selected_configuration": "agnostic_plus_selected_rid",
+    "selected_configuration": "two_vid_plus_selected_rid",
     "vid_models": {
       "existing": {
         "name": "existing_demographic_ready_vid",
-        "role": "base total and demographic distribution"
+        "role": "demographic output plus candidate total and overlap inputs"
       },
       "demographic_agnostic": {
         "name": "email_first_demographic_agnostic_vid",
@@ -459,92 +650,103 @@
         ]
       }
     },
-    "reference_id_instructions": {
-      "existing_vid_base": {
-        "mode": "active_reference_id_correction",
-        "model": {
-          "name": "pair_aware_fixed",
-          "family": "pair_aware_fixed_plus_log",
-          "n_edps": 10,
-          "slope_mode": "none",
-          "parameter_count": 53,
-          "ridge_penalty": 0.35,
-          "coefficients": [
-            -1.9334153786351844,
-            -2.682105220750071,
-            -3.1861761413136946,
-            -3.470480159825493,
-            -3.5532213156666237,
-            -3.481740696667934,
-            -3.416090896674226,
-            -3.306006795238502,
-            -8.43769498715119e-15,
-            1.9769158111876126,
-            1.5872855805549813,
-            1.3208940309554498,
-            1.1377019941258601,
-            0.8331989421292669,
-            0.5879261531795148,
-            0.14381441804977474,
-            -0.27679778070066785,
-            -0.8515064045376755,
-            1.48886083777845,
-            1.124755645195362,
-            1.0125043816985362,
-            0.6318881725290064,
-            0.35079251304758796,
-            0.002917824027454108,
-            -0.40905940591937284,
-            -1.0640465921274729,
-            1.0465676890499698,
-            0.8349598946262904,
-            0.6569177985214186,
-            0.33449267659666004,
-            -0.040154039006336184,
-            -0.36157783476448313,
-            -0.8422083996439164,
-            0.5601189832839717,
-            0.38968873551924543,
-            0.03644804064601481,
-            -0.1320600667218872,
-            -0.6197984358326211,
-            -0.8883264371538107,
-            0.3847928370698582,
-            0.08815523101444347,
-            -0.18069990244482748,
-            -0.8888731408336232,
-            -1.1175593751671429,
-            -0.11401753224481154,
-            -0.329790227606587,
-            -0.9271583610795573,
-            -1.301771655629255,
-            -0.3092552939636326,
-            -0.6134895463861865,
-            -1.1001243607027948,
-            -0.8649221534093143,
-            -1.1193779254357368
-          ]
-        },
-        "runtime_inputs": [
-          "selected_base_vid_marginal_reaches",
-          "selected_base_vid_subset_intersections",
-          "reference_id_subset_intersections",
-          "reference_id_collision_floor",
-          "population_size"
+    "selected_total_reach_function": {
+      "name": "two_vid_plus_selected_rid",
+      "vid_inputs": [
+        "demographic_vid",
+        "demographic_agnostic_vid"
+      ],
+      "uses_reference_id": true,
+      "uses_person_level_crosswalk": false,
+      "demographic_agnostic_vid": {
+        "name": "email_first_demographic_agnostic_vid",
+        "model_type": "impression_level_vid_labeler_surrogate",
+        "identity_inputs": [
+          "optional_normalized_email",
+          "optional_edp_proprietary_id"
         ],
-        "steps": [
-          "subtract the approved collision floor from each Reference-ID intersection",
-          "apply the frozen capture-rate model to the matching EDP subset",
-          "decode one nonnegative audience for the requested report",
-          "return bounded reach plus diagnostics"
+        "optional_context": [
+          "campaign_objective",
+          "audience_strategy",
+          "co_viewing_or_other_context"
         ],
-        "decoder": {
-          "family": "pairwise_maximum_entropy",
-          "pair_ridge": 1e-06,
-          "evidence_half_saturation": 20.0
-        }
+        "uses_reference_id_calibration_input": false,
+        "n_edps": 10,
+        "parameter_count": 61,
+        "ridge_penalty": 2.0,
+        "coefficients": [
+          -0.9318575064413611,
+          -0.4753921293276655,
+          -0.3139519073694996,
+          -0.013302243910226524,
+          0.024876535288498258,
+          0.039961666279277774,
+          0.11731789993346164,
+          0.3812651957369381,
+          0.14925427664976743,
+          -0.5187233981907496,
+          -0.40371981683106756,
+          -0.4424409861955345,
+          0.15791237686866091,
+          -0.03413280769489613,
+          0.06856778508188358,
+          0.21005213268875678,
+          0.3851169402411738,
+          -0.5910518918730655,
+          -0.34446169981422553,
+          -0.13251058210348365,
+          0.14809835944936395,
+          -0.045898028842571825,
+          0.03288593813029155,
+          0.10141861387310716,
+          -0.29332978493946926,
+          -0.15398630592688542,
+          -0.1649972368008379,
+          0.19810429342587668,
+          0.05463357949158955,
+          0.18944917204904277,
+          -0.2908945828558195,
+          -0.12327053007075986,
+          -0.021015203640548333,
+          0.12343786244747032,
+          0.04570665692777315,
+          -0.22754695666195515,
+          -0.12448765307361007,
+          -0.0773120251277679,
+          0.14098630704326082,
+          -0.2605179497601649,
+          -0.0980134535673811,
+          -0.027681761689864193,
+          -0.15009832684632685,
+          -0.08857390635903058,
+          -0.14246403372936672,
+          -0.022296840994230183,
+          -1.2760374505024907,
+          -0.0076778561476875395,
+          -0.13727496948250573,
+          0.23456220909248976,
+          -0.022296840994230294,
+          0.17110396930567728,
+          -0.007677856147687442,
+          -0.13727496948250553,
+          -0.12066148931056117,
+          0.30663636011719875,
+          0.8602753212356816,
+          -0.4412093401756715,
+          -0.12169430917566668,
+          -0.05913905826414754,
+          0.23456220909248945
+        ]
       },
-      "demographic_agnostic_vid_base": {
+      "vid_output_combiner": {
+        "name": "two_vid_aggregate_combiner",
+        "model_type": "aggregate_pair_intersection_blend",
+        "agnostic_weight": 0.8517483853863137,
+        "demographic_vid_weight": 0.1482516146136863,
+        "uses_person_level_crosswalk": false,
+        "parameter_count": 1
+      },
+      "reference_id_instruction": {
         "mode": "active_reference_id_correction",
         "model": {
           "name": "pair_aware_fixed_plus_shared_log",
@@ -630,6 +832,10 @@
         }
       }
     },
+    "validated_candidate_choices": {
+      "demographic_vid_plus_reference_id": "existing_plus_fixed",
+      "two_vid_plus_reference_id": "two_vid_plus_fixed_log"
+    },
     "demographic_adjustment": {
       "name": "contextual_panel_demographic_adjustment",
       "instruction": "Adjust the demographic VID distribution to the selected final total; use proportional scaling if the contextual adjustment is not validated."
@@ -638,11 +844,11 @@
   {
     "panel_design": "representative",
     "draw": 3,
-    "selected_configuration": "existing_plus_selected_rid",
+    "selected_configuration": "two_vid_plus_selected_rid",
     "vid_models": {
       "existing": {
         "name": "existing_demographic_ready_vid",
-        "role": "base total and demographic distribution"
+        "role": "demographic output plus candidate total and overlap inputs"
       },
       "demographic_agnostic": {
         "name": "email_first_demographic_agnostic_vid",
@@ -725,70 +931,166 @@
         ]
       }
     },
-    "reference_id_instructions": {
-      "existing_vid_base": {
+    "selected_total_reach_function": {
+      "name": "two_vid_plus_selected_rid",
+      "vid_inputs": [
+        "demographic_vid",
+        "demographic_agnostic_vid"
+      ],
+      "uses_reference_id": true,
+      "uses_person_level_crosswalk": false,
+      "demographic_agnostic_vid": {
+        "name": "email_first_demographic_agnostic_vid",
+        "model_type": "impression_level_vid_labeler_surrogate",
+        "identity_inputs": [
+          "optional_normalized_email",
+          "optional_edp_proprietary_id"
+        ],
+        "optional_context": [
+          "campaign_objective",
+          "audience_strategy",
+          "co_viewing_or_other_context"
+        ],
+        "uses_reference_id_calibration_input": false,
+        "n_edps": 10,
+        "parameter_count": 61,
+        "ridge_penalty": 2.0,
+        "coefficients": [
+          -0.9028534649097564,
+          -0.47060050381107965,
+          -0.3233775196939386,
+          0.04472482699182031,
+          0.06559752934393324,
+          0.034031903967707056,
+          0.2466385936887222,
+          0.3563694840192395,
+          0.20067952860408694,
+          -0.5161596317074177,
+          -0.3806886945306701,
+          -0.4563573476041336,
+          0.1644914166432273,
+          -0.028992274867486123,
+          0.05306084202097951,
+          0.18439389125166,
+          0.3888757936757765,
+          -0.6327200935872948,
+          -0.3272090641980271,
+          -0.11969107481837027,
+          0.1927847008096016,
+          -0.04670836257799474,
+          0.11342158243240864,
+          0.13722382279904122,
+          -0.3323643102245317,
+          -0.15206834445045753,
+          -0.1964442202429473,
+          0.1736553008277013,
+          0.05765809970455696,
+          0.19699011665869393,
+          -0.2531092702220352,
+          -0.15870414660787657,
+          -0.047157044794558824,
+          0.2500685566861728,
+          0.12931990052197223,
+          -0.22367198134594873,
+          -0.11564252026946176,
+          -0.05881897958855761,
+          0.2571261055289028,
+          -0.2841831135110106,
+          -0.1047855858420419,
+          -0.04339592605672582,
+          -0.12104338255234355,
+          -0.12663644698720877,
+          -0.1381271752909079,
+          -0.028271867894653163,
+          -1.2570188690054367,
+          -0.01023380944505936,
+          -0.15669037227381466,
+          0.22711773793148998,
+          -0.028271867894653246,
+          0.1487225941543996,
+          -0.010233809445059305,
+          -0.15669037227381466,
+          -0.11142661178186522,
+          0.3292474052576525,
+          0.9630774486025142,
+          -0.43720169102965256,
+          -0.11854685353654237,
+          -0.06293221364794833,
+          0.22711773793149068
+        ]
+      },
+      "vid_output_combiner": {
+        "name": "two_vid_aggregate_combiner",
+        "model_type": "aggregate_pair_intersection_blend",
+        "agnostic_weight": 0.8441755263688727,
+        "demographic_vid_weight": 0.15582447363112728,
+        "uses_person_level_crosswalk": false,
+        "parameter_count": 1
+      },
+      "reference_id_instruction": {
         "mode": "active_reference_id_correction",
         "model": {
-          "name": "pair_aware_fixed",
+          "name": "pair_aware_fixed_plus_shared_log",
           "family": "pair_aware_fixed_plus_log",
           "n_edps": 10,
-          "slope_mode": "none",
-          "parameter_count": 53,
+          "slope_mode": "shared",
+          "parameter_count": 54,
           "ridge_penalty": 0.35,
           "coefficients": [
-            -1.9311426345305054,
-            -2.688150143644671,
-            -3.1847495130395718,
-            -3.4577872940604673,
-            -3.4826086160119734,
-            -3.3426246556964507,
-            -3.2583653061658544,
-            -3.355036179689,
-            -3.5652160623880813,
-            1.9436162352814503,
-            1.6397338873210487,
-            1.3157676751773586,
-            0.9950799960516151,
-            0.7142006903682654,
-            0.4919823114325824,
-            0.10963285033449577,
-            -0.2429953563380624,
-            -0.7772887016123655,
-            1.457277557819661,
-            1.1104278187478986,
-            0.9190588947801444,
-            0.5952574184160868,
-            0.4091057569162885,
-            -0.08013067670716778,
-            -0.24939356245424293,
-            -0.9001185624573403,
-            1.1026397840032696,
-            0.8267774954318272,
-            0.5746812500036127,
-            0.3030413353516668,
-            0.017948490283812735,
-            -0.227229235160622,
-            -0.6948561368446997,
-            0.55430619200166,
-            0.23777421696216483,
-            0.04368625952349847,
-            -0.18906124541734126,
-            -0.5445075107263647,
-            -0.764245977124002,
-            0.296603484652914,
-            -0.02170048164129934,
-            -0.23280310673187432,
-            -0.9022684983121803,
-            -1.0708297125431945,
-            -0.3344287788731489,
-            -0.3468161447916378,
-            -0.7850479874607628,
-            -1.3862639097352736,
-            -0.5652764933723506,
-            -0.7807581212722599,
-            -0.7509259446410299,
-            -0.7310458288365349,
-            -1.0168559698552992
+            -2.3312573927874363,
+            -3.0876768211240657,
+            -3.5930905997160263,
+            -3.883544333804543,
+            -3.9417100369328555,
+            -3.852216528072155,
+            -3.8118043811849085,
+            -3.9271041205780977,
+            -4.137276724322556,
+            2.000083450179746,
+            1.6920323036504907,
+            1.3534802897026288,
+            1.007868450892335,
+            0.7478689698948765,
+            0.5165476698360062,
+            0.11494736161392903,
+            -0.23977277220157356,
+            -0.7575221959446367,
+            1.4944663147462522,
+            1.1320968843477766,
+            0.9478085380715696,
+            0.5583286334900619,
+            0.4206379096707857,
+            -0.09066760176582325,
+            -0.2472076483078608,
+            -0.9660037010709243,
+            1.1142486855414075,
+            0.8530832955447392,
+            0.5872997398038647,
+            0.2548013836154304,
+            -0.005505626676667874,
+            -0.23610478748215236,
+            -0.6866681552249745,
+            0.5621023715885181,
+            0.2359881995120819,
+            0.02597010198354477,
+            -0.27084892378990544,
+            -0.5799512908226905,
+            -0.7861977845501205,
+            0.30916364732226254,
+            -0.011103286368675275,
+            -0.2437883780656676,
+            -0.9127624829429632,
+            -1.0571587221819452,
+            -0.3433541795078349,
+            -0.366192850168215,
+            -0.8003142091157496,
+            -1.4651340738319472,
+            -0.6142774881226811,
+            -0.7947287260098628,
+            -0.7479980314680528,
+            -0.7556672848332998,
+            -0.9941010162264855,
+            -0.18364371584379102
           ]
         },
         "runtime_inputs": [
@@ -809,11 +1111,11 @@
           "pair_ridge": 1e-06,
           "evidence_half_saturation": 20.0
         }
-      },
-      "demographic_agnostic_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
       }
+    },
+    "validated_candidate_choices": {
+      "demographic_vid_plus_reference_id": "existing_plus_fixed",
+      "two_vid_plus_reference_id": "two_vid_plus_fixed_log"
     },
     "demographic_adjustment": {
       "name": "contextual_panel_demographic_adjustment",
@@ -827,7 +1129,7 @@
     "vid_models": {
       "existing": {
         "name": "existing_demographic_ready_vid",
-        "role": "base total and demographic distribution"
+        "role": "demographic output plus candidate total and overlap inputs"
       },
       "demographic_agnostic": {
         "name": "email_first_demographic_agnostic_vid",
@@ -910,8 +1212,14 @@
         ]
       }
     },
-    "reference_id_instructions": {
-      "existing_vid_base": {
+    "selected_total_reach_function": {
+      "name": "existing_plus_selected_rid",
+      "vid_inputs": [
+        "demographic_vid"
+      ],
+      "uses_reference_id": true,
+      "uses_person_level_crosswalk": false,
+      "reference_id_instruction": {
         "mode": "active_reference_id_correction",
         "model": {
           "name": "pair_aware_fixed",
@@ -994,11 +1302,11 @@
           "pair_ridge": 1e-06,
           "evidence_half_saturation": 20.0
         }
-      },
-      "demographic_agnostic_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
       }
+    },
+    "validated_candidate_choices": {
+      "demographic_vid_plus_reference_id": "existing_plus_fixed",
+      "two_vid_plus_reference_id": "two_vid"
     },
     "demographic_adjustment": {
       "name": "contextual_panel_demographic_adjustment",
@@ -1012,7 +1320,7 @@
     "vid_models": {
       "existing": {
         "name": "existing_demographic_ready_vid",
-        "role": "base total and demographic distribution"
+        "role": "demographic output plus candidate total and overlap inputs"
       },
       "demographic_agnostic": {
         "name": "email_first_demographic_agnostic_vid",
@@ -1095,8 +1403,14 @@
         ]
       }
     },
-    "reference_id_instructions": {
-      "existing_vid_base": {
+    "selected_total_reach_function": {
+      "name": "existing_plus_selected_rid",
+      "vid_inputs": [
+        "demographic_vid"
+      ],
+      "uses_reference_id": true,
+      "uses_person_level_crosswalk": false,
+      "reference_id_instruction": {
         "mode": "active_reference_id_correction",
         "model": {
           "name": "pair_aware_fixed",
@@ -1179,11 +1493,11 @@
           "pair_ridge": 1e-06,
           "evidence_half_saturation": 20.0
         }
-      },
-      "demographic_agnostic_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
       }
+    },
+    "validated_candidate_choices": {
+      "demographic_vid_plus_reference_id": "existing_plus_fixed",
+      "two_vid_plus_reference_id": "two_vid"
     },
     "demographic_adjustment": {
       "name": "contextual_panel_demographic_adjustment",
@@ -1197,7 +1511,7 @@
     "vid_models": {
       "existing": {
         "name": "existing_demographic_ready_vid",
-        "role": "base total and demographic distribution"
+        "role": "demographic output plus candidate total and overlap inputs"
       },
       "demographic_agnostic": {
         "name": "email_first_demographic_agnostic_vid",
@@ -1280,8 +1594,14 @@
         ]
       }
     },
-    "reference_id_instructions": {
-      "existing_vid_base": {
+    "selected_total_reach_function": {
+      "name": "existing_plus_selected_rid",
+      "vid_inputs": [
+        "demographic_vid"
+      ],
+      "uses_reference_id": true,
+      "uses_person_level_crosswalk": false,
+      "reference_id_instruction": {
         "mode": "active_reference_id_correction",
         "model": {
           "name": "pair_aware_fixed",
@@ -1364,11 +1684,11 @@
           "pair_ridge": 1e-06,
           "evidence_half_saturation": 20.0
         }
-      },
-      "demographic_agnostic_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
       }
+    },
+    "validated_candidate_choices": {
+      "demographic_vid_plus_reference_id": "existing_plus_fixed",
+      "two_vid_plus_reference_id": "two_vid"
     },
     "demographic_adjustment": {
       "name": "contextual_panel_demographic_adjustment",
@@ -1382,7 +1702,7 @@
     "vid_models": {
       "existing": {
         "name": "existing_demographic_ready_vid",
-        "role": "base total and demographic distribution"
+        "role": "demographic output plus candidate total and overlap inputs"
       },
       "demographic_agnostic": {
         "name": "email_first_demographic_agnostic_vid",
@@ -1465,8 +1785,14 @@
         ]
       }
     },
-    "reference_id_instructions": {
-      "existing_vid_base": {
+    "selected_total_reach_function": {
+      "name": "existing_plus_selected_rid",
+      "vid_inputs": [
+        "demographic_vid"
+      ],
+      "uses_reference_id": true,
+      "uses_person_level_crosswalk": false,
+      "reference_id_instruction": {
         "mode": "active_reference_id_correction",
         "model": {
           "name": "pair_aware_fixed",
@@ -1549,11 +1875,11 @@
           "pair_ridge": 1e-06,
           "evidence_half_saturation": 20.0
         }
-      },
-      "demographic_agnostic_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
       }
+    },
+    "validated_candidate_choices": {
+      "demographic_vid_plus_reference_id": "existing_plus_fixed",
+      "two_vid_plus_reference_id": "two_vid_plus_mixture"
     },
     "demographic_adjustment": {
       "name": "contextual_panel_demographic_adjustment",
@@ -1567,7 +1893,7 @@
     "vid_models": {
       "existing": {
         "name": "existing_demographic_ready_vid",
-        "role": "base total and demographic distribution"
+        "role": "demographic output plus candidate total and overlap inputs"
       },
       "demographic_agnostic": {
         "name": "email_first_demographic_agnostic_vid",
@@ -1650,8 +1976,14 @@
         ]
       }
     },
-    "reference_id_instructions": {
-      "existing_vid_base": {
+    "selected_total_reach_function": {
+      "name": "existing_plus_selected_rid",
+      "vid_inputs": [
+        "demographic_vid"
+      ],
+      "uses_reference_id": true,
+      "uses_person_level_crosswalk": false,
+      "reference_id_instruction": {
         "mode": "active_reference_id_correction",
         "model": {
           "name": "pair_aware_fixed",
@@ -1734,11 +2066,11 @@
           "pair_ridge": 1e-06,
           "evidence_half_saturation": 20.0
         }
-      },
-      "demographic_agnostic_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
       }
+    },
+    "validated_candidate_choices": {
+      "demographic_vid_plus_reference_id": "existing_plus_fixed",
+      "two_vid_plus_reference_id": "two_vid"
     },
     "demographic_adjustment": {
       "name": "contextual_panel_demographic_adjustment",
@@ -1748,11 +2080,11 @@
   {
     "panel_design": "observable_bias_weighted",
     "draw": 1,
-    "selected_configuration": "existing_plus_selected_rid",
+    "selected_configuration": "two_vid_plus_selected_rid",
     "vid_models": {
       "existing": {
         "name": "existing_demographic_ready_vid",
-        "role": "base total and demographic distribution"
+        "role": "demographic output plus candidate total and overlap inputs"
       },
       "demographic_agnostic": {
         "name": "email_first_demographic_agnostic_vid",
@@ -1835,8 +2167,103 @@
         ]
       }
     },
-    "reference_id_instructions": {
-      "existing_vid_base": {
+    "selected_total_reach_function": {
+      "name": "two_vid_plus_selected_rid",
+      "vid_inputs": [
+        "demographic_vid",
+        "demographic_agnostic_vid"
+      ],
+      "uses_reference_id": true,
+      "uses_person_level_crosswalk": false,
+      "demographic_agnostic_vid": {
+        "name": "email_first_demographic_agnostic_vid",
+        "model_type": "impression_level_vid_labeler_surrogate",
+        "identity_inputs": [
+          "optional_normalized_email",
+          "optional_edp_proprietary_id"
+        ],
+        "optional_context": [
+          "campaign_objective",
+          "audience_strategy",
+          "co_viewing_or_other_context"
+        ],
+        "uses_reference_id_calibration_input": false,
+        "n_edps": 10,
+        "parameter_count": 61,
+        "ridge_penalty": 2.0,
+        "coefficients": [
+          -0.83653046340092,
+          -0.46172564743534117,
+          -0.29960927457052167,
+          0.013601961855122843,
+          -0.08527452282476448,
+          0.13644081112657003,
+          0.08091786261072165,
+          0.4465815656632526,
+          0.23447675203580334,
+          -0.46045718058939894,
+          -0.317999557242958,
+          -0.4227814127936798,
+          0.18690292695097666,
+          -0.010832995557509217,
+          0.22157888013503393,
+          0.23312619164532672,
+          0.4267982049010365,
+          -0.6519407048876521,
+          -0.37540522743438315,
+          -0.15059446249356812,
+          0.17467659841678884,
+          -0.10854240432305073,
+          0.11522513863088886,
+          0.1551776190332555,
+          -0.35152965884990167,
+          -0.21132058114428448,
+          -0.16619406813887633,
+          0.18640519881683726,
+          0.017882478166210136,
+          0.23605736552922738,
+          -0.2707741727061718,
+          -0.15027623061357012,
+          -0.03891385803353531,
+          0.20949199250758482,
+          0.15623309890660883,
+          -0.24164004282708146,
+          -0.1364697728677748,
+          -0.05927853204374159,
+          0.2932777574169434,
+          -0.277649112010432,
+          -0.12076694690776829,
+          0.013168708227682902,
+          -0.15727236790722812,
+          -0.12866245462318118,
+          -0.1330434977583385,
+          -0.02654187833981747,
+          -1.278490726049809,
+          -0.019697399569137436,
+          -0.14986197761143888,
+          0.21075186967304885,
+          -0.026541878339817304,
+          0.16118516172552239,
+          -0.01969739956913659,
+          -0.1498619776114392,
+          -0.0927172622602629,
+          0.3174457084487596,
+          1.028505977201836,
+          -0.4343615846410906,
+          -0.11272862242911665,
+          -0.05979691190492534,
+          0.21075186967304932
+        ]
+      },
+      "vid_output_combiner": {
+        "name": "two_vid_aggregate_combiner",
+        "model_type": "aggregate_pair_intersection_blend",
+        "agnostic_weight": 0.8551229706761427,
+        "demographic_vid_weight": 0.14487702932385726,
+        "uses_person_level_crosswalk": false,
+        "parameter_count": 1
+      },
+      "reference_id_instruction": {
         "mode": "active_reference_id_correction",
         "model": {
           "name": "pair_aware_fixed",
@@ -1919,11 +2346,11 @@
           "pair_ridge": 1e-06,
           "evidence_half_saturation": 20.0
         }
-      },
-      "demographic_agnostic_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
       }
+    },
+    "validated_candidate_choices": {
+      "demographic_vid_plus_reference_id": "existing_plus_fixed",
+      "two_vid_plus_reference_id": "two_vid_plus_fixed"
     },
     "demographic_adjustment": {
       "name": "contextual_panel_demographic_adjustment",
@@ -1933,11 +2360,11 @@
   {
     "panel_design": "observable_bias_weighted",
     "draw": 2,
-    "selected_configuration": "existing_plus_selected_rid",
+    "selected_configuration": "two_vid_plus_selected_rid",
     "vid_models": {
       "existing": {
         "name": "existing_demographic_ready_vid",
-        "role": "base total and demographic distribution"
+        "role": "demographic output plus candidate total and overlap inputs"
       },
       "demographic_agnostic": {
         "name": "email_first_demographic_agnostic_vid",
@@ -2020,70 +2447,166 @@
         ]
       }
     },
-    "reference_id_instructions": {
-      "existing_vid_base": {
+    "selected_total_reach_function": {
+      "name": "two_vid_plus_selected_rid",
+      "vid_inputs": [
+        "demographic_vid",
+        "demographic_agnostic_vid"
+      ],
+      "uses_reference_id": true,
+      "uses_person_level_crosswalk": false,
+      "demographic_agnostic_vid": {
+        "name": "email_first_demographic_agnostic_vid",
+        "model_type": "impression_level_vid_labeler_surrogate",
+        "identity_inputs": [
+          "optional_normalized_email",
+          "optional_edp_proprietary_id"
+        ],
+        "optional_context": [
+          "campaign_objective",
+          "audience_strategy",
+          "co_viewing_or_other_context"
+        ],
+        "uses_reference_id_calibration_input": false,
+        "n_edps": 10,
+        "parameter_count": 61,
+        "ridge_penalty": 2.0,
+        "coefficients": [
+          -0.9292024837564986,
+          -0.4553367136359375,
+          -0.28905939484841947,
+          0.017748632047501406,
+          0.07315385256569107,
+          0.06810412872598204,
+          0.29311251252849546,
+          0.35780369836211245,
+          0.1875548695001618,
+          -0.5617534913415112,
+          -0.34620054899323854,
+          -0.4957109187932744,
+          0.1614566081667433,
+          0.009103696120464355,
+          0.0954662259089688,
+          0.10418464682825218,
+          0.35598713245593405,
+          -0.5881281700292251,
+          -0.407041239560573,
+          -0.14844885033071886,
+          0.13865603339243043,
+          0.05351996439096865,
+          0.02657582191112645,
+          0.09074857956509352,
+          -0.43182488894932797,
+          -0.15301547756876221,
+          -0.18802315111715812,
+          0.19495418424061212,
+          -0.05985792931758778,
+          0.16077526844429701,
+          -0.2692983035097789,
+          -0.15644255112541436,
+          -0.04938861232307881,
+          0.12953717641430473,
+          -0.018155685157889623,
+          -0.22125065842747804,
+          -0.10074587456386479,
+          -0.04020622662420152,
+          0.1424130819037771,
+          -0.2555062138951199,
+          -0.11972736532027112,
+          0.06373679969746049,
+          -0.3081956871035477,
+          -0.1604841194350354,
+          -0.13755924938429342,
+          -0.021193811590014572,
+          -1.3217309664143664,
+          -0.017527836350055975,
+          -0.18361941922972824,
+          0.2085596131762627,
+          -0.021193811590014766,
+          0.1813943163637352,
+          -0.017527836350055614,
+          -0.1836194192297284,
+          -0.08776254775081002,
+          0.3056389828437899,
+          0.9503176098564361,
+          -0.513018050633869,
+          -0.10428442155790693,
+          -0.04857333073810074,
+          0.20855961317626323
+        ]
+      },
+      "vid_output_combiner": {
+        "name": "two_vid_aggregate_combiner",
+        "model_type": "aggregate_pair_intersection_blend",
+        "agnostic_weight": 0.8586143477384334,
+        "demographic_vid_weight": 0.14138565226156663,
+        "uses_person_level_crosswalk": false,
+        "parameter_count": 1
+      },
+      "reference_id_instruction": {
         "mode": "active_reference_id_correction",
         "model": {
-          "name": "pair_aware_fixed",
+          "name": "pair_aware_fixed_plus_shared_log",
           "family": "pair_aware_fixed_plus_log",
           "n_edps": 10,
-          "slope_mode": "none",
-          "parameter_count": 53,
+          "slope_mode": "shared",
+          "parameter_count": 54,
           "ridge_penalty": 0.35,
           "coefficients": [
-            -1.9282858519179225,
-            -2.65593022328817,
-            -3.1284418535656533,
-            -3.3829971927449343,
-            -3.4910828202471484,
-            -3.5381390581881904,
-            -3.555551736249633,
-            -3.160567137202584,
-            6.439293542825908e-15,
-            1.9922800089639574,
-            1.6213871233997834,
-            1.4125195676476263,
-            1.1783038196055018,
-            0.7260085066898618,
-            0.6909579392960685,
-            0.061939111607285824,
-            -0.14613728986076957,
-            -0.8078867067741415,
-            1.4577338452900983,
-            1.1245380411873787,
-            1.0101243720500446,
-            0.4482761076409041,
-            0.36511072367464914,
-            -0.1971035943694417,
-            -0.18543424431321842,
-            -1.186859974871071,
-            1.1383989228015918,
-            0.9848243102619463,
-            0.6283504363043577,
-            0.1986794650218372,
-            -0.10459547112012144,
-            -0.05034338610871025,
-            -0.7647078038098304,
-            0.7558265837978813,
-            0.22854632166754096,
-            0.19623494253333362,
-            -0.38699888332508325,
-            -0.16646316283381957,
-            -0.7323433637718794,
-            0.24116514455074645,
-            0.08634614357254167,
-            -0.3645518326088574,
-            -0.5276039986210308,
-            -1.0489951867952327,
-            -0.24851717377047666,
-            -0.6663935123936701,
-            -0.7125048811188328,
-            -1.8812271502410116,
-            -0.40396382212698406,
-            -0.5534859683482714,
-            -0.7595242402033242,
-            -0.8099484124293241,
-            -1.0685549087834756
+            -2.3584532454144154,
+            -3.0837981418092535,
+            -3.5620398903629074,
+            -3.8269210167267946,
+            -3.956639109564481,
+            -4.036448388971965,
+            -4.075184416617849,
+            -3.6335886374519086,
+            8.881784197001252e-16,
+            2.0494399746874574,
+            1.671596230702281,
+            1.4534060644069193,
+            1.1926994403069608,
+            0.760114725704468,
+            0.7129203234808315,
+            0.07221431822547275,
+            -0.14138046451481878,
+            -0.7712331184431993,
+            1.4894858214484723,
+            1.1455823507730605,
+            1.0359377267260714,
+            0.4077718919418678,
+            0.36170418189531905,
+            -0.21676459904396966,
+            -0.1938406751583419,
+            -1.2495714951866388,
+            1.1430984703156652,
+            1.0026158787363526,
+            0.6383200138471894,
+            0.13541136600690556,
+            -0.13579026436645253,
+            -0.06672389037464846,
+            -0.761292584101796,
+            0.7677343670366926,
+            0.2306173045404598,
+            0.16555674832324058,
+            -0.4771186297079451,
+            -0.19129874223225685,
+            -0.7369637723514872,
+            0.2532333812185277,
+            0.08754924822162236,
+            -0.37376335004934236,
+            -0.5453401483117303,
+            -1.0206024119544093,
+            -0.2581782296506768,
+            -0.6963878148355716,
+            -0.7179730865478372,
+            -1.9397400208501279,
+            -0.4684173679863409,
+            -0.5861978926259586,
+            -0.750030619431465,
+            -0.8654236593462823,
+            -1.0029943831852672,
+            -0.19718474078147274
           ]
         },
         "runtime_inputs": [
@@ -2104,11 +2627,11 @@
           "pair_ridge": 1e-06,
           "evidence_half_saturation": 20.0
         }
-      },
-      "demographic_agnostic_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
       }
+    },
+    "validated_candidate_choices": {
+      "demographic_vid_plus_reference_id": "existing_plus_fixed",
+      "two_vid_plus_reference_id": "two_vid_plus_fixed_log"
     },
     "demographic_adjustment": {
       "name": "contextual_panel_demographic_adjustment",
@@ -2122,7 +2645,7 @@
     "vid_models": {
       "existing": {
         "name": "existing_demographic_ready_vid",
-        "role": "base total and demographic distribution"
+        "role": "demographic output plus candidate total and overlap inputs"
       },
       "demographic_agnostic": {
         "name": "email_first_demographic_agnostic_vid",
@@ -2205,8 +2728,14 @@
         ]
       }
     },
-    "reference_id_instructions": {
-      "existing_vid_base": {
+    "selected_total_reach_function": {
+      "name": "existing_plus_selected_rid",
+      "vid_inputs": [
+        "demographic_vid"
+      ],
+      "uses_reference_id": true,
+      "uses_person_level_crosswalk": false,
+      "reference_id_instruction": {
         "mode": "active_reference_id_correction",
         "model": {
           "name": "pair_aware_fixed",
@@ -2289,11 +2818,11 @@
           "pair_ridge": 1e-06,
           "evidence_half_saturation": 20.0
         }
-      },
-      "demographic_agnostic_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
       }
+    },
+    "validated_candidate_choices": {
+      "demographic_vid_plus_reference_id": "existing_plus_fixed",
+      "two_vid_plus_reference_id": "two_vid"
     },
     "demographic_adjustment": {
       "name": "contextual_panel_demographic_adjustment",
@@ -2307,7 +2836,7 @@
     "vid_models": {
       "existing": {
         "name": "existing_demographic_ready_vid",
-        "role": "base total and demographic distribution"
+        "role": "demographic output plus candidate total and overlap inputs"
       },
       "demographic_agnostic": {
         "name": "email_first_demographic_agnostic_vid",
@@ -2390,15 +2919,21 @@
         ]
       }
     },
-    "reference_id_instructions": {
-      "existing_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
-      },
-      "demographic_agnostic_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
+    "selected_total_reach_function": {
+      "name": "existing_vid",
+      "vid_inputs": [
+        "demographic_vid"
+      ],
+      "uses_reference_id": false,
+      "uses_person_level_crosswalk": false,
+      "reference_id_instruction": {
+        "mode": "disabled",
+        "description": "Use the provider's VID-only finalization function."
       }
+    },
+    "validated_candidate_choices": {
+      "demographic_vid_plus_reference_id": "existing_vid",
+      "two_vid_plus_reference_id": "two_vid"
     },
     "demographic_adjustment": {
       "name": "contextual_panel_demographic_adjustment",
@@ -2412,7 +2947,7 @@
     "vid_models": {
       "existing": {
         "name": "existing_demographic_ready_vid",
-        "role": "base total and demographic distribution"
+        "role": "demographic output plus candidate total and overlap inputs"
       },
       "demographic_agnostic": {
         "name": "email_first_demographic_agnostic_vid",
@@ -2495,15 +3030,21 @@
         ]
       }
     },
-    "reference_id_instructions": {
-      "existing_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
-      },
-      "demographic_agnostic_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
+    "selected_total_reach_function": {
+      "name": "existing_vid",
+      "vid_inputs": [
+        "demographic_vid"
+      ],
+      "uses_reference_id": false,
+      "uses_person_level_crosswalk": false,
+      "reference_id_instruction": {
+        "mode": "disabled",
+        "description": "Use the provider's VID-only finalization function."
       }
+    },
+    "validated_candidate_choices": {
+      "demographic_vid_plus_reference_id": "existing_vid",
+      "two_vid_plus_reference_id": "two_vid"
     },
     "demographic_adjustment": {
       "name": "contextual_panel_demographic_adjustment",
@@ -2517,7 +3058,7 @@
     "vid_models": {
       "existing": {
         "name": "existing_demographic_ready_vid",
-        "role": "base total and demographic distribution"
+        "role": "demographic output plus candidate total and overlap inputs"
       },
       "demographic_agnostic": {
         "name": "email_first_demographic_agnostic_vid",
@@ -2600,15 +3141,21 @@
         ]
       }
     },
-    "reference_id_instructions": {
-      "existing_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
-      },
-      "demographic_agnostic_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
+    "selected_total_reach_function": {
+      "name": "existing_vid",
+      "vid_inputs": [
+        "demographic_vid"
+      ],
+      "uses_reference_id": false,
+      "uses_person_level_crosswalk": false,
+      "reference_id_instruction": {
+        "mode": "disabled",
+        "description": "Use the provider's VID-only finalization function."
       }
+    },
+    "validated_candidate_choices": {
+      "demographic_vid_plus_reference_id": "existing_vid",
+      "two_vid_plus_reference_id": "two_vid"
     },
     "demographic_adjustment": {
       "name": "contextual_panel_demographic_adjustment",
@@ -2622,7 +3169,7 @@
     "vid_models": {
       "existing": {
         "name": "existing_demographic_ready_vid",
-        "role": "base total and demographic distribution"
+        "role": "demographic output plus candidate total and overlap inputs"
       },
       "demographic_agnostic": {
         "name": "email_first_demographic_agnostic_vid",
@@ -2705,15 +3252,21 @@
         ]
       }
     },
-    "reference_id_instructions": {
-      "existing_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
-      },
-      "demographic_agnostic_vid_base": {
-        "mode": "identity",
-        "description": "Return the selected VID result without Reference-ID correction."
+    "selected_total_reach_function": {
+      "name": "existing_vid",
+      "vid_inputs": [
+        "demographic_vid"
+      ],
+      "uses_reference_id": false,
+      "uses_person_level_crosswalk": false,
+      "reference_id_instruction": {
+        "mode": "disabled",
+        "description": "Use the provider's VID-only finalization function."
       }
+    },
+    "validated_candidate_choices": {
+      "demographic_vid_plus_reference_id": "existing_vid",
+      "two_vid_plus_reference_id": "two_vid"
     },
     "demographic_adjustment": {
       "name": "contextual_panel_demographic_adjustment",
