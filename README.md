@@ -121,8 +121,27 @@ PYTHONPATH=src .venv/bin/python -m reference_calibration.daily_labeling \
   --profile full --output-dir outputs/daily_labeling_final
 PYTHONPATH=src .venv/bin/python -m reference_calibration.venn_information_proof \
   --profile full --output-dir outputs/full_venn_proof_final
+PYTHONPATH=src .venv/bin/python -m reference_calibration.calibrated_venn_labeling \
+  --profile full --candidates panel_fixed_log_pairwise \
+  --evidence-half-saturation 5 \
+  --output-dir outputs/calibrated_venn_pairwise_half5
+PYTHONPATH=src .venv/bin/python -m reference_calibration.temporal_solver_benchmark \
+  --output-dir outputs/temporal_solver_benchmark_union_guard
+PYTHONPATH=src .venv/bin/python -m reference_calibration.online_regularization_sweep \
+  --output-dir outputs/online_regularization_sweep
+PYTHONPATH=src .venv/bin/python -m reference_calibration.online_identity_constraints \
+  --output-dir outputs/online_identity_constraints
 .venv/bin/python notebooks/build_daily_match_labeling_research.py
 ```
+
+The calibrated-Venn run is the realistic end-to-end path: a provider model
+learned from a separate 5,000-person panel converts cumulative VID reaches and
+Reference-ID overlaps into one full Venn target, which is then projected onto
+the states reachable from already-frozen labels. The solver benchmark compares
+the exact integer projection with the faster constructive allocator. The two
+smaller studies quantify sensitivity to evidence regularization and the online
+conflict between future shared-email anchors and previously assigned fallback
+VIDs.
 
 ## What is validated
 
