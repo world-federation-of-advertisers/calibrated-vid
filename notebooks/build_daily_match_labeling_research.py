@@ -70,6 +70,8 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 OUTPUT_DIR = PROJECT_ROOT / "outputs" / "daily_labeling_final"
 VENN_OUTPUT_DIR = PROJECT_ROOT / "outputs" / "full_venn_proof_final"
 CALIBRATED_VENN_OUTPUT_DIR = PROJECT_ROOT / "outputs" / "calibrated_venn_pairwise_half5"
+DIRECT_VENN_OUTPUT_DIR = PROJECT_ROOT / "outputs" / "calibrated_venn_direct_pair_half5"
+ALL_MODELS_OUTPUT_DIR = PROJECT_ROOT / "outputs" / "calibrated_venn_labeling_final"
 SOLVER_OUTPUT_DIR = PROJECT_ROOT / "outputs" / "temporal_solver_benchmark_union_guard"
 IDENTITY_OUTPUT_DIR = PROJECT_ROOT / "outputs" / "online_identity_constraints"
 REGULARIZATION_OUTPUT_DIR = PROJECT_ROOT / "outputs" / "online_regularization_sweep"
@@ -91,6 +93,12 @@ with (VENN_OUTPUT_DIR / "full_venn_metrics.csv").open() as stream:
     venn_metrics = list(csv.DictReader(stream))
 calibrated_venn_summary = json.loads(
     (CALIBRATED_VENN_OUTPUT_DIR / "calibrated_venn_summary.json").read_text()
+)
+direct_venn_summary = json.loads(
+    (DIRECT_VENN_OUTPUT_DIR / "calibrated_venn_summary.json").read_text()
+)
+all_models_summary = json.loads(
+    (ALL_MODELS_OUTPUT_DIR / "calibrated_venn_summary.json").read_text()
 )
 with (CALIBRATED_VENN_OUTPUT_DIR / "calibrated_venn_metrics.csv").open() as stream:
     calibrated_venn_metrics = list(csv.DictReader(stream))
@@ -597,6 +605,7 @@ This uses no true Venn diagram at runtime and does not link a VID to a Reference
 methods = calibrated_venn_summary["methods"]
 chosen = methods["panel_fixed_log_pairwise__recent_creation"]
 existing = methods["existing_vid"]
+direct = direct_venn_summary["methods"]["panel_direct_pairwise__recent_creation"]
 rows = [
     {
         "method": "Existing VID",
@@ -615,6 +624,15 @@ rows = [
         "prefix": f"{chosen['report_error_by_type']['prefix']['mean']:.1%}",
         "interval": f"{chosen['report_error_by_type']['interval']['mean']:.1%}",
         "noncontiguous": f"{chosen['report_error_by_type']['noncontiguous']['mean']:.1%}",
+    },
+    {
+        "method": "Direct-rate pair calibration + reachable Venn labels",
+        "mean": f"{direct['report_error']['mean']:.1%}",
+        "p90": f"{direct['report_error']['p90']:.1%}",
+        "worst": f"{direct['report_error']['max']:.1%}",
+        "prefix": f"{direct['report_error_by_type']['prefix']['mean']:.1%}",
+        "interval": f"{direct['report_error_by_type']['interval']['mean']:.1%}",
+        "noncontiguous": f"{direct['report_error_by_type']['noncontiguous']['mean']:.1%}",
     },
 ]
 display(Markdown(markdown_table(
@@ -636,9 +654,36 @@ display(Image(filename=str(CALIBRATED_VENN_OUTPUT_DIR / "calibrated_venn_error.p
         r"""
 Across 19 independent campaigns, 13 weeks, and reports containing two, five, or ten EDPs, the end-to-end method reduced mean union-reach error from **48.0% to 13.6%**. Because the output is encoded into immutable labels, the same events always produce the same answer and every cumulative prefix is nondecreasing.
 
+The direct bounded model, `capture = a + b × log(size)`, was also run through the complete temporal pipeline. It produced 13.9% mean error versus 13.6% for the logit model. Its median was slightly better, but its p90 and worst-case errors were slightly worse. The result supports leading with the bounded logit form while retaining the direct form as a required real-data challenger; it does not justify treating either functional form as settled.
+
+Although the TEE can compute all 1,023 nonempty Reference-ID intersections at ten EDPs, the best synthetic result did **not** fit every order directly. In the structural comparison, pairwise calibration followed by one coherent maximum-entropy Venn performed substantially better than directly calibrating all orders or decoding every exact Reference-ID pattern. The higher-order counts remain useful for validation and residual checks; sparse high-order observations should not automatically receive their own unconstrained correction.
+
 The result is promising but not yet a production proof. The worst campaign still had 137.6% error. The main failures were an intentionally hidden downward linkage shift, app-activity retargeting with low email matchability, and abrupt shared-seed campaigns. These are calibration-transfer failures, not inconsistencies in the final VID sets.
 
 The daily calibrated target also moved downward at some later checkpoints. Once an earlier, larger union has been encoded, that decrease is impossible. Stronger optimizer weights cannot solve this; the reachable result must retain at least the already-created VIDs. A production rule therefore needs a conservative online policy: only activate correction in provider-validated contexts, use uncertainty to avoid early overcorrection, and retain the previous feasible target or the existing VID result when the new target moves outside its validated envelope.
+"""
+    ),
+    code(
+        r"""
+comparison = all_models_summary["methods"]
+structural_methods = [
+    ("panel_fixed_log_pairwise__recent_creation", "Fixed+log pairs, inferred higher orders"),
+    ("panel_mixture_pairwise__oldest_creation", "Two-group pairs, inferred higher orders"),
+    ("panel_fixed_log_all_orders__oldest_creation", "Direct calibration of every order"),
+    ("panel_mixture_full_patterns__oldest_creation", "Full exact-pattern mixture decoder"),
+]
+rows = [
+    {
+        "method": label,
+        "mean": f"{comparison[name]['report_error']['mean']:.1%}",
+        "p90": f"{comparison[name]['report_error']['p90']:.1%}",
+    }
+    for name, label in structural_methods
+]
+display(Markdown(markdown_table(
+    rows,
+    [("method", "Venn construction"), ("mean", "Mean report error"), ("p90", "p90")],
+)))
 """
     ),
     code(
@@ -696,7 +741,7 @@ display(Markdown(markdown_table(
     ),
     markdown(
         r"""
-At ten EDPs the exact integer optimizer averaged about seven seconds per daily campaign update and preserved more of the provider's detailed Venn target. The fast constructive allocator averaged about 0.066 seconds—roughly 100 times faster—but added about four percentage points of report error in this three-campaign stress benchmark. The exact solver is therefore credible as the first reference implementation or as a fallback; the fast allocator is a throughput optimization, not yet an equivalent replacement.
+At ten EDPs the exact formulation has 1,024 destination cells and 59,049 allowed old-cell-to-new-cell transitions. It averaged 4.5 seconds per daily campaign update and preserved more of the provider's detailed Venn target. The fast constructive allocator averaged 0.057 seconds—about 78 times faster. In this three-campaign stress benchmark their report errors were effectively identical: 15.79% and 15.80%. That supports the fast allocator as the primary implementation, with the exact optimizer retained as a validation oracle and fallback when the fast solution moves the requested Venn unusually far.
 
 ### 10.1 A separate online constraint: direct email anchors
 
@@ -718,8 +763,8 @@ rows = [
     },
     {
         "policy": "Reserve only where that email will appear later",
-        "result": f"All EDPs feasible in {future_reservation['campaigns_with_all_edps_feasible']}/19 campaigns",
-        "meaning": "Works in the synthetic set, but requires future identity-roster knowledge unavailable to a strict same-day algorithm.",
+        "result": f"Enough per-EDP capacity in {future_reservation['campaigns_with_all_edps_feasible']}/19 campaigns",
+        "meaning": "Passes a necessary capacity check, not a full allocation proof, and requires future identity-roster knowledge unavailable to a strict same-day algorithm.",
     },
     {
         "policy": "Never overlap email and proprietary VID namespaces",
@@ -772,6 +817,9 @@ The current simulation establishes that the aggregate Venn-to-label step is comp
 ## 12. Other designs worth considering
 
 - **Provider-defined low-rank pool basis.** Learn a small set of reusable EDP membership patterns from calibration campaigns, then allocate new IDs only among those patterns. This is more interpretable than 1,023 independent ten-EDP cells and more expressive than one global lane.
+- **Three-state reservation lattice.** Track each VID slot at each EDP as occupied, open, or reserved for a direct identifier that may arrive later. At ten EDPs this has at most `3^10 = 59,049` aggregate state classes—the same scale as the exact transition graph—but it requires a trustworthy way to set future reservations.
+- **Several deterministic candidate VIDs per identifier.** Cuckoo-hashing-style choices can lower the chance that a future email anchor finds its preferred VID occupied. They provide a probabilistic safety valve, not a guarantee, and unrelated identifiers need coordinated shared candidates if they are to create useful synthetic overlap.
+- **Model-line anchor registry.** Pre-register stable email-to-VID assignments and EDP-specific eligibility before campaign labeling, then let proprietary identifiers use only safe positions. This most closely preserves current VID semantics, but it needs broader identity-roster input than campaign-to-date aggregates alone.
 - **Arrival-aware allocation cost.** Prefer synthetic matches with compatible first-seen weeks and activity histories. The oracle “recent” and “oldest” results show that timing policy matters, but a fixed recency rule is not universally best.
 - **Coordinated-sampling pools.** Use shared random priorities so EDPs choose aligned samples or ranks without exchanging raw identifiers. This can estimate and construct overlap with less state, although it still cannot discover unmatched real identities.
 - **Multi-resolution VID ladder.** Store several deterministic candidate labels per event and freeze one resolution for the model line or flight. This avoids rereading raw events but requires a measurement-protocol change and does not permit reports to choose different resolutions independently.

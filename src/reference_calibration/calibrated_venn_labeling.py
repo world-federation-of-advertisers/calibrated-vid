@@ -32,6 +32,7 @@ from .measurement import calibration_dataset, measure_report
 from .models import CalibrationModel, LatentMixtureModel, PairAwareLogModel
 from .panel_validation import _fit_reference_models, _panel_observations, draw_panel
 from .population import Campaign, SyntheticWorld, generate_campaign, make_world
+from .research_models import DirectPairLogModel
 from .venn_information_proof import _proof_report_specs
 
 
@@ -558,6 +559,11 @@ def _decoder_candidates(
             pairwise(panel_models["fixed_log"], "panel_fixed_log_pairwise"),
         ),
         DecoderCandidate(
+            "panel_direct_pairwise",
+            "5,000-person panel; direct bounded fixed-plus-log pair capture; maximum-entropy closure.",
+            pairwise(panel_models["direct_pair"], "panel_direct_pairwise"),
+        ),
+        DecoderCandidate(
             "panel_mixture_pairwise",
             "5,000-person panel; two matchability groups; pairs followed by maximum-entropy closure.",
             pairwise(panel_models["mixture"], "panel_mixture_pairwise"),
@@ -604,6 +610,7 @@ def _plot(rows: list[dict], output: Path) -> None:
     methods = [
         "existing_vid",
         "panel_fixed_log_pairwise__active_today",
+        "panel_direct_pairwise__active_today",
         "panel_mixture_pairwise__active_today",
         "panel_fixed_log_all_orders__active_today",
         "panel_mixture_full_patterns__active_today",
@@ -617,6 +624,7 @@ def _plot(rows: list[dict], output: Path) -> None:
     labels = {
         "existing_vid": "Existing VID",
         "panel_fixed_log_pairwise__active_today": "Panel fixed+log / pairs",
+        "panel_direct_pairwise__active_today": "Panel direct fixed+log / pairs",
         "panel_mixture_pairwise__active_today": "Panel mixture / pairs",
         "panel_fixed_log_all_orders__active_today": "Panel fixed+log / all orders",
         "panel_mixture_full_patterns__active_today": "Panel mixture / full patterns",
@@ -672,6 +680,22 @@ def run_calibrated_venn_labeling(
     panel = draw_panel(world, "representative", config.seed + 400_000, panel_size=5_000)
     panel_observations = list(_panel_observations(world, training, specs, panel).values())
     panel_models = _fit_reference_models(config, panel_observations, seed_offset=811)
+    panel_truth_observations = [
+        replace(
+            observation,
+            baseline_intersections=observation.truth_intersections.copy(),
+            baseline_unions=observation.truth_unions.copy(),
+        )
+        for observation in panel_observations
+    ]
+    panel_models["direct_pair"] = DirectPairLogModel.fit(
+        calibration_dataset(
+            panel_truth_observations,
+            config.minimum_calibration_intersection,
+        ),
+        config.n_edps,
+        config.ridge_penalty,
+    )
     population_models = _full_population_reference_models(world, training)
     candidates = _decoder_candidates(
         panel_models,

@@ -125,6 +125,10 @@ PYTHONPATH=src .venv/bin/python -m reference_calibration.calibrated_venn_labelin
   --profile full --candidates panel_fixed_log_pairwise \
   --evidence-half-saturation 5 \
   --output-dir outputs/calibrated_venn_pairwise_half5
+PYTHONPATH=src .venv/bin/python -m reference_calibration.calibrated_venn_labeling \
+  --profile full --candidates panel_direct_pairwise \
+  --evidence-half-saturation 5 \
+  --output-dir outputs/calibrated_venn_direct_pair_half5
 PYTHONPATH=src .venv/bin/python -m reference_calibration.temporal_solver_benchmark \
   --output-dir outputs/temporal_solver_benchmark_union_guard
 PYTHONPATH=src .venv/bin/python -m reference_calibration.online_regularization_sweep \

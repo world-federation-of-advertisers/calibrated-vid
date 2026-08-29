@@ -75,9 +75,9 @@ def run_temporal_solver_benchmark(output_dir: Path) -> dict:
         decoded = [
             calibrate_report_pairwise_maximum_entropy(
                 observation,
-                models["mixture"],
+                models["fixed_log"],
                 pair_ridge=1e-6,
-                evidence_half_saturation=20.0,
+                evidence_half_saturation=5.0,
                 name="solver_benchmark",
             )
             for observation in observations
