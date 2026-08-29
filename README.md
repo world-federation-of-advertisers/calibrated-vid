@@ -119,6 +119,8 @@ allocators. Reproduce it with:
 ```bash
 PYTHONPATH=src .venv/bin/python -m reference_calibration.daily_labeling \
   --profile full --output-dir outputs/daily_labeling_final
+PYTHONPATH=src .venv/bin/python -m reference_calibration.venn_information_proof \
+  --profile full --output-dir outputs/full_venn_proof_final
 .venv/bin/python notebooks/build_daily_match_labeling_research.py
 ```
 

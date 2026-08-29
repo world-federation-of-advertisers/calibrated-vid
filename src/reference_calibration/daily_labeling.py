@@ -10,6 +10,7 @@ from math import gcd
 
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import sparse
 from scipy.optimize import linprog
 
 from .config import SimulationConfig
@@ -1329,10 +1330,17 @@ def _transport_cells(current: np.ndarray, target: np.ndarray) -> dict[tuple[int,
     destination_rows = {
         mask: len(source_rows) + index for index, mask in enumerate(demands)
     }
-    matrix = np.zeros((len(source_rows) + len(destination_rows), len(edges)), dtype=float)
+    row_indices: list[int] = []
+    column_indices: list[int] = []
+    matrix_values: list[float] = []
     for column, (source, destination) in enumerate(edges):
-        matrix[source_rows[source], column] = 1.0
-        matrix[destination_rows[destination], column] = 1.0
+        row_indices.extend((source_rows[source], destination_rows[destination]))
+        column_indices.extend((column, column))
+        matrix_values.extend((1.0, 1.0))
+    matrix = sparse.coo_matrix(
+        (matrix_values, (row_indices, column_indices)),
+        shape=(len(source_rows) + len(destination_rows), len(edges)),
+    ).tocsr()
     rhs = np.asarray(list(supplies.values()) + list(demands.values()), dtype=float)
     costs = np.asarray(
         [
@@ -1346,7 +1354,7 @@ def _transport_cells(current: np.ndarray, target: np.ndarray) -> dict[tuple[int,
     if not solved.success:
         raise RuntimeError(f"online Venn transport is infeasible: {solved.message}")
     rounded = np.rint(solved.x).astype(int)
-    if np.max(np.abs(matrix @ rounded - rhs)) > 1e-6:
+    if np.max(np.abs(np.asarray(matrix @ rounded).reshape(-1) - rhs)) > 1e-6:
         raise RuntimeError("online Venn transport did not produce an integral flow")
     return {
         edge: int(count)

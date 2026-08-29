@@ -67,6 +67,7 @@ def markdown_table(rows, columns):
 PROJECT_ROOT = find_project_root()
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 OUTPUT_DIR = PROJECT_ROOT / "outputs" / "daily_labeling_final"
+VENN_OUTPUT_DIR = PROJECT_ROOT / "outputs" / "full_venn_proof_final"
 
 RUN_EXPERIMENT = False
 if RUN_EXPERIMENT:
@@ -80,6 +81,9 @@ with (OUTPUT_DIR / "daily_dials.csv").open() as stream:
     dials = list(csv.DictReader(stream))
 with (OUTPUT_DIR / "cross_campaign_metrics.csv").open() as stream:
     portfolio = list(csv.DictReader(stream))
+venn_summary = json.loads((VENN_OUTPUT_DIR / "full_venn_summary.json").read_text())
+with (VENN_OUTPUT_DIR / "full_venn_metrics.csv").open() as stream:
+    venn_metrics = list(csv.DictReader(stream))
 
 print(f"Synthetic users: {summary['configuration']['n_users']:,}")
 print(f"EDPs: {summary['configuration']['n_edps']}")
@@ -377,6 +381,80 @@ The result is useful even though the targets are oracles:
 - Knowing the complete cumulative five-EDP Venn diagram is sufficient for every cumulative prefix and EDP subset.
 - Arbitrary middle and noncontiguous windows still have error because the cumulative cells do not say *when* the synthetic matches should occur.
 - Adding first-seen-time cohorts can reduce one class of window error but can worsen another. Exact arbitrary-window behavior would require arrival-time overlap cells, a genuine identity link, or delaying assignment until the relevant future is known.
+"""
+    ),
+    markdown(
+        r"""
+## 7A. What if the complete Venn diagram is available for all ten EDPs?
+
+For ten EDPs, a complete cumulative Venn diagram contains 1,023 nonempty exact cells. It specifies how many people have been reached by exactly each EDP combination. Equivalently, the workload may receive every inclusive pairwise through ten-way intersection and recover the exact cells by inclusion–exclusion, provided the inputs are jointly valid.
+
+### Cumulative-prefix guarantee
+
+Assume the full cumulative Venn table at every checkpoint comes from one real underlying population. At checkpoint (t-1), each stored VID has a current EDP-membership mask (S). At checkpoint (t), that person can remain in (S) or move only to a superset (T) as additional EDPs reach them. Newly reached people enter from the empty mask.
+
+Construct a flow network with an edge (S → T) whenever (S ⊆ T). The prior cell counts plus the required number of new people are supplies; the new Venn cells are demands. The real population itself proves that a feasible flow exists. Because this is an integer network-flow problem, it has an integer solution. Assign rank-ordered new EDP identifiers along that flow and freeze the resulting VIDs. By induction, every cumulative Venn cell is exact at every checkpoint.
+
+Therefore every cumulative report over **any subset of the ten EDPs** is exact—not merely the full ten-EDP union. This is a genuine guarantee, conditional on receiving valid full cumulative Venn tables.
+"""
+    ),
+    code(
+        r"""
+venn_labels = {
+    "daily_full_venn": "Full daily Venn only",
+    "cumulative_full_venn_recent": "Full cumulative Venn / prefer recent",
+    "cumulative_full_venn_oldest": "Full cumulative Venn / prefer old",
+}
+rows = []
+for method, label in venn_labels.items():
+    result = venn_summary["methods"][method]
+    rows.append({
+        "method": label,
+        "all": f"{result['all_reports']['mean']:.1%}",
+        "prefix": f"{result['by_report_type']['prefix']['mean']:.1%}",
+        "interval": f"{result['by_report_type']['interval']['mean']:.1%}",
+        "noncontiguous": f"{result['by_report_type']['noncontiguous']['mean']:.1%}",
+        "max": f"{result['all_reports']['max']:.1%}",
+    })
+display(Markdown(markdown_table(
+    rows,
+    [
+        ("method", "Information supplied"),
+        ("all", "Mean: all reports"),
+        ("prefix", "Cumulative prefixes"),
+        ("interval", "Middle intervals"),
+        ("noncontiguous", "Noncontiguous weeks"),
+        ("max", "Worst report"),
+    ],
+)))
+print("Exact-cell audits:", venn_summary["exact_cell_audits"])
+display(Image(filename=str(VENN_OUTPUT_DIR / "full_venn_report_error.png")))
+"""
+    ),
+    markdown(
+        r"""
+The full experiment used 18,000 people, ten EDPs, thirteen weeks, nineteen campaign scenarios, and all 1,023 cumulative cells. The exact-cell audit had zero error at every cumulative checkpoint for both allocation heuristics. That simultaneously verifies all 1,023 EDP subsets at every prefix.
+
+The remaining interval error is not a solver defect. The cumulative Venn tables specify *who has appeared by each checkpoint in aggregate*, but not which synthetic matches should be attributed to the weeks inside an arbitrary later window. Preferring recently created slots helps ordinary middle intervals; preferring old slots can help other shapes. Neither rule is universally correct.
+
+### Why daily plus cumulative Venn is still insufficient
+
+The limitation already exists with one EDP and three days:
+
+| | Day 1 | Day 2 | Day 3 | Daily counts | Cumulative counts | Weeks 2–3 reach |
+|---|---|---|---|---|---|---:|
+| World 1 | a | b | a | 1, 1, 1 | 1, 2, 2 | 2 |
+| World 2 | a | b | b | 1, 1, 1 | 1, 2, 2 | 1 |
+
+The daily and cumulative aggregates are identical, but the middle-window answer differs. No deterministic allocator seeing only those aggregates can guarantee the right answer in both worlds. Adding all EDP Venn cells does not remove this temporal ambiguity.
+
+### Information that is sufficient for every window
+
+A complete activity-pattern table would classify people by every EDP × week membership bit. Given those nonnegative atom counts, create that many anonymous VIDs for each pattern and place them in every indicated EDP-week event set. Any report is then a sum of the same fixed atoms, so every EDP subset and every week subset is exact and mutually consistent.
+
+The small proof used three EDPs and four weeks: all 105 nonempty EDP/week report combinations were exact. The cost is dimensionality. Three EDPs × four weeks allow 4,095 nonempty patterns; ten EDPs × thirteen weeks allow (2^130−1), approximately 1.36 × 10^39. Only observed patterns need storage, but obtaining the table is effectively obtaining a time-indexed identity-overlap representation. It is much stronger information than daily or cumulative Venn counts.
+
+**Conclusion.** Complete cumulative Venn data makes cumulative reporting fully solved and makes arbitrary windows empirically very accurate, but not mathematically exact. Exact arbitrary windows require full time-pattern information, actual cross-time identity linkage, or full-flight buffering followed by one global allocation over the report calendar.
 """
     ),
     markdown(
