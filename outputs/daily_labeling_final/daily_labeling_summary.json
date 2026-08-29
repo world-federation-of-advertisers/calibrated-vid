@@ -1,0 +1,1158 @@
+{
+  "profile": "full",
+  "configuration": {
+    "n_users": 18000,
+    "population_size": 180000000,
+    "n_edps": 10,
+    "n_weeks": 13,
+    "training_campaigns_per_scenario": 2,
+    "evaluation_campaigns_per_scenario": 2,
+    "seed": 20260829,
+    "bridge_pool_fraction": 0.035,
+    "static_bridge_probability": 0.12,
+    "warmup_days": 3,
+    "dial_grid_size": 17,
+    "ridge_penalty": 1.0
+  },
+  "training_campaign_count": 26,
+  "evaluation_campaign_count": 35,
+  "training_scenario_roster": [
+    "broad_awareness_control",
+    "traffic_optimization",
+    "video_engagement_retargeting",
+    "lead_generation",
+    "sales_prospecting",
+    "website_retargeting",
+    "crm_customer_list",
+    "catalog_retargeting",
+    "lookalike_prospecting",
+    "advantage_audience_expansion",
+    "app_activity_retargeting",
+    "unrelated_niche_control",
+    "mixed_funnel_portfolio"
+  ],
+  "evaluation_scenario_roster": [
+    "broad_awareness_control",
+    "traffic_optimization",
+    "video_engagement_retargeting",
+    "lead_generation",
+    "sales_prospecting",
+    "website_retargeting",
+    "crm_customer_list",
+    "catalog_retargeting",
+    "lookalike_prospecting",
+    "advantage_audience_expansion",
+    "app_activity_retargeting",
+    "unrelated_niche_control",
+    "mixed_funnel_portfolio",
+    "linkage_shift_-1.0",
+    "linkage_shift_0.0",
+    "linkage_shift_1.0"
+  ],
+  "dial_fit": {
+    "by_feature_set": {
+      "collision_resolved_full": {
+        "mean_absolute_error": 0.0433542289188531,
+        "p90_absolute_error": 0.06629392249194793
+      },
+      "context_scale": {
+        "mean_absolute_error": 0.06561148555979825,
+        "p90_absolute_error": 0.17822840680546329
+      },
+      "fixed_marginal_union": {
+        "mean_absolute_error": 0.03177400686156171,
+        "p90_absolute_error": 0.06579723722896787
+      },
+      "full": {
+        "mean_absolute_error": 0.062017475211903386,
+        "p90_absolute_error": 0.1750151796435453
+      }
+    },
+    "feature_names": [
+      "edp_count_fraction",
+      "mean_reach_fraction",
+      "reach_fraction_std",
+      "max_reach_fraction",
+      "log_geometric_mean_reach",
+      "mean_email_availability",
+      "email_availability_std",
+      "visible_to_min_mean",
+      "visible_to_min_std",
+      "visible_to_min_max",
+      "visible_to_population_baseline_mean",
+      "visible_to_population_baseline_std",
+      "visible_to_population_baseline_max",
+      "objective_awareness",
+      "objective_traffic",
+      "objective_engagement",
+      "objective_leads",
+      "objective_app_promotion",
+      "objective_sales",
+      "strategy_broad",
+      "strategy_interest",
+      "strategy_engagement_retargeting",
+      "strategy_lead_optimization",
+      "strategy_sales_prospecting",
+      "strategy_website_retargeting",
+      "strategy_customer_list",
+      "strategy_catalog_retargeting",
+      "strategy_lookalike",
+      "strategy_audience_expansion",
+      "strategy_app_retargeting",
+      "strategy_niche"
+    ],
+    "coefficient_count": 32,
+    "context_only_coefficient_count": 24,
+    "collision_resolved_coefficient_count": 32,
+    "fixed_marginal_union_coefficient_count": 32,
+    "pair_targeted_capture_parameter_count": 46,
+    "static_broad_campaign_dial": 0.0
+  },
+  "methods": {
+    "cohort_3_week_rank_lattice": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.21745516652242275,
+        "median": 0.10624315443592552,
+        "p90": 0.5380748933514803,
+        "max": 2.6734567901234567
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": 0.20193745324894508,
+        "median": 0.10438163601016899,
+        "p90": 0.5380748933514803,
+        "max": 2.6734567901234567
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 1.7300482734609597,
+        "median": 0.3005968529571351,
+        "p90": 1.0049971640907418,
+        "max": 152.0
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.010606637806637807,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.5627222222222222
+      },
+      "stable_key_fragmentation": 0.0,
+      "cross_edp_email_fragmentation": 0.0,
+      "mean_vids_per_true_person": 2.4383091753212582,
+      "mean_day_dial_churn": 0.01416666666666667,
+      "mean_state_entries": 20119.257142857143,
+      "pool_count": 280,
+      "requires_ordered_days": true,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "context_and_scale_only_pool": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.10101189698978269,
+        "median": 0.05284464685896045,
+        "p90": 0.2432576725002126,
+        "max": 0.7142857142857143
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": 0.05058508684556492,
+        "median": 0.012110091743119266,
+        "p90": 0.220759287618794,
+        "max": 0.7142857142857143
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 1.167204888385576,
+        "median": 0.31020071811171934,
+        "p90": 0.6299975910199117,
+        "max": 105.0
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 0.07363509766678153,
+        "median": 0.06207375365544596,
+        "p90": 0.14764099894975397,
+        "max": 0.43337595907928395
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "stable_key_fragmentation": 0.0,
+      "cross_edp_email_fragmentation": 0.0,
+      "mean_vids_per_true_person": 2.437130582887579,
+      "mean_day_dial_churn": 0.017750470535206554,
+      "mean_state_entries": 20119.257142857143,
+      "pool_count": 2,
+      "requires_ordered_days": true,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "cumulative_adaptive_pool": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.0977906254444056,
+        "median": 0.05130122644331439,
+        "p90": 0.23737072591928124,
+        "max": 0.7602627257799671
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": 0.04807657290524771,
+        "median": 0.007326007326007326,
+        "p90": 0.208203184268193,
+        "max": 0.7602627257799671
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 1.251579059843739,
+        "median": 0.3010869565217391,
+        "p90": 0.6333375238168715,
+        "max": 113.0
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 0.07255842241268735,
+        "median": 0.0595809532889137,
+        "p90": 0.14708435306139528,
+        "max": 0.43337595907928395
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "stable_key_fragmentation": 0.027850836776315294,
+      "cross_edp_email_fragmentation": 0.0,
+      "mean_vids_per_true_person": 2.4568851444033455,
+      "mean_day_dial_churn": 0.018927171918716432,
+      "mean_state_entries": 0.0,
+      "pool_count": 2,
+      "requires_ordered_days": false,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "fixed_marginal_overlap_atlas": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.15998039653228063,
+        "median": 0.1128165771297007,
+        "p90": 0.3380314130314131,
+        "max": 1.0112889983579638
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": -0.07190219868212129,
+        "median": -0.07178393745557925,
+        "p90": 0.09269719431550104,
+        "max": 1.0112889983579638
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 1.3365150414454459,
+        "median": 0.6851313969571231,
+        "p90": 2.4996322648651237,
+        "max": 31.816666666666666
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "stable_key_fragmentation": 0.0,
+      "cross_edp_email_fragmentation": 0.999893073544069,
+      "mean_vids_per_true_person": 3.1488459405409297,
+      "mean_day_dial_churn": 0.03469403632210527,
+      "mean_state_entries": 24884.057142857142,
+      "pool_count": 1,
+      "requires_ordered_days": true,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "fixed_model_line_pool": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.25130664236560263,
+        "median": 0.10534124629080119,
+        "p90": 0.7066465935288498,
+        "max": 3.6734567901234567
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": 0.24086940306916704,
+        "median": 0.10534124629080119,
+        "p90": 0.7066465935288498,
+        "max": 3.6734567901234567
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 0.9495187375567202,
+        "median": 0.418848167539267,
+        "p90": 0.7330800189522712,
+        "max": 72.0
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 0.023918071601341448,
+        "median": 0.017857142857142856,
+        "p90": 0.04875647591471164,
+        "max": 0.1452479983730299
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "stable_key_fragmentation": 0.0,
+      "cross_edp_email_fragmentation": 0.0,
+      "mean_vids_per_true_person": 2.438622050953867,
+      "mean_day_dial_churn": 0.0,
+      "mean_state_entries": 0.0,
+      "pool_count": 2,
+      "requires_ordered_days": false,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "forbidden_person_identity_oracle": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "stable_key_fragmentation": 0.0,
+      "cross_edp_email_fragmentation": 0.0,
+      "mean_vids_per_true_person": 1.0,
+      "mean_day_dial_churn": 0.0,
+      "mean_state_entries": 18000.0,
+      "pool_count": 1,
+      "requires_ordered_days": false,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "full_flight_buffer_then_freeze": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.08745482430122699,
+        "median": 0.05022063458709813,
+        "p90": 0.18813954486904252,
+        "max": 0.6529146141215106
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": 0.017716245439690484,
+        "median": -0.011486664906258251,
+        "p90": 0.1560314693654039,
+        "max": 0.6529146141215106
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 1.3229012301495795,
+        "median": 0.28617536309844,
+        "p90": 0.641584311349142,
+        "max": 123.0
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 0.08436769667427714,
+        "median": 0.06845532613818536,
+        "p90": 0.16928306749082883,
+        "max": 0.43337595907928395
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "stable_key_fragmentation": 0.0,
+      "cross_edp_email_fragmentation": 0.0,
+      "mean_vids_per_true_person": 2.4368480783335698,
+      "mean_day_dial_churn": 0.0,
+      "mean_state_entries": 0.0,
+      "pool_count": 2,
+      "requires_ordered_days": false,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "oracle_online_union_oldest": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.07028620502729452,
+        "median": 0.04100946372239748,
+        "p90": 0.1810665055042927,
+        "max": 0.6223458038422649
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": -0.06769365680857775,
+        "median": -0.0396950578338591,
+        "p90": 0.0,
+        "max": 0.1208313194780087
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 5.943451052745905,
+        "median": 0.6337493217580032,
+        "p90": 2.7852687626774872,
+        "max": 532.0
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "stable_key_fragmentation": 0.0,
+      "cross_edp_email_fragmentation": 0.9998649986087876,
+      "mean_vids_per_true_person": 3.1484401198138663,
+      "mean_day_dial_churn": 0.0,
+      "mean_state_entries": 24884.057142857142,
+      "pool_count": 1,
+      "requires_ordered_days": true,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "oracle_online_union_recent": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.09192227546242396,
+        "median": 0.05013927576601671,
+        "p90": 0.2498080614203455,
+        "max": 0.6066734074823054
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": -0.08620269785204643,
+        "median": -0.04221802142407057,
+        "p90": 0.0,
+        "max": 0.2523227383863081
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 5.493443715707779,
+        "median": 0.6785714285714286,
+        "p90": 3.057441322230888,
+        "max": 447.0
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "stable_key_fragmentation": 0.0,
+      "cross_edp_email_fragmentation": 0.9999031335819224,
+      "mean_vids_per_true_person": 3.1488455464485066,
+      "mean_day_dial_churn": 0.0,
+      "mean_state_entries": 24884.057142857142,
+      "pool_count": 1,
+      "requires_ordered_days": true,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "oracle_online_venn_oldest": {
+      "union_error": {
+        "count": 280,
+        "mean": 0.02031854592170761,
+        "median": 0.0,
+        "p90": 0.07250323214023136,
+        "max": 0.20399780941949616
+      },
+      "signed_union_error": {
+        "count": 280,
+        "mean": -0.015839381105882854,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.06552892131318395
+      },
+      "pair_intersection_error": {
+        "count": 280,
+        "mean": 0.08381982224853736,
+        "median": 0.0,
+        "p90": 0.29929218718001227,
+        "max": 0.6753338018271258
+      },
+      "marginal_reach_error": {
+        "count": 280,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "population_bound_excess": {
+        "count": 280,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "stable_key_fragmentation": 0.0,
+      "cross_edp_email_fragmentation": 0.9929325242911567,
+      "mean_vids_per_true_person": 2.5915720771041006,
+      "mean_day_dial_churn": 0.0,
+      "mean_state_entries": 15165.6,
+      "pool_count": 31,
+      "requires_ordered_days": true,
+      "consistency": {
+        "nested_report_checks": 770,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "oracle_online_venn_recent": {
+      "union_error": {
+        "count": 280,
+        "mean": 0.014710634804246461,
+        "median": 0.0,
+        "p90": 0.060061643835616435,
+        "max": 0.12184336087513092
+      },
+      "signed_union_error": {
+        "count": 280,
+        "mean": -0.012776174940775528,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.04914285714285714
+      },
+      "pair_intersection_error": {
+        "count": 280,
+        "mean": 0.05363036626304931,
+        "median": 0.0,
+        "p90": 0.19939182913396258,
+        "max": 0.5894568690095847
+      },
+      "marginal_reach_error": {
+        "count": 280,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "population_bound_excess": {
+        "count": 280,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "stable_key_fragmentation": 0.0,
+      "cross_edp_email_fragmentation": 0.9928798058793125,
+      "mean_vids_per_true_person": 2.591502740283012,
+      "mean_day_dial_churn": 0.0,
+      "mean_state_entries": 15165.6,
+      "pool_count": 31,
+      "requires_ordered_days": true,
+      "consistency": {
+        "nested_report_checks": 770,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "oracle_same_day_dial": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.09211092609280294,
+        "median": 0.04247003647733194,
+        "p90": 0.22292277614858264,
+        "max": 0.7485632183908046
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": 0.0754746802890236,
+        "median": 0.027965284474445518,
+        "p90": 0.22292277614858264,
+        "max": 0.7485632183908046
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 1.1091881690059513,
+        "median": 0.29591836734693877,
+        "p90": 0.611939494228105,
+        "max": 98.0
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 0.059200692303152384,
+        "median": 0.04769935192096705,
+        "p90": 0.12103727680180412,
+        "max": 0.2629518072289157
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "stable_key_fragmentation": 0.0330785391464465,
+      "cross_edp_email_fragmentation": 0.0,
+      "mean_vids_per_true_person": 2.460022310682173,
+      "mean_day_dial_churn": 0.06644345238095238,
+      "mean_state_entries": 0.0,
+      "pool_count": 2,
+      "requires_ordered_days": false,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "ordered_collision_resolved_overlap_pool": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.09245061930809512,
+        "median": 0.06066464144343183,
+        "p90": 0.218626692150947,
+        "max": 0.8975308641975308
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": 0.06377559345136896,
+        "median": 0.029170090386195564,
+        "p90": 0.21619268473832273,
+        "max": 0.8975308641975308
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 2.518882835719946,
+        "median": 0.19495017150743876,
+        "p90": 0.9592970521541974,
+        "max": 291.0
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 8.115284371586737e-05,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.010807800191290209
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.006817316017316016,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.37205555555555553
+      },
+      "stable_key_fragmentation": 0.0,
+      "cross_edp_email_fragmentation": 0.0,
+      "mean_vids_per_true_person": 2.4370198861134704,
+      "mean_day_dial_churn": 0.03973020106151886,
+      "mean_state_entries": 20119.257142857143,
+      "pool_count": 2,
+      "requires_ordered_days": true,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "ordered_memoized_rank_lattice": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.17903675505619449,
+        "median": 0.08991328160657235,
+        "p90": 0.4275720980113306,
+        "max": 2.6734567901234567
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": 0.16325083025452847,
+        "median": 0.0849406528189911,
+        "p90": 0.4275720980113306,
+        "max": 2.6734567901234567
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 2.2242433610762222,
+        "median": 0.2894486692015209,
+        "p90": 1.1255905511811024,
+        "max": 215.0
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.010158585858585858,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.5627222222222222
+      },
+      "stable_key_fragmentation": 0.0,
+      "cross_edp_email_fragmentation": 0.0,
+      "mean_vids_per_true_person": 2.438159886095087,
+      "mean_day_dial_churn": 0.01416666666666667,
+      "mean_state_entries": 20119.257142857143,
+      "pool_count": 64,
+      "requires_ordered_days": true,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "pair_targeted_fixed_marginal_atlas": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.10395628803598991,
+        "median": 0.050870147255689425,
+        "p90": 0.2277239694098957,
+        "max": 1.0112889983579638
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": 0.009153650285708168,
+        "median": -0.016916384726921217,
+        "p90": 0.14328764726899137,
+        "max": 1.0112889983579638
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 2.094899253663477,
+        "median": 0.3657726692209451,
+        "p90": 0.9148102960868918,
+        "max": 195.0
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "stable_key_fragmentation": 0.0,
+      "cross_edp_email_fragmentation": 0.9999702788216415,
+      "mean_vids_per_true_person": 3.149502663654256,
+      "mean_day_dial_churn": 0.03469403632210527,
+      "mean_state_entries": 24884.057142857142,
+      "pool_count": 46,
+      "requires_ordered_days": true,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "provider_blended_ordered_pool": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.09934512320713358,
+        "median": 0.05231522707034728,
+        "p90": 0.23662900004000173,
+        "max": 0.7417898193760263
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": 0.049497777796834425,
+        "median": 0.010067114093959731,
+        "p90": 0.21006889876264465,
+        "max": 0.7417898193760263
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 1.1884877242665144,
+        "median": 0.3076923076923077,
+        "p90": 0.6362156089245,
+        "max": 106.0
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 0.07367611841701176,
+        "median": 0.06180224114413595,
+        "p90": 0.14962356457443882,
+        "max": 0.43337595907928395
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "stable_key_fragmentation": 0.0,
+      "cross_edp_email_fragmentation": 0.0,
+      "mean_vids_per_true_person": 2.4370869794269177,
+      "mean_day_dial_churn": 0.017899042900311957,
+      "mean_state_entries": 20119.257142857143,
+      "pool_count": 2,
+      "requires_ordered_days": true,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "quantized_hysteresis_pool": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.1120238106801379,
+        "median": 0.05654905751570807,
+        "p90": 0.29083889928858636,
+        "max": 0.8411330049261084
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": 0.07147805178914683,
+        "median": 0.025112685125563427,
+        "p90": 0.2811399800572103,
+        "max": 0.8411330049261084
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 1.1757338707402312,
+        "median": 0.31227436823104693,
+        "p90": 0.638541964992853,
+        "max": 103.0
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 0.06480204890807363,
+        "median": 0.056141541579355726,
+        "p90": 0.12837321704245813,
+        "max": 0.43337595907928395
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "stable_key_fragmentation": 0.02796697678833741,
+      "cross_edp_email_fragmentation": 0.0,
+      "mean_vids_per_true_person": 2.4564798107066435,
+      "mean_day_dial_churn": 0.01416666666666667,
+      "mean_state_entries": 0.0,
+      "pool_count": 2,
+      "requires_ordered_days": false,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "same_day_adaptive_pool": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.11700160182614823,
+        "median": 0.06459773992241524,
+        "p90": 0.2996370246411087,
+        "max": 0.8485221674876847
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": 0.07461694347800742,
+        "median": 0.024501225061253063,
+        "p90": 0.2953149034571892,
+        "max": 0.8485221674876847
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 1.0722907449906975,
+        "median": 0.3181818181818182,
+        "p90": 0.6424700231797236,
+        "max": 88.0
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 0.06438292154507336,
+        "median": 0.055982920404911395,
+        "p90": 0.12529199039391095,
+        "max": 0.43337595907928395
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "stable_key_fragmentation": 0.017367418818494792,
+      "cross_edp_email_fragmentation": 0.0,
+      "mean_vids_per_true_person": 2.449584145958825,
+      "mean_day_dial_churn": 0.03551899039128358,
+      "mean_state_entries": 0.0,
+      "pool_count": 2,
+      "requires_ordered_days": false,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "sticky_first_seen_pool": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.09799729018081835,
+        "median": 0.05115166018546216,
+        "p90": 0.23737072591928124,
+        "max": 0.7602627257799671
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": 0.04840117942419098,
+        "median": 0.008301591952339095,
+        "p90": 0.20761667400426337,
+        "max": 0.7602627257799671
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 1.1911019920577532,
+        "median": 0.3050397877984085,
+        "p90": 0.6372525340437796,
+        "max": 108.0
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 0.07379613347088301,
+        "median": 0.06094847348210599,
+        "p90": 0.14976003168279495,
+        "max": 0.43337595907928395
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "stable_key_fragmentation": 0.0,
+      "cross_edp_email_fragmentation": 0.0,
+      "mean_vids_per_true_person": 2.437083872611014,
+      "mean_day_dial_churn": 0.018927171918716432,
+      "mean_state_entries": 20119.257142857143,
+      "pool_count": 2,
+      "requires_ordered_days": true,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    },
+    "three_day_buffer_then_freeze": {
+      "union_error": {
+        "count": 385,
+        "mean": 0.11903394142943077,
+        "median": 0.05530676220331393,
+        "p90": 0.2953333359319882,
+        "max": 1.2645885286783043
+      },
+      "signed_union_error": {
+        "count": 385,
+        "mean": 0.07987712913642248,
+        "median": 0.020792079207920793,
+        "p90": 0.2845638285964642,
+        "max": 1.2645885286783043
+      },
+      "pair_intersection_error": {
+        "count": 385,
+        "mean": 1.059870330157212,
+        "median": 0.3139784946236559,
+        "p90": 0.6528083502903089,
+        "max": 90.0
+      },
+      "marginal_reach_error": {
+        "count": 385,
+        "mean": 0.06337643370218024,
+        "median": 0.054748871688681054,
+        "p90": 0.12501082051949405,
+        "max": 0.43337595907928395
+      },
+      "population_bound_excess": {
+        "count": 385,
+        "mean": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "stable_key_fragmentation": 0.0,
+      "cross_edp_email_fragmentation": 0.0,
+      "mean_vids_per_true_person": 2.4375080260420963,
+      "mean_day_dial_churn": 0.0,
+      "mean_state_entries": 0.0,
+      "pool_count": 2,
+      "requires_ordered_days": false,
+      "consistency": {
+        "nested_report_checks": 1505,
+        "nested_report_violations": 0,
+        "max_nested_violation": 0,
+        "max_replay_difference": 0
+      }
+    }
+  },
+  "cross_campaign": {
+    "campaign_pairs": 4,
+    "campaign_order_sensitivity": {
+      "count": 48,
+      "mean": 0.0027243810109017323,
+      "median": 0.00042450382202104,
+      "p90": 0.005273064292824698,
+      "max": 0.057569296375266525
+    },
+    "methods": {
+      "campaign_local_maps": {
+        "count": 48,
+        "mean": 0.07894389611439116,
+        "median": 0.05773963240680402,
+        "p90": 0.1723057644110278,
+        "max": 0.4108031272210377
+      },
+      "shared_map_campaign_specific_forward": {
+        "count": 48,
+        "mean": 0.09575154864165643,
+        "median": 0.054611703347107375,
+        "p90": 0.1823303572200281,
+        "max": 0.8685145700071073
+      },
+      "shared_map_campaign_specific_reverse": {
+        "count": 48,
+        "mean": 0.09355572781784606,
+        "median": 0.054842277476690036,
+        "p90": 0.18261684773996922,
+        "max": 0.8109452736318408
+      },
+      "shared_map_global_daily_state": {
+        "count": 48,
+        "mean": 0.11834182798711222,
+        "median": 0.05490959364720136,
+        "p90": 0.25847412421342003,
+        "max": 1.1975835110163469
+      }
+    }
+  },
+  "interpretation": {
+    "consistency": "Every result is computed from immutable event labels, so nested reports and exact reruns are consistent by construction.",
+    "fragmentation": "Day-varying stateless pools can still assign one stable input identifier to several VIDs across days, inflating multi-day reach even though reports remain logically consistent.",
+    "warmup": "The buffered method avoids that fragmentation but cannot publish final labels until its warmup period ends."
+  }
+}

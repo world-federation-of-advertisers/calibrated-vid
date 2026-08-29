@@ -107,6 +107,21 @@ panel-draw and activation-decision files, an example set of frozen
 provider-to-measurement instructions in `provider_packages.json`, and accuracy charts to
 `outputs/panel_5000_final/`.
 
+The label-time research spike is in
+`notebooks/daily_match_labeling_research.ipynb`. It asks whether same-day or
+campaign-to-date Reference-ID matching can be encoded into immutable VID
+labels. It tests adaptive hash pools, stored first-seen mappings,
+collision-resolved 1:1 assignment, fixed-marginal and pair-targeted overlap
+allocators, pair and higher-order rank lattices,
+buffered labeling, cross-campaign map scope, and oracle online union/Venn
+allocators. Reproduce it with:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m reference_calibration.daily_labeling \
+  --profile full --output-dir outputs/daily_labeling_final
+.venv/bin/python notebooks/build_daily_match_labeling_research.py
+```
+
 ## What is validated
 
 The original calibration experiment fits on large, broadly targeted campaigns.
