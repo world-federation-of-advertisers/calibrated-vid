@@ -27,7 +27,7 @@ This notebook asks whether Reference-ID match information can improve the **labe
 The short answer is:
 
 - **Yes for aggregate overlap geometry, if days are processed in order and the system keeps a durable model-line-wide identifier-to-VID map.** A provider-estimated cumulative Venn target can be converted into immutable labels while preserving every EDP's reach.
-- **Not yet as a complete production design with strict shared-email anchoring.** An email that first appears at another EDP later can conflict with a fallback VID already frozen there. Without reservation, lookahead, or an allowed anchor miss, no online algorithm can guarantee both the email match and exact single-EDP reach.
+- **Stable shared-email mapping is compatible with the design.** A stored 1:1 `Reference ID → VID` map, or a fixed Dirac pool and hash, sends the same Reference ID to the same VID every time. The residual allocator must treat those VIDs as fixed anchors while placing proprietary fallbacks.
 - **No aggregate-only method can guarantee exact accuracy for every arbitrary time window.** Aggregate counts do not reveal whether an identifier seen today represents a person seen under a different, unlinkable identifier last week.
 - **A simple daily hash-pool adjustment is not enough.** It can improve union reach while introducing same-publisher collisions, stable-ID fragmentation, or campaign-order dependence.
 - **The most promising direction is a sequential, coordinated rank allocator driven by a provider-supplied cumulative calibration rule.** The aggregate Venn projection is feasible; direct-anchor reservation and calibration-transfer guardrails are the remaining gating research questions.
@@ -73,7 +73,6 @@ CALIBRATED_VENN_OUTPUT_DIR = PROJECT_ROOT / "outputs" / "calibrated_venn_pairwis
 DIRECT_VENN_OUTPUT_DIR = PROJECT_ROOT / "outputs" / "calibrated_venn_direct_pair_half5"
 ALL_MODELS_OUTPUT_DIR = PROJECT_ROOT / "outputs" / "calibrated_venn_labeling_final"
 SOLVER_OUTPUT_DIR = PROJECT_ROOT / "outputs" / "temporal_solver_benchmark_union_guard"
-IDENTITY_OUTPUT_DIR = PROJECT_ROOT / "outputs" / "online_identity_constraints"
 REGULARIZATION_OUTPUT_DIR = PROJECT_ROOT / "outputs" / "online_regularization_sweep"
 
 RUN_EXPERIMENT = False
@@ -103,9 +102,6 @@ all_models_summary = json.loads(
 with (CALIBRATED_VENN_OUTPUT_DIR / "calibrated_venn_metrics.csv").open() as stream:
     calibrated_venn_metrics = list(csv.DictReader(stream))
 solver_summary = json.loads((SOLVER_OUTPUT_DIR / "temporal_solver_summary.json").read_text())
-identity_summary = json.loads(
-    (IDENTITY_OUTPUT_DIR / "online_identity_constraints.json").read_text()
-)
 regularization_summary = json.loads(
     (REGULARIZATION_OUTPUT_DIR / "online_regularization_summary.json").read_text()
 )
@@ -133,6 +129,8 @@ Label-time calibration tries to move the correction earlier:
 Once every event has one immutable VID, a report over any set of events is a set cardinality. Therefore a larger event set cannot have smaller reach, overlapping reports obey ordinary set arithmetic, and re-running the same report does not require retrieving its old result.
 
 That consistency guarantee does **not** prove accuracy. A labeler can be perfectly self-consistent and still map one real person to several VIDs or map several people to one VID.
+
+**Non-negotiable invariant:** the calibration layer does not alter any EDP's single-publisher reach. Each EDP retains a one-to-one assignment between its distinct labeling identifiers and occupied VIDs. Calibration changes only which of those already-counted EDP sets share VID positions across EDPs. If a cross-EDP target conflicts with the single-publisher reaches, the target is adjusted or flagged; the per-EDP reaches are never sacrificed.
 """
     ),
     markdown(
@@ -164,7 +162,7 @@ Same-day match information cannot be used by independent EDP labelers without co
 
 1. Each EDP reads the day's raw impressions inside its TEE and produces encrypted aggregate Reference-ID counts and the set of newly seen labeling identifiers.
 2. An approved TEE workload combines the EDP aggregates with the campaign-to-date state.
-3. The model provider's frozen rule converts objective, audience strategy, scale, email availability, and pairwise or higher-order Reference-ID matches into pool probabilities or allocation quotas.
+3. The model provider's frozen rule converts objective, audience strategy, scale, model-line coverage assumptions, and pairwise or higher-order Reference-ID matches into pool probabilities or allocation quotas.
 4. The workload freezes a date/model-line calibration manifest.
 5. EDPs route and rank only newly seen identifiers under that manifest. Existing identifiers reuse their canonical stored VID.
 6. Final impressions are labeled and become immutable.
@@ -215,7 +213,7 @@ Three implementation conditions matter:
 
 1. “Fixed” must mean the realized per-EDP assignment is preserved—not merely that a hash range has the same capacity. A collision-free rank map, or an unchanged marginal hash distribution with separately measured collision behavior, is needed.
 2. Directly shared email keys should be placed before synthetic fallback sharing for the day.
-3. A shared email can first appear at another EDP later. If its canonical VID was already occupied there by a finalized fallback assignment, exact anchoring and exact single-EDP reach cannot both be preserved. A production design therefore needs an anchor-reservation policy, a short finalization buffer, or an explicitly modeled collision allowance. This is a real online constraint, not a calibration-detail problem.
+3. Reference-ID assignments are durable. The fallback allocator must never place a different identifier on the same VID at the same EDP. This can be implemented with the existing 1:1 rank map, a protected Reference-ID lane, or an occupancy-aware central allocator. A harder conflict arises only if an EDP can switch the same person from a proprietary acting key to an email key after the earlier label is final, or if fallback allocation ignores the protected Reference-ID positions.
 
 | Design | Intuition | Main expected benefit | Main risk |
 |---|---|---|---|
@@ -348,7 +346,7 @@ display(Markdown(markdown_table(
 
 All methods using stored impression labels have zero logical report contradictions. That is expected: cardinality over immutable labels is inherently consistent.
 
-The fixed-marginal prototypes deliberately treat all inputs as EDP-local fallback IDs so the experiment can isolate the synthetic overlap allocator. That is why their “shared-email fragmentation” column is 100%. It is not a proposed production behavior: a deployable version must place directly shared email anchors first, then allocate only the residual proprietary-ID reach. The anchor-reservation issue described above remains to be tested.
+The fixed-marginal prototypes deliberately treat all inputs as EDP-local fallback IDs so the experiment can isolate the synthetic overlap allocator. That is why their “shared-email fragmentation” column is 100%. It is not a proposed production behavior: a deployable version keeps the stored Reference-ID-to-VID assignment fixed, places those direct matches first, and allocates only the residual proprietary-ID reach.
 
 The difficult tradeoff is elsewhere:
 
@@ -593,8 +591,8 @@ The strongest practical experiment replaces the oracle target with the informati
 
 1. The model provider fits a frozen capture-rate model on a separate 5,000-person panel and whole-campaign training data.
 2. For each cumulative checkpoint, the TEE forms one 10-bit Reference-ID membership histogram. That one histogram supplies every pairwise through ten-way aggregate without 1,023 separate joins.
-3. The provider's fixed-plus-log pair model corrects the 45 pairwise overlaps. A maximum-entropy decoder turns the ten per-EDP reaches and 45 corrected pairs into one complete 1,024-cell Venn table.
-4. The daily allocator projects that table onto a state reachable from the VIDs already frozen on earlier days, then assigns only newly seen identifiers.
+3. The provider's fixed-plus-log pair model corrects the 45 pairwise overlaps. A maximum-entropy decoder turns the ten authoritative, unchanged per-EDP VID reaches and 45 corrected pairs into one complete 1,024-cell Venn table.
+4. The daily allocator projects that table onto a state reachable from the VIDs already frozen on earlier days while preserving every per-EDP reach exactly, then assigns only newly seen identifiers.
 5. Every later report is a direct distinct count over the immutable labels. No old report result is consulted.
 
 This uses no true Venn diagram at runtime and does not link a VID to a Reference ID. Synthetic truth is retained only by the test harness for scoring.
@@ -653,6 +651,8 @@ display(Image(filename=str(CALIBRATED_VENN_OUTPUT_DIR / "calibrated_venn_error.p
     markdown(
         r"""
 Across 19 independent campaigns, 13 weeks, and reports containing two, five, or ten EDPs, the end-to-end method reduced mean union-reach error from **48.0% to 13.6%**. Because the output is encoded into immutable labels, the same events always produce the same answer and every cumulative prefix is nondecreasing.
+
+All calibrated methods in this comparison preserve the existing VID single-publisher results exactly. The simulation treats those per-EDP reaches as authoritative inputs; the reported error differences come only from cross-EDP duplication and union construction.
 
 The direct bounded model, `capture = a + b × log(size)`, was also run through the complete temporal pipeline. It produced 13.9% mean error versus 13.6% for the logit model. Its median was slightly better, but its p90 and worst-case errors were slightly worse. The result supports leading with the bounded logit form while retaining the direct form as a required real-data challenger; it does not justify treating either functional form as settled.
 
@@ -743,53 +743,40 @@ display(Markdown(markdown_table(
         r"""
 At ten EDPs the exact formulation has 1,024 destination cells and 59,049 allowed old-cell-to-new-cell transitions. It averaged 4.5 seconds per daily campaign update and preserved more of the provider's detailed Venn target. The fast constructive allocator averaged 0.057 seconds—about 78 times faster. In this three-campaign stress benchmark their report errors were effectively identical: 15.79% and 15.80%. That supports the fast allocator as the primary implementation, with the exact optimizer retained as a validation oracle and fallback when the fast solution moves the requested Venn unusually far.
 
-### 10.1 A separate online constraint: direct email anchors
+### 10.1 Direct Reference-ID anchors and the residual pool
 
-The Venn allocator above deliberately tests aggregate geometry. A production labeler must also respect the fact that the same email presented at two EDPs is a direct identity anchor. That creates an additional online problem.
+The Venn allocator above deliberately tests aggregate geometry and uses EDP-local synthetic keys. A production implementation should instead place direct anchors first. The same email-derived Reference ID uses its stored 1:1 VID, or deterministically hashes through the same fixed Dirac component, every time it appears.
 
-Consider two days. On day 1, the target asks a proprietary ID at A to share a VID with email `e` at B. On day 2, email `e` first appears at A. Keeping `e` on its stable cross-EDP VID now puts two different A identifiers on one VID, reducing A's reach. Moving `e` to another VID preserves A's reach but breaks the email anchor. With no knowledge of day 2 on day 1, no deterministic algorithm can guarantee all three properties: arbitrary overlap control, exact per-EDP reach, and permanent email anchoring.
-"""
-    ),
-    code(
-        r"""
-global_reservation = identity_summary["reserve_every_email_vid_at_every_edp"]
-future_reservation = identity_summary["future_aware_per_edp_reservation"]
-separate = identity_summary["strict_email_and_proprietary_namespaces"]
-rows = [
-    {
-        "policy": "Reserve every observed email VID at every EDP",
-        "result": f"All EDPs feasible in {global_reservation['campaigns_with_all_edps_feasible']}/19 campaigns",
-        "meaning": "Safe but too conservative for the broad campaign; peak proprietary demand was 3.16× remaining capacity.",
-    },
-    {
-        "policy": "Reserve only where that email will appear later",
-        "result": f"Enough per-EDP capacity in {future_reservation['campaigns_with_all_edps_feasible']}/19 campaigns",
-        "meaning": "Passes a necessary capacity check, not a full allocation proof, and requires future identity-roster knowledge unavailable to a strict same-day algorithm.",
-    },
-    {
-        "policy": "Never overlap email and proprietary VID namespaces",
-        "result": f"Misses a mean {separate['mean_true_pair_overlap_that_crosses_identifier_modes']:.1%} of true pair overlap",
-        "meaning": "Operationally simple, but discards too much legitimate email-to-proprietary overlap.",
-    },
-]
-display(Markdown(markdown_table(
-    rows,
-    [("policy", "Policy"), ("result", "Synthetic result"), ("meaning", "Interpretation")],
-)))
-"""
-    ),
-    markdown(
-        r"""
-This narrows the recommendation. A label-time design can encode a provider-estimated full cumulative Venn and make all future reports logically consistent. To preserve direct email semantics as well, it also needs one of the following: an EDP/model-line identity roster that allows safe reservation before campaign delivery, a bounded finalization buffer with enough lookahead, or an explicit rule allowing a small number of anchor misses. Merely increasing the VID space does not remove the conflict; the issue is local slot occupancy at the EDP where the email arrives later.
+The residual allocator then fills only the overlap that the calibrated target requires beyond those direct matches. It must keep the mapping one-to-one within each EDP: two different identifiers from the same EDP cannot occupy one VID merely to manufacture cross-EDP overlap.
+
+For two EDPs, suppose the marginal reaches are 100 and 80, the collision-corrected Reference-ID match is 18, and the provider's capture model says those matches represent 60% of true overlap. The target overlap is 30. The fixed Reference-ID mapping supplies 18 shared VIDs automatically. The adaptive fallback pools need to create only 12 additional shared VIDs. The final logical pools are 70 A-only, 50 B-only, and 30 A-and-B, for union reach 150.
+
+For three EDPs, one possible calibrated target is:
+
+| Logical VID pool | Target count |
+|---|---:|
+| A only | 60 |
+| B only | 45 |
+| C only | 35 |
+| A and B only | 20 |
+| A and C only | 10 |
+| B and C only | 5 |
+| A, B, and C | 10 |
+
+The EDP totals are therefore 100, 80, and 60, while union reach is 185. Reference IDs already shared by A and B are assigned once and occupy either the A-and-B or A-B-C logical pool. The allocator fills the remaining quotas by mapping newly seen proprietary IDs from the required EDPs to the same VID. At ten EDPs the same construction has 1,023 possible nonempty membership patterns, but these are logical occupancy classes—not 1,023 independently fitted calibration curves or necessarily 1,023 physical hash ranges.
+
+“Changing the pool boundaries” should therefore mean changing the quotas used for **new fallback assignments**. It must not reinterpret old hashes. A previously seen Reference ID or proprietary ID always reuses its stored VID. If a pure Dirac implementation is preferred, the membership patterns can be fixed components and the daily manifest can change how many new fallback IDs enter each component; deterministic hashing remains fixed inside the selected component.
+
+A conditional edge case remains only if the acting identifier for the same EDP user can change after finalization—for example, proprietary fallback first and email later. If input selection is stable, the stored Reference-ID mapping and one-to-one EDP assignment solve the anchor problem directly.
 
 ### 10.2 What the current ranked serving path contributes
 
-The current `RankedPopulationNode` already provides two valuable pieces: a collision-free Feistel assignment for pre-ranked identifiers and a two-pass mode that identifies the selected pool before final labeling. It does not by itself coordinate ranks across EDPs or reserve a future shared-email slot. The smallest credible extension is therefore a model-line-wide coordinated rank service inside the TEE, not a new static hash formula:
+The current `RankedPopulationNode` already provides two valuable pieces: a collision-free Feistel assignment for pre-ranked identifiers and a two-pass mode that identifies the selected pool before final labeling. It does not by itself coordinate the residual ranks across EDPs against one target Venn. The smallest credible extension is therefore a model-line-wide coordinated rank service inside the TEE, not a new static hash formula:
 
 - retain the existing EDP-local fingerprint-to-rank indexes;
 - add a durable VID-slot ledger recording the EDP membership of each occupied slot;
 - apply the provider's Venn target as quotas for allowed slot transitions;
-- reserve or otherwise protect direct-email assignments; and
+- treat the existing Reference-ID-to-VID map as fixed and exclude occupied local slots when allocating fallback overlap; and
 - emit ordinary immutable VIDs after the daily state is committed.
 
 The provider need not supply the true Venn. It supplies the frozen rule that translates cumulative VID reaches and Reference-ID overlaps into the target Venn. The measurement operator applies that rule and the reachability constraints inside the TEE.
@@ -804,12 +791,12 @@ The best next implementation is not a freely changing daily Dirac mixture. It is
 1. Maintain one canonical identifier-to-VID assignment for the model line. Previously seen identifiers always reuse it.
 2. Compute both daily and cumulative Reference-ID match summaries inside the TEE, but use the cumulative value as the primary signal. Daily values are diagnostics or a bounded fast-response term.
 3. Have the model provider supply and version the function that converts campaign context, scale, model-line coverage assumptions, and aggregate Reference-ID overlaps into target pairwise and selected higher-order overlaps. The runtime does not need to reveal whether any one Reference ID came from email or fallback.
-4. Hold each EDP's pool size fixed and adjust only overlap among the EDP pools. Preserve direct shared-email anchors, then jointly allocate only newly seen proprietary fallback identifiers into private, pair, and structured higher-order shared slots. This step requires an explicit reservation, lookahead, or anchor-exception policy; the aggregate Venn target alone is insufficient. Do not let a smaller hash pool manufacture overlap through same-EDP collisions.
+4. Treat accurate single-publisher VID reach as a hard equality constraint. Hold each EDP's occupied VID count fixed and adjust only overlap among EDPs. Preserve the stored Reference-ID mappings, then jointly allocate only newly seen proprietary fallback identifiers into private, pair, and structured higher-order shared slots. The allocator must exclude VID positions already occupied at that EDP. Additional reservation or lookahead is needed only if the acting identifier itself can change after finalization. Do not let a smaller hash pool manufacture overlap through same-EDP collisions.
 5. Freeze one daily allocation manifest after an event-time watermark. Late data uses that manifest. Never relabel a prior impression.
 6. Make the calibration state model-line-wide. Campaign-specific features may influence target quotas, but the canonical assignment cannot fork by campaign without harming combined-campaign reach.
 7. Validate prefix, interval, noncontiguous, subset, and cross-campaign reports separately. Zero consistency violations is necessary but not an accuracy metric.
 
-The current simulation establishes that the aggregate Venn-to-label step is computationally feasible and materially more accurate than the existing VID baseline in the tested non-representative campaigns. It does **not** yet establish a production-safe online email-reservation policy or acceptable error under hidden linkage shifts. Those are the two gating questions for a real-data prototype.
+The current simulation establishes that the aggregate Venn-to-label step is computationally feasible and materially more accurate than the existing VID baseline in the tested non-representative campaigns. It does **not** yet combine that allocator with the real stored Reference-ID map or establish acceptable error under hidden linkage shifts. Those are the two gating questions for a real-data prototype.
 """
     ),
     markdown(

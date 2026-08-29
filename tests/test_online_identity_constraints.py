@@ -10,7 +10,7 @@ class OnlineIdentityConstraintsTest(unittest.TestCase):
         result = two_day_anchor_counterexample()
         self.assertEqual(result["day_1"]["required_union"], 1)
         self.assertEqual(result["day_2"]["required_edp_a_reach"], 2)
-        self.assertIn("breaks the shared-email anchor", result["contradiction"])
+        self.assertIn("breaks the shared-email anchor", result["conditional_conflict"])
 
 
 if __name__ == "__main__":

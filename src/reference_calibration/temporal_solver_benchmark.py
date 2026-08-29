@@ -89,7 +89,12 @@ def run_temporal_solver_benchmark(output_dir: Path) -> dict:
             for day, (observation, report) in enumerate(zip(observations, decoded)):
                 marginals = np.asarray(
                     [
-                        int(round(observation.truth_intersections[1 << edp] / observation.person_weight))
+                        int(
+                            round(
+                                observation.baseline_intersections[1 << edp]
+                                / observation.person_weight
+                            )
+                        )
                         for edp in range(config.n_edps)
                     ],
                     dtype=int,

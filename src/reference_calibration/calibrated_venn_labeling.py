@@ -757,7 +757,12 @@ def run_calibrated_venn_labeling(
                 raw_cells = decoded.exclusive_cells / observation.person_weight
                 marginals = np.asarray(
                     [
-                        int(round(observation.truth_intersections[1 << edp] / observation.person_weight))
+                        int(
+                            round(
+                                observation.baseline_intersections[1 << edp]
+                                / observation.person_weight
+                            )
+                        )
                         for edp in range(config.n_edps)
                     ],
                     dtype=int,

@@ -9,7 +9,7 @@ from reference_calibration.calibrated_venn_labeling import (
     reconcile_reachable_cells_greedy,
 )
 from reference_calibration.config import SimulationConfig
-from reference_calibration.daily_labeling import _transport_cells
+from reference_calibration.daily_labeling import _report_union, _transport_cells, _truth_union
 from reference_calibration.population import generate_campaign, make_world
 from reference_calibration.venn_information_proof import (
     _label_exact_cells,
@@ -82,6 +82,17 @@ class CalibratedVennLabelingTest(unittest.TestCase):
                 _label_exact_cells(result.labels, tuple(range(day + 1)), edps)[1:],
                 target[1:],
             )
+        for edp in edps:
+            for week_mask in range(1, 1 << self.world.config.n_weeks):
+                weeks = tuple(
+                    week
+                    for week in range(self.world.config.n_weeks)
+                    if week_mask & (1 << week)
+                )
+                self.assertEqual(
+                    _report_union(result.labels, weeks, (edp,)),
+                    _truth_union(self.campaign, weeks, (edp,)),
+                )
 
 if __name__ == "__main__":
     unittest.main()

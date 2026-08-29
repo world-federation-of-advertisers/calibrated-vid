@@ -6,6 +6,7 @@
     "campaigns": 19
   },
   "two_day_counterexample": {
+    "assumption": "The same EDP can first label a person with a proprietary fallback and later present a shared email-derived Reference ID for that person, or a synthetic fallback assignment may occupy a Reference-ID VID at that EDP. A stable pre-ranked Reference-ID lane avoids this premise.",
     "day_1": {
       "edp_a": [
         "proprietary:p"
@@ -22,7 +23,7 @@
       ],
       "required_edp_a_reach": 2
     },
-    "contradiction": "Stable email identity requires VID(e@A) = VID(e@B), but the day-1 overlap already made that VID equal to VID(p@A). EDP A would then have one VID for two distinct identifiers. Assigning a second VID instead preserves A's reach but breaks the shared-email anchor.",
+    "conditional_conflict": "Stable email identity requires VID(e@A) = VID(e@B), but the day-1 overlap already made that VID equal to VID(p@A). EDP A would then have one VID for two distinct identifiers. Assigning a second VID instead preserves A's reach but breaks the shared-email anchor.",
     "ways_out": [
       "reserve capacity for future email arrivals",
       "know the relevant identity roster before finalizing labels",

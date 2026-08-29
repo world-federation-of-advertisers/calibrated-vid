@@ -12,7 +12,7 @@ from .population import make_world
 
 
 def two_day_anchor_counterexample() -> dict[str, object]:
-    """Small proof that strict online guarantees need reservation or lookahead.
+    """Conditional stress case when an EDP can change its acting key over time.
 
     On day one, a proprietary identifier at A is deliberately overlapped with
     an email identifier at B.  If that same email later arrives at A, its
@@ -21,6 +21,12 @@ def two_day_anchor_counterexample() -> dict[str, object]:
     the email preserves A's reach but breaks the anchor.
     """
     return {
+        "assumption": (
+            "The same EDP can first label a person with a proprietary fallback and later "
+            "present a shared email-derived Reference ID for that person, or a synthetic "
+            "fallback assignment may occupy a Reference-ID VID at that EDP. A stable "
+            "pre-ranked Reference-ID lane avoids this premise."
+        ),
         "day_1": {
             "edp_a": ["proprietary:p"],
             "edp_b": ["email:e"],
@@ -31,7 +37,7 @@ def two_day_anchor_counterexample() -> dict[str, object]:
             "edp_a_adds": ["email:e"],
             "required_edp_a_reach": 2,
         },
-        "contradiction": (
+        "conditional_conflict": (
             "Stable email identity requires VID(e@A) = VID(e@B), but the day-1 "
             "overlap already made that VID equal to VID(p@A). EDP A would then "
             "have one VID for two distinct identifiers. Assigning a second VID "

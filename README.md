@@ -141,7 +141,9 @@ PYTHONPATH=src .venv/bin/python -m reference_calibration.online_identity_constra
 The calibrated-Venn run is the realistic end-to-end path: a provider model
 learned from a separate 5,000-person panel converts cumulative VID reaches and
 Reference-ID overlaps into one full Venn target, which is then projected onto
-the states reachable from already-frozen labels. The solver benchmark compares
+the states reachable from already-frozen labels. The existing single-EDP VID
+reaches are hard equality constraints throughout; calibration changes only
+cross-EDP overlap. The solver benchmark compares
 the exact integer projection with the faster constructive allocator. The two
 smaller studies quantify sensitivity to evidence regularization and the online
 conflict between future shared-email anchors and previously assigned fallback
