@@ -1,0 +1,229 @@
+{
+  "configuration": {
+    "profile": "full",
+    "n_users": 18000,
+    "n_edps": 10,
+    "n_weeks": 13,
+    "campaign_count": 19,
+    "cumulative_venn_cell_count": 1023
+  },
+  "methods": {
+    "cumulative_full_venn_oldest": {
+      "all_reports": {
+        "count": 285,
+        "mean": 0.020700098134006518,
+        "median": 0.0,
+        "p90": 0.08286809966171671,
+        "max": 0.1555043227665706
+      },
+      "by_report_type": {
+        "prefix": {
+          "count": 152,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "max": 0.0
+        },
+        "interval": {
+          "count": 76,
+          "mean": 0.062237646893123985,
+          "median": 0.05575482225410489,
+          "p90": 0.13000861328153446,
+          "max": 0.1555043227665706
+        },
+        "noncontiguous": {
+          "count": 57,
+          "mean": 0.020516961479200596,
+          "median": 0.014075067024128687,
+          "p90": 0.04696054374515058,
+          "max": 0.11579915878023134
+        }
+      },
+      "by_edp_count": {
+        "2": {
+          "count": 76,
+          "mean": 0.011056788728816323,
+          "median": 0.0,
+          "p90": 0.03167870492629655,
+          "max": 0.08526107072042301
+        },
+        "5": {
+          "count": 95,
+          "mean": 0.017748931217862456,
+          "median": 0.0,
+          "p90": 0.05937124342291093,
+          "max": 0.1371517631015001
+        },
+        "10": {
+          "count": 114,
+          "mean": 0.029588276834253368,
+          "median": 0.0,
+          "p90": 0.11612289718979149,
+          "max": 0.1555043227665706
+        }
+      }
+    },
+    "cumulative_full_venn_recent": {
+      "all_reports": {
+        "count": 285,
+        "mean": 0.015734997199549995,
+        "median": 0.0,
+        "p90": 0.061907090605712416,
+        "max": 0.10799532632281755
+      },
+      "by_report_type": {
+        "prefix": {
+          "count": 152,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "max": 0.0
+        },
+        "interval": {
+          "count": 76,
+          "mean": 0.0249089117771354,
+          "median": 0.017767325285443628,
+          "p90": 0.06202312477407514,
+          "max": 0.09696314319185366
+        },
+        "noncontiguous": {
+          "count": 57,
+          "mean": 0.04546310362823611,
+          "median": 0.046759747102212854,
+          "p90": 0.08551435571772846,
+          "max": 0.10799532632281755
+        }
+      },
+      "by_edp_count": {
+        "2": {
+          "count": 76,
+          "mean": 0.008094945606984538,
+          "median": 0.0,
+          "p90": 0.024558989334988547,
+          "max": 0.08460013218770654
+        },
+        "5": {
+          "count": 95,
+          "mean": 0.015166871121919136,
+          "median": 0.0,
+          "p90": 0.0560016495917128,
+          "max": 0.09028683181225554
+        },
+        "10": {
+          "count": 114,
+          "mean": 0.021301803325952676,
+          "median": 0.0,
+          "p90": 0.07429614956804703,
+          "max": 0.10799532632281755
+        }
+      }
+    },
+    "daily_full_venn": {
+      "all_reports": {
+        "count": 285,
+        "mean": 0.8965913902270631,
+        "median": 0.6465352828989193,
+        "p90": 1.9567876463169307,
+        "max": 4.383589059372915
+      },
+      "by_report_type": {
+        "prefix": {
+          "count": 152,
+          "mean": 1.0412519748290554,
+          "median": 0.7135138612568714,
+          "p90": 2.2011572066465517,
+          "max": 4.383589059372915
+        },
+        "interval": {
+          "count": 76,
+          "mean": 0.8745310417974443,
+          "median": 0.7676073461194277,
+          "p90": 1.663633236439344,
+          "max": 2.960202887241514
+        },
+        "noncontiguous": {
+          "count": 57,
+          "mean": 0.5402436291945757,
+          "median": 0.4630738522954092,
+          "p90": 1.1456818806208686,
+          "max": 1.5764053840063341
+        }
+      },
+      "by_edp_count": {
+        "2": {
+          "count": 76,
+          "mean": 0.3217337462983914,
+          "median": 0.28289744567594965,
+          "p90": 0.6376114918573873,
+          "max": 1.219954648526077
+        },
+        "5": {
+          "count": 95,
+          "mean": 0.8577163367050046,
+          "median": 0.6858947660696931,
+          "p90": 1.7915296808773076,
+          "max": 2.94179523141655
+        },
+        "10": {
+          "count": 114,
+          "mean": 1.3122256974478936,
+          "median": 1.1045912061248087,
+          "p90": 2.679006220206695,
+          "max": 4.383589059372915
+        }
+      }
+    }
+  },
+  "exact_cell_audits": {
+    "daily_full_venn_max_cell_difference": 0,
+    "cumulative_full_venn_recent_max_prefix_cell_difference": 0,
+    "cumulative_full_venn_oldest_max_prefix_cell_difference": 0
+  },
+  "daily_plus_cumulative_counterexample": {
+    "world_1": [
+      [
+        "a"
+      ],
+      [
+        "b"
+      ],
+      [
+        "a"
+      ]
+    ],
+    "world_2": [
+      [
+        "a"
+      ],
+      [
+        "b"
+      ],
+      [
+        "b"
+      ]
+    ],
+    "daily_reach_both": [
+      1,
+      1,
+      1
+    ],
+    "cumulative_reach_both": [
+      1,
+      2,
+      2
+    ],
+    "world_1_weeks_2_3_union": 2,
+    "world_2_weeks_2_3_union": 1,
+    "daily_equal": true,
+    "cumulative_equal": true
+  },
+  "time_atom_audit": {
+    "edps": 3,
+    "weeks": 4,
+    "possible_nonempty_activity_atoms": 4095,
+    "observed_nonempty_activity_atoms": 158,
+    "report_queries_checked": 105,
+    "max_report_difference": 0
+  },
+  "ten_edp_thirteen_week_possible_activity_atoms": 1361129467683753853853498429727072845823
+}

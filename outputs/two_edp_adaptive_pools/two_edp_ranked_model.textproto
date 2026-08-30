@@ -1,0 +1,46 @@
+name: "two-edp-reference-anchored-ranked-model"
+index: 0
+branch_node {
+  updates {
+    updates {
+      conditional_assignment {
+        condition {
+          op: HAS
+          name: "labeler_input.profile_info.proprietary_id_space_1_user_info.user_id"
+        }
+        assignments {
+          source_field: "labeler_input.profile_info.proprietary_id_space_1_user_info.user_id_fingerprint"
+          target_field: "acting_fingerprint"
+        }
+      }
+    }
+    updates {
+      conditional_assignment {
+        condition {
+          op: HAS
+          name: "labeler_input.profile_info.email_user_info.user_id"
+        }
+        assignments {
+          source_field: "labeler_input.profile_info.email_user_info.user_id_fingerprint"
+          target_field: "acting_fingerprint"
+        }
+      }
+    }
+  }
+  branches {
+    condition { op: TRUE }
+    node {
+      name: "shared-ranked-total-reach-pool"
+      index: 1
+      ranked_population_node {
+        pools {
+          population_offset: 10000000
+          total_population: 10000
+        }
+        random_seed: "model-line-2026q3-shared-ranked-pool-v1"
+        ranked_size: 9500
+        unranked_mode: DISJOINT
+      }
+    }
+  }
+}

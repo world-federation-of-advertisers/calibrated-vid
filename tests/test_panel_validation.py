@@ -1,0 +1,149 @@
+import unittest
+
+import numpy as np
+
+from reference_calibration.config import SimulationConfig
+from reference_calibration.panel_validation import (
+    EmailFirstPanelVidModel,
+    PANEL_DESIGNS,
+    TwoVidAggregateCombiner,
+    draw_panel,
+    measure_panel_report,
+)
+from reference_calibration.population import generate_campaign, make_world
+
+
+class PanelValidationTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.config = SimulationConfig(n_users=6_000, panel_size=5_000)
+        cls.world = make_world(cls.config)
+        cls.campaigns = [
+            generate_campaign(
+                cls.world,
+                scenario,
+                cls.config.seed + 900_000 + index,
+                f"panel_test_{scenario}",
+            )
+            for index, scenario in enumerate(
+                (
+                    "broad_awareness_control",
+                    "website_retargeting",
+                    "crm_customer_list",
+                    "app_activity_retargeting",
+                )
+            )
+        ]
+
+    def test_panel_designs_have_requested_size_and_finite_weights(self):
+        for index, design in enumerate(PANEL_DESIGNS):
+            panel = draw_panel(self.world, design, self.config.seed + index)
+            self.assertEqual(panel.raw_size, 5_000)
+            self.assertTrue(np.all(np.isfinite(panel.weights)))
+            self.assertAlmostEqual(
+                float(panel.weights.sum()),
+                float(self.config.population_size),
+                places=4,
+            )
+            self.assertGreater(panel.effective_size, 0)
+            self.assertLessEqual(panel.effective_size, panel.raw_size + 1e-6)
+
+    def test_email_first_panel_model_produces_bounded_report(self):
+        panel = draw_panel(self.world, "representative", self.config.seed + 10)
+        observations = [
+            measure_panel_report(
+                self.world,
+                campaign,
+                panel,
+                tuple(range(self.config.n_weeks)),
+                tuple(range(5)),
+            )
+            for campaign in self.campaigns
+        ]
+        model = EmailFirstPanelVidModel.fit(observations, self.config.n_edps)
+        full = measure_panel_report(
+            self.world,
+            self.campaigns[0],
+            panel,
+            tuple(range(self.config.n_weeks)),
+            tuple(range(5)),
+        )
+        result = model.predict_report(full)
+        marginals = np.asarray(
+            [full.truth_intersections[1 << index] for index in range(5)],
+            dtype=float,
+        )
+        self.assertGreaterEqual(result.full_union, float(np.max(marginals)) - 1e-5)
+        self.assertLessEqual(
+            result.full_union,
+            min(float(np.sum(marginals)), self.config.population_size) + 1e-5,
+        )
+
+    def test_email_anchor_is_preserved_in_every_pair_target(self):
+        panel = draw_panel(self.world, "representative", self.config.seed + 11)
+        observations = [
+            measure_panel_report(
+                self.world,
+                campaign,
+                panel,
+                tuple(range(self.config.n_weeks)),
+                tuple(range(5)),
+            )
+            for campaign in self.campaigns
+        ]
+        model = EmailFirstPanelVidModel.fit(observations, self.config.n_edps)
+        observation = observations[0]
+        targets = model.predict_pair_targets(observation)
+        for left in range(5):
+            for right in range(left + 1, 5):
+                mask = (1 << left) | (1 << right)
+                self.assertGreaterEqual(
+                    targets[mask] + 1e-6,
+                    observation.email_intersections[mask],
+                )
+
+    def test_two_vid_combiner_uses_only_bounded_aggregate_blend(self):
+        panel = draw_panel(self.world, "representative", self.config.seed + 12)
+        observations = [
+            measure_panel_report(
+                self.world,
+                campaign,
+                panel,
+                tuple(range(self.config.n_weeks)),
+                tuple(range(5)),
+            )
+            for campaign in self.campaigns
+        ]
+        agnostic = EmailFirstPanelVidModel.fit(observations, self.config.n_edps)
+        combiner = TwoVidAggregateCombiner.fit(observations, agnostic)
+        self.assertGreaterEqual(combiner.agnostic_weight, 0.0)
+        self.assertLessEqual(combiner.agnostic_weight, 1.0)
+        self.assertFalse(combiner.describe()["uses_person_level_crosswalk"])
+
+        observation = observations[0]
+        agnostic_targets = agnostic.predict_pair_targets(observation)
+        combined_targets = combiner.predict_pair_targets(observation, agnostic)
+        for left in range(5):
+            for right in range(left + 1, 5):
+                mask = (1 << left) | (1 << right)
+                endpoints = (
+                    observation.baseline_intersections[mask],
+                    agnostic_targets[mask],
+                )
+                self.assertGreaterEqual(combined_targets[mask], min(endpoints) - 1e-6)
+                self.assertLessEqual(combined_targets[mask], max(endpoints) + 1e-6)
+
+        result = combiner.predict_report(observation, agnostic)
+        marginals = np.asarray(
+            [observation.truth_intersections[1 << index] for index in range(5)],
+            dtype=float,
+        )
+        self.assertGreaterEqual(result.full_union, float(np.max(marginals)) - 1e-5)
+        self.assertLessEqual(
+            result.full_union,
+            min(float(np.sum(marginals)), self.config.population_size) + 1e-5,
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

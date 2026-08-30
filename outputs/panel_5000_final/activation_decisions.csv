@@ -1,0 +1,17 @@
+panel_design,draw,selected_existing_correction,selected_two_vid_correction,recommended_configuration,existing_correction_active,two_vid_correction_active,existing_correction_harmed_truth,two_vid_correction_harmed_truth,existing_correction_error_change,two_vid_correction_error_change,recommended_error_change_vs_existing,agnostic_model_parameter_count,two_vid_combiner_parameter_count,two_vid_agnostic_weight,consistency_checks,consistency_violations
+representative,0,existing_plus_fixed,two_vid_plus_fixed,two_vid_plus_selected_rid,True,True,False,False,-0.32539665458199574,-0.04883025581805166,-0.3335092277757851,61,1,0.8345519103083145,52,1
+representative,1,existing_plus_fixed,two_vid_plus_fixed_log,two_vid_plus_selected_rid,True,True,False,False,-0.31999607841480693,-0.04788773759929178,-0.3359744887246251,61,1,0.8589995436698391,52,0
+representative,2,existing_plus_fixed,two_vid_plus_fixed_log,two_vid_plus_selected_rid,True,True,False,False,-0.32072110602476317,-0.04606650250942401,-0.3330585146552789,61,1,0.8517483853863137,52,2
+representative,3,existing_plus_fixed,two_vid_plus_fixed_log,two_vid_plus_selected_rid,True,True,False,False,-0.32332985640334877,-0.04752618614944769,-0.334282790398497,61,1,0.8441755263688727,52,1
+low_effective_size,0,existing_plus_fixed,two_vid,existing_plus_selected_rid,True,False,False,False,-0.31459897702513673,0.0,-0.31459897702513673,61,1,0.8683526075629527,52,0
+low_effective_size,1,existing_plus_fixed,two_vid,existing_plus_selected_rid,True,False,False,False,-0.3215574065600245,0.0,-0.3215574065600245,61,1,0.8659944145239822,52,1
+low_effective_size,2,existing_plus_fixed,two_vid,existing_plus_selected_rid,True,False,False,False,-0.32999551849130904,0.0,-0.32999551849130904,61,1,0.8427079467976955,52,0
+low_effective_size,3,existing_plus_fixed,two_vid_plus_mixture,existing_plus_selected_rid,True,True,False,False,-0.32829343144028056,-0.027072471445384952,-0.32829343144028056,61,1,0.8638370058698279,52,3
+observable_bias_weighted,0,existing_plus_fixed,two_vid,existing_plus_selected_rid,True,False,False,False,-0.32809120544068143,0.0,-0.32809120544068143,61,1,0.8843216120238135,52,1
+observable_bias_weighted,1,existing_plus_fixed,two_vid_plus_fixed,two_vid_plus_selected_rid,True,True,False,False,-0.3248598324704367,-0.040464640656773465,-0.33005247867702775,61,1,0.8551229706761427,52,1
+observable_bias_weighted,2,existing_plus_fixed,two_vid_plus_fixed_log,two_vid_plus_selected_rid,True,True,False,False,-0.31801426865747906,-0.048978289013800316,-0.3364109282412356,61,1,0.8586143477384334,52,1
+observable_bias_weighted,3,existing_plus_fixed,two_vid,existing_plus_selected_rid,True,False,False,False,-0.32893448425146843,0.0,-0.32893448425146843,61,1,0.8682775017300054,52,1
+hidden_matchability_bias,0,existing_vid,two_vid,existing_vid,False,False,False,False,0.0,0.0,0.0,61,1,1.0,52,0
+hidden_matchability_bias,1,existing_vid,two_vid,existing_vid,False,False,False,False,0.0,0.0,0.0,61,1,1.0,52,0
+hidden_matchability_bias,2,existing_vid,two_vid,existing_vid,False,False,False,False,0.0,0.0,0.0,61,1,1.0,52,0
+hidden_matchability_bias,3,existing_vid,two_vid,existing_vid,False,False,False,False,0.0,0.0,0.0,61,1,1.0,52,0

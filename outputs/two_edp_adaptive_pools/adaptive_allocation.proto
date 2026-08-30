@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package calibrated_vid.example;
+
+message EdpReach {
+  string edp = 1;
+  uint64 reach = 2;
+}
+
+// Aggregate control record produced inside the TEE. It contains no raw email,
+// Reference ID, proprietary ID, or claimed cross-EDP person link.
+message DailyAllocationManifest {
+  string model_line = 1;
+  uint32 day = 2;
+  repeated string edps = 3;
+  uint64 requested_cumulative_overlap = 4;
+  uint64 achieved_cumulative_overlap = 5;
+  repeated EdpReach edp_reaches = 6;
+  uint64 union_reach = 7;
+  uint64 direct_reference_overlap = 8;
+  uint64 synthetic_fallback_overlap = 9;
+  string target_status = 10;
+  uint64 late_anchor_conflicts = 11;
+}

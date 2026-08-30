@@ -1,0 +1,48 @@
+{
+  "configuration": {
+    "n_users": 12000,
+    "n_edps": 10,
+    "n_weeks": 13,
+    "campaigns": 19
+  },
+  "two_day_counterexample": {
+    "assumption": "The same EDP can first label a person with a proprietary fallback and later present a shared email-derived Reference ID for that person, or a synthetic fallback assignment may occupy a Reference-ID VID at that EDP. A stable pre-ranked Reference-ID lane avoids this premise.",
+    "day_1": {
+      "edp_a": [
+        "proprietary:p"
+      ],
+      "edp_b": [
+        "email:e"
+      ],
+      "required_union": 1,
+      "forced_assignment": "VID(p@A) = VID(e@B)"
+    },
+    "day_2": {
+      "edp_a_adds": [
+        "email:e"
+      ],
+      "required_edp_a_reach": 2
+    },
+    "conditional_conflict": "Stable email identity requires VID(e@A) = VID(e@B), but the day-1 overlap already made that VID equal to VID(p@A). EDP A would then have one VID for two distinct identifiers. Assigning a second VID instead preserves A's reach but breaks the shared-email anchor.",
+    "ways_out": [
+      "reserve capacity for future email arrivals",
+      "know the relevant identity roster before finalizing labels",
+      "permit a controlled anchor miss or local collision",
+      "permit later relabeling or restatement"
+    ]
+  },
+  "reserve_every_email_vid_at_every_edp": {
+    "feasible_edp_campaign_fraction": 0.9526315789473684,
+    "campaigns_with_all_edps_feasible": 18,
+    "maximum_proprietary_demand_to_capacity": 3.158959537572254
+  },
+  "future_aware_per_edp_reservation": {
+    "feasible_edp_campaign_fraction": 1.0,
+    "campaigns_with_all_edps_feasible": 19
+  },
+  "strict_email_and_proprietary_namespaces": {
+    "mean_true_pair_overlap_that_crosses_identifier_modes": 0.4403924125840004,
+    "p90_true_pair_overlap_that_crosses_identifier_modes": 0.47834933654477085,
+    "interpretation": "This share cannot be represented as an email-to-proprietary match if the two VID namespaces never overlap."
+  }
+}

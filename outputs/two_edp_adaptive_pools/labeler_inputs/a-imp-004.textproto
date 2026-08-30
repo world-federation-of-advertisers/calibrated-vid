@@ -1,0 +1,15 @@
+event_id {
+  publisher: "EDP_A"
+  id: "a-imp-004"
+}
+timestamp_usec: 1700086400000000
+profile_info {
+  proprietary_id_space_1_user_info {
+    user_id: "a-dan"
+  }
+}
+traffic_info { event_collection_id: "campaign-example" }
+rank_assignments {
+  pool_offset: 10000000
+  local_rank: 3
+}

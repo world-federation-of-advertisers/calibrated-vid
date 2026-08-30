@@ -1,0 +1,13 @@
+model_line: "2026q3"
+day: 2
+edps: "EDP_A"
+edps: "EDP_B"
+requested_cumulative_overlap: 4
+achieved_cumulative_overlap: 4
+edp_reaches { edp: "EDP_A" reach: 5 }
+edp_reaches { edp: "EDP_B" reach: 5 }
+union_reach: 6
+direct_reference_overlap: 2
+synthetic_fallback_overlap: 2
+target_status: "EXACT"
+late_anchor_conflicts: 0
