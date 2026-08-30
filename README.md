@@ -149,6 +149,20 @@ smaller studies quantify sensitivity to evidence regularization and the online
 conflict between future shared-email anchors and previously assigned fallback
 VIDs.
 
+A concrete two-EDP implementation walkthrough is generated with:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m reference_calibration.two_edp_adaptive_pools \
+  --output-dir outputs/two_edp_adaptive_pools
+```
+
+It writes a current-schema `CompiledNode` textproto, one `LabelerInput`
+textproto per example impression, daily aggregate allocation manifests, the
+persistent rank state, and a person-by-person trace. The example covers direct
+Reference-ID matches, proprietary-only synthetic overlap, repeated
+impressions, unequal email coverage, an infeasible lower target, and a late
+email revelation that conflicts with a previously frozen proprietary VID.
+
 ## What is validated
 
 The original calibration experiment fits on large, broadly targeted campaigns.

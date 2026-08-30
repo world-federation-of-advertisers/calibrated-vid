@@ -1,0 +1,18 @@
+event_id {
+  publisher: "EDP_B"
+  id: "b-imp-005"
+}
+timestamp_usec: 1700172800000000
+profile_info {
+  email_user_info {
+    user_id: "bob@example.test"
+  }
+  proprietary_id_space_1_user_info {
+    user_id: "b-bob"
+  }
+}
+traffic_info { event_collection_id: "campaign-example" }
+rank_assignments {
+  pool_offset: 10000000
+  local_rank: 1
+}

@@ -1,0 +1,141 @@
+{
+  "account_rank": {
+    "EDP_A:a-alice": 0,
+    "EDP_A:a-bob": 1,
+    "EDP_A:a-carol": 2,
+    "EDP_A:a-dan": 3,
+    "EDP_A:a-eve": 5,
+    "EDP_A:a-frank": 6,
+    "EDP_A:a-heidi": 9,
+    "EDP_B:b-alice": 0,
+    "EDP_B:b-bob": 1,
+    "EDP_B:b-carol": 2,
+    "EDP_B:b-erin": 4,
+    "EDP_B:b-eve": 5,
+    "EDP_B:b-grace": 7,
+    "EDP_B:b-heidi": 8,
+    "EDP_B:b-ivan": 9
+  },
+  "reference_rank": {
+    "101": 0,
+    "102": 1,
+    "303": 5,
+    "404": 8
+  },
+  "reference_edps": {
+    "101": [
+      "EDP_A",
+      "EDP_B"
+    ],
+    "102": [
+      "EDP_A",
+      "EDP_B"
+    ],
+    "303": [
+      "EDP_A",
+      "EDP_B"
+    ],
+    "404": [
+      "EDP_B"
+    ]
+  },
+  "rank_edps": {
+    "0": [
+      "EDP_A",
+      "EDP_B"
+    ],
+    "1": [
+      "EDP_A",
+      "EDP_B"
+    ],
+    "2": [
+      "EDP_A",
+      "EDP_B"
+    ],
+    "3": [
+      "EDP_A"
+    ],
+    "4": [
+      "EDP_B"
+    ],
+    "5": [
+      "EDP_A",
+      "EDP_B"
+    ],
+    "6": [
+      "EDP_A"
+    ],
+    "7": [
+      "EDP_B"
+    ],
+    "8": [
+      "EDP_B"
+    ],
+    "9": [
+      "EDP_A",
+      "EDP_B"
+    ]
+  },
+  "day_summaries": [
+    {
+      "day": 1,
+      "requested_overlap": 2,
+      "achieved_overlap": 2,
+      "edp_a_reach": 4,
+      "edp_b_reach": 3,
+      "union_reach": 5,
+      "direct_reference_overlap": 1,
+      "synthetic_fallback_overlap": 1,
+      "target_status": "EXACT",
+      "late_anchor_conflicts": 0
+    },
+    {
+      "day": 2,
+      "requested_overlap": 4,
+      "achieved_overlap": 4,
+      "edp_a_reach": 5,
+      "edp_b_reach": 5,
+      "union_reach": 6,
+      "direct_reference_overlap": 2,
+      "synthetic_fallback_overlap": 2,
+      "target_status": "EXACT",
+      "late_anchor_conflicts": 0
+    },
+    {
+      "day": 3,
+      "requested_overlap": 3,
+      "achieved_overlap": 4,
+      "edp_a_reach": 6,
+      "edp_b_reach": 6,
+      "union_reach": 8,
+      "direct_reference_overlap": 3,
+      "synthetic_fallback_overlap": 1,
+      "target_status": "PROJECTED_UP_TO_IMMUTABLE_LOWER_BOUND",
+      "late_anchor_conflicts": 0
+    },
+    {
+      "day": 4,
+      "requested_overlap": 4,
+      "achieved_overlap": 4,
+      "edp_a_reach": 7,
+      "edp_b_reach": 7,
+      "union_reach": 10,
+      "direct_reference_overlap": 3,
+      "synthetic_fallback_overlap": 1,
+      "target_status": "EXACT",
+      "late_anchor_conflicts": 0
+    },
+    {
+      "day": 5,
+      "requested_overlap": 5,
+      "achieved_overlap": 5,
+      "edp_a_reach": 7,
+      "edp_b_reach": 8,
+      "union_reach": 10,
+      "direct_reference_overlap": 3,
+      "synthetic_fallback_overlap": 2,
+      "target_status": "EXACT",
+      "late_anchor_conflicts": 1
+    }
+  ]
+}
