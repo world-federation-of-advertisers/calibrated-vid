@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "calibrated-vid"
+version = "0.2.0"
+description = "Synthetic demonstration of campaign-specific Reference-ID VID calibration"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=2.0",
+  "protobuf>=7.35.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "grpcio-tools>=1.84",
+]
+notebook = [
+  "ipykernel>=6.0",
+  "jupyterlab>=4.0",
+  "matplotlib>=3.8",
+  "nbconvert>=7.0",
+  "nbformat>=5.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
