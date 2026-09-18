@@ -1,0 +1,58 @@
+random_seed: 20260916
+
+fingerprint_observation_model {
+  publisher_a_coverage: 0.30
+  publisher_b_coverage: 0.80
+  conditional_match_probability: 0.60
+}
+
+populations {
+  name: "broad_reach_population"
+  population_size: 200000
+  event_groups {
+    publisher: "publisher_a"
+    reach_probability: 0.40
+  }
+  event_groups {
+    publisher: "publisher_b"
+    reach_probability: 0.32
+  }
+  overlap_rate_of_smaller_reach: 0.55
+  campaign_overlap_standard_deviation: 0.07
+}
+
+populations {
+  name: "response_population"
+  population_size: 200000
+  event_groups {
+    publisher: "publisher_a"
+    reach_probability: 0.40
+  }
+  event_groups {
+    publisher: "publisher_b"
+    reach_probability: 0.32
+  }
+  overlap_rate_of_smaller_reach: 0.22
+  campaign_overlap_standard_deviation: 0.05
+}
+
+campaign_cohorts {
+  objective: "reach"
+  population: "broad_reach_population"
+  split: TRAIN
+  campaign_count: 10
+}
+
+campaign_cohorts {
+  objective: "reach"
+  population: "broad_reach_population"
+  split: EVALUATION
+  campaign_count: 10
+}
+
+campaign_cohorts {
+  objective: "traffic"
+  population: "response_population"
+  split: EVALUATION
+  campaign_count: 10
+}

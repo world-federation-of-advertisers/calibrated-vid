@@ -1,0 +1,25 @@
+{
+  "evaluation": [
+    {
+      "calibrated_overlap_mae_points": 0.7334396995284604,
+      "calibrated_union_mape_percent": 0.43087226462309836,
+      "campaigns": 10,
+      "fixed_overlap_mae_points": 6.822777274399025,
+      "fixed_union_mape_percent": 3.925987492487578,
+      "objective": "reach"
+    },
+    {
+      "calibrated_overlap_mae_points": 0.3384818543763285,
+      "calibrated_union_mape_percent": 0.16468100710481698,
+      "campaigns": 10,
+      "fixed_overlap_mae_points": 30.480904616609088,
+      "fixed_union_mape_percent": 14.854020565643193,
+      "objective": "traffic"
+    }
+  ],
+  "model": {
+    "fixed_overlap_rate": 0.5027597684501801,
+    "reference_overlap_center": 0.5027597684501801,
+    "reference_sensitivity": 1.005049926592663
+  }
+}
