@@ -77,9 +77,9 @@ It illustrates three hypothetical failure shapes:
 
 | Synthetic test | Held-out result |
 | --- | --- |
-| Matched Traffic versus Reach | Traffic overlap is lower in 87.5% of pairs; median gap is 15.0 points |
-| Medium→large versus large→medium | Reversing publisher size changes median overlap by 15.0 points |
-| Equal-size large Reach | Overlap spans 11.0% at P10 to 51.6% at P90 |
+| Matched Traffic versus Reach | Traffic overlap is lower in 87.5% of pairs; median gap is 14.8 points |
+| Medium→large versus large→medium | Reversing publisher size changes median overlap by 14.4 points |
+| Equal-size large Reach | Overlap spans 11.0% at P10 to 51.4% at P90 |
 
 The fixed large-Reach baseline has held-out overlap MAE of approximately 21
 points for Traffic and 19 points for the two directional configurations. The

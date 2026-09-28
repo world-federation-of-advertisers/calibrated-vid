@@ -431,6 +431,14 @@ def _weighted_sample(
     return np.argpartition(keys, -count)[-count:]
 
 
+def _sampling_seed(random_seed: int, comparison_id: str) -> np.random.SeedSequence:
+    """Returns one stable seed per matched campaign comparison."""
+
+    return np.random.SeedSequence(
+        [random_seed, *comparison_id.encode("utf-8")]
+    )
+
+
 def simulate_campaign(
     audience: SyntheticAudience,
     plan: CampaignPlan,
@@ -438,10 +446,9 @@ def simulate_campaign(
 ) -> CampaignResult:
     """Simulates publisher delivery and derives overlap from selected people."""
 
-    seed = config.random_seed + sum(
-        (index + 1) * ord(char) for index, char in enumerate(plan.comparison_id)
+    rng = np.random.default_rng(
+        _sampling_seed(config.random_seed, plan.comparison_id)
     )
-    rng = np.random.default_rng(seed)
     concentration = 2.00
     selected_a = _weighted_sample(
         rng,

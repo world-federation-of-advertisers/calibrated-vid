@@ -249,7 +249,7 @@ show_table(
         id="objective-test-results",
     ),
     new_markdown_cell(
-        """> **Test 1 TL;DR.** A single mean or median learned from large Reach campaigns cannot represent the matched Traffic campaigns in this synthetic market. Traffic produces lower overlap in most pairs, with a 15-point median within-pair gap. Applying the larger Reach overlap therefore overstates the shared audience and understates the additional unique audience contributed by the second publisher.""",
+        """> **Test 1 TL;DR.** A single mean or median learned from large Reach campaigns cannot represent the matched Traffic campaigns in this synthetic market. Traffic produces lower overlap in most pairs, with a roughly 15-point median within-pair gap. Applying the larger Reach overlap therefore overstates the shared audience and understates the additional unique audience contributed by the second publisher.""",
         id="objective-test-conclusion",
     ),
     new_markdown_cell(
@@ -302,7 +302,7 @@ show_table(
         id="direction-test-results",
     ),
     new_markdown_cell(
-        """> **Test 2 TL;DR.** A single large-to-large Reach average cannot represent both asymmetric size directions. The medium-to-large configuration has a 15-point higher median within-pair overlap than the reversed configuration, despite using the same objective, sizes, target, and delivery conditions. The fixed baseline consequently understates overlap in one direction and overstates it in the other, reversing the direction of the unique-reach error.""",
+        """> **Test 2 TL;DR.** A single large-to-large Reach average cannot represent both asymmetric size directions. The medium-to-large configuration has a roughly 14-point higher median within-pair overlap than the reversed configuration, despite using the same objective, sizes, target, and delivery conditions. The fixed baseline consequently understates overlap in one direction and overstates it in the other, reversing the direction of the unique-reach error.""",
         id="direction-test-conclusion",
     ),
     new_markdown_cell(

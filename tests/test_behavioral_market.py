@@ -6,6 +6,8 @@ from dataclasses import replace
 from pathlib import Path
 
 from calibrated_vid.behavioral_market import (
+    MarketConfig,
+    _sampling_seed,
     behavioral_diagnostics,
     build_audience,
     fit_overlap_model,
@@ -128,6 +130,15 @@ class BehavioralMarketTest(unittest.TestCase):
                 campaign_id=plan.campaign_id,
             ),
         )
+
+    def test_comparison_ids_have_unique_sampling_seeds(self) -> None:
+        config = MarketConfig()
+        comparison_ids = {plan.comparison_id for plan in make_campaign_plans(config)}
+        generated_states = {
+            tuple(_sampling_seed(config.random_seed, comparison_id).generate_state(4))
+            for comparison_id in comparison_ids
+        }
+        self.assertEqual(len(generated_states), len(comparison_ids))
 
     def test_reference_signal_improves_every_scenario(self) -> None:
         summary = summarize_scenarios(self.campaigns, self.predictions)
