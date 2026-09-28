@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.12"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Create development environment
+        run: ./scripts/bootstrap.sh
+
+      - name: Run unit tests
+        run: .venv/bin/python -m unittest discover -s tests -v
+
+      - name: Execute notebooks
+        if: matrix.python-version == '3.10'
+        run: |
+          PYTHONPATH=src .venv/bin/python notebooks/build_two_population_notebook.py
+          if [[ -f notebooks/build_behavioral_market_notebook.py ]]; then
+            PYTHONPATH=src .venv/bin/python notebooks/build_behavioral_market_notebook.py
+          fi
+
+      - name: Verify notebook generation is idempotent
+        if: matrix.python-version == '3.10'
+        run: |
+          git add --all
+          PYTHONPATH=src .venv/bin/python notebooks/build_two_population_notebook.py
+          if [[ -f notebooks/build_behavioral_market_notebook.py ]]; then
+            PYTHONPATH=src .venv/bin/python notebooks/build_behavioral_market_notebook.py
+          fi
+          git diff --exit-code
