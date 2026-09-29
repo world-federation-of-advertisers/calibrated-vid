@@ -1,6 +1,11 @@
 # Campaign-specific calibrated VID demonstration
 
-[![Open the illustrative notebook in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/world-federation-of-advertisers/calibrated-vid/blob/main/notebooks/two_population_calibration.ipynb)
+## Notebooks
+
+| Notebook | Purpose | Launch |
+| --- | --- | --- |
+| Behavioral market scenarios | Primary mechanism study: overlap emerges from objective, size direction, publisher-local opportunity, and cost | [Open in Colab](https://colab.research.google.com/github/world-federation-of-advertisers/calibrated-vid/blob/main/notebooks/behavioral_market_scenarios.ipynb) |
+| Two-population calibration | Companion arithmetic illustration using pre-specified overlap populations | [Open in Colab](https://colab.research.google.com/github/world-federation-of-advertisers/calibrated-vid/blob/main/notebooks/two_population_calibration.ipynb) |
 
 This repository contains two complementary synthetic experiments. The first is
 a deliberately small arithmetic illustration that asks:
@@ -58,8 +63,6 @@ PYTHONPATH=src .venv/bin/python notebooks/build_behavioral_market_notebook.py
 The experiment is feasibility evidence, not a production accuracy claim. Its key assumptions are that the fingerprint-bearing subset has the same overlap behavior as the rest of each campaign and that the coverage and agreement parameters are known. Independent panel validation is required before applying those assumptions to real campaigns.
 
 ## Behavioral market stress test
-
-[![Open the behavioral notebook in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/world-federation-of-advertisers/calibrated-vid/blob/main/notebooks/behavioral_market_scenarios.ipynb)
 
 The second notebook replaces the two pre-specified overlap populations with a
 person-level synthetic market. People differ in publisher activity, click and
