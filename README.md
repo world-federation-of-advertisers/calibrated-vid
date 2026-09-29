@@ -59,7 +59,7 @@ The experiment is feasibility evidence, not a production accuracy claim. Its key
 
 ## Behavioral market stress test
 
-[![Open the behavioral notebook in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/world-federation-of-advertisers/calibrated-vid/blob/stevenwarejones_behavioral_scenarios/notebooks/behavioral_market_scenarios.ipynb)
+[![Open the behavioral notebook in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/world-federation-of-advertisers/calibrated-vid/blob/main/notebooks/behavioral_market_scenarios.ipynb)
 
 The second notebook replaces the two pre-specified overlap populations with a
 person-level synthetic market. People differ in publisher activity, click and
