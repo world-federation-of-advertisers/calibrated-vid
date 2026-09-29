@@ -24,12 +24,16 @@ NOTEBOOK_METADATA = {
 
 cells = [
     new_markdown_cell(
-        """# Why a Reach-trained VID overlap does not transfer
+        """# Illustrative calibration arithmetic with two populations
 
-This fully synthetic experiment isolates one failure mode: two campaign families have the same expected single-publisher reaches but draw from populations with different cross-publisher affinity. A model trained only on broad Reach campaigns therefore learns the wrong shared-population size for Traffic campaigns.
+This fully synthetic arithmetic example assigns two campaign families different overlap populations in advance. It then shows how a model trained only on the higher-overlap population misstates the shared-population size for the lower-overlap population.
 
-The experiment then tests whether a campaign-specific shared-fingerprint signal can adjust that shared population without changing either publisher's own reach.""",
+The result is illustrative rather than causal evidence: the population difference is an input to this notebook. The experiment then tests whether a campaign-specific shared-fingerprint signal can adjust that shared population without changing either publisher's own reach.""",
         id="introduction",
+    ),
+    new_code_cell(
+        "import os\nimport subprocess\nimport sys\nfrom pathlib import Path\n\nif \"google.colab\" in sys.modules:\n    repo = Path(\"/content/calibrated-vid\")\n    if not repo.exists():\n        subprocess.run(\n            [\n                \"git\",\n                \"clone\",\n                \"--depth\",\n                \"1\",\n                \"https://github.com/world-federation-of-advertisers/calibrated-vid.git\",\n                str(repo),\n            ],\n            check=True,\n        )\n    subprocess.run(\n        [sys.executable, \"-m\", \"pip\", \"install\", \"--quiet\", \"-e\", str(repo)],\n        check=True,\n    )\n    os.chdir(repo)\n\nrepo_root = Path.cwd()\nif str(repo_root / \"src\") not in sys.path:\n    sys.path.insert(0, str(repo_root / \"src\"))",
+        id="colab-setup",
     ),
     new_markdown_cell(
         """## Experimental design
@@ -43,7 +47,9 @@ The experiment then tests whether a campaign-specific shared-fingerprint signal 
 - When the same person has a fingerprint at both publishers, those fingerprints agree with 60% probability.
 - The simulator retains the held-out true person overlap until evaluation.
 
-The fixed model first learns the normal publisher overlap from Reach campaigns. The calibrated model retains that Reach baseline and adds one parameter, `reference_sensitivity`, which translates a campaign's coverage-corrected fingerprint-overlap deviation into a change in the shared virtual population.""",
+The fixed model first learns the normal publisher overlap from Reach campaigns. The calibrated model retains that Reach baseline and adds one parameter, `reference_sensitivity`, which translates a campaign's coverage-corrected fingerprint-overlap deviation into a change in the shared virtual population.
+
+Because the fingerprint observation process is generated directly from the simulator's true shared-person set, the calibrated result is an upper-bound feasibility illustration. It is not independent evidence that a real fingerprint-bearing subset represents everyone else.""",
         id="experimental-design",
     ),
     new_code_cell(
