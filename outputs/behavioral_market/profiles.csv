@@ -1,0 +1,8 @@
+name,label,active_days,video_share_a,video_share_b,schedule
+broad_long,"Long flight, broad placements",42,0.35,0.35,broad
+feed_short,"Short flight, feed-heavy",10,0.05,0.05,broad
+video_short,"Short flight, video-heavy",10,0.9,0.9,broad
+a_feed_b_video,"A feed-heavy, B video-heavy",18,0.08,0.88,broad
+a_video_b_feed,"A video-heavy, B feed-heavy",18,0.88,0.08,broad
+daytime_feed,"Daytime, feed-heavy",18,0.1,0.1,daytime
+evening_video,"Evening, video-heavy",18,0.82,0.82,evening

@@ -37,6 +37,16 @@ class MarketConfig:
     fingerprint_coverage_a: float = 0.30
     fingerprint_coverage_b: float = 0.80
     fingerprint_agreement: float = 0.60
+    opportunity_shift_sigma: float = 0.70
+    price_shift_sigma: float = 0.60
+    direction_cost_contrast: float = 1.40
+    traffic_response_exponent: float = 2.00
+    conversion_response_exponent: float = 2.50
+    selection_concentration: float = 2.00
+    objective_comparisons: int = 48
+    traffic_comparisons: int = 32
+    conversion_comparisons: int = 20
+    direction_comparisons: int = 32
     random_seed: int = 20260927
 
 
@@ -247,10 +257,14 @@ def _direction(reach_a: int, reach_b: int) -> str:
 def make_campaign_plans(config: MarketConfig = MarketConfig()) -> list[CampaignPlan]:
     """Builds balanced training and evaluation cohorts for three stress tests."""
 
+    if not 0 <= config.conversion_comparisons <= config.traffic_comparisons:
+        raise ValueError("conversion_comparisons must not exceed traffic_comparisons")
+    if not 0 <= config.traffic_comparisons <= config.objective_comparisons:
+        raise ValueError("traffic_comparisons must not exceed objective_comparisons")
     rng = np.random.default_rng(config.random_seed + 1)
     plans: list[CampaignPlan] = []
     for split in ("train", "evaluation"):
-        for ordinal in range(48):
+        for ordinal in range(config.objective_comparisons):
             comparison_id = f"objective-{split}-{ordinal + 1:02d}"
             active_days = int(
                 np.clip(
@@ -273,9 +287,9 @@ def make_campaign_plans(config: MarketConfig = MarketConfig()) -> list[CampaignP
             )
             auction_state = int(rng.integers(0, 2**31 - 1))
             objectives = [("reach", "reach_large_large")]
-            if ordinal < 32:
+            if ordinal < config.traffic_comparisons:
                 objectives.append(("traffic", "traffic_large_large"))
-            if ordinal < 20:
+            if ordinal < config.conversion_comparisons:
                 objectives.append(("conversion", "conversion_large_large"))
             for objective, scenario in objectives:
                 plans.append(
@@ -295,7 +309,7 @@ def make_campaign_plans(config: MarketConfig = MarketConfig()) -> list[CampaignP
                     )
                 )
 
-        for ordinal in range(32):
+        for ordinal in range(config.direction_comparisons):
             comparison_id = f"direction-{split}-{ordinal + 1:02d}"
             active_days = int(
                 np.clip(
@@ -334,7 +348,7 @@ def make_campaign_plans(config: MarketConfig = MarketConfig()) -> list[CampaignP
                         short_video_share_a=short_video_share_a,
                         short_video_share_b=short_video_share_b,
                         auction_state=auction_state,
-                        opportunity_asymmetry=1.4,
+                        opportunity_asymmetry=config.direction_cost_contrast,
                     )
                 )
     return plans
@@ -344,6 +358,7 @@ def _delivery_weight(
     audience: SyntheticAudience,
     plan: CampaignPlan,
     publisher: str,
+    config: MarketConfig,
 ) -> np.ndarray:
     if publisher == "a":
         activity = (
@@ -367,15 +382,26 @@ def _delivery_weight(
     if plan.objective == "reach":
         objective_value = np.ones_like(cost)
     elif plan.objective == "traffic":
-        objective_value = np.power(click_score, 2.00)
+        objective_value = np.power(click_score, config.traffic_response_exponent)
     elif plan.objective == "conversion":
-        objective_value = np.power(audience.conversion_score, 2.50)
+        objective_value = np.power(
+            audience.conversion_score,
+            config.conversion_response_exponent,
+        )
     else:
         raise ValueError(f"Unknown objective {plan.objective!r}")
 
     publisher_rng = np.random.default_rng(plan.auction_state + publisher_offset)
-    local_opportunity_shift = publisher_rng.normal(0.0, 0.70, len(SEGMENTS))
-    local_price_shift = publisher_rng.normal(0.0, 0.60, len(SEGMENTS))
+    local_opportunity_shift = publisher_rng.normal(
+        0.0,
+        config.opportunity_shift_sigma,
+        len(SEGMENTS),
+    )
+    local_price_shift = publisher_rng.normal(
+        0.0,
+        config.price_shift_sigma,
+        len(SEGMENTS),
+    )
     local_activity = activity * np.exp(local_opportunity_shift[audience.segment])
     opportunity_probability = 1.0 - np.exp(
         -0.08 * plan.active_days * local_activity
@@ -449,16 +475,16 @@ def simulate_campaign(
     rng = np.random.default_rng(
         _sampling_seed(config.random_seed, plan.comparison_id)
     )
-    concentration = 2.00
+    concentration = config.selection_concentration
     selected_a = _weighted_sample(
         rng,
-        _delivery_weight(audience, plan, "a"),
+        _delivery_weight(audience, plan, "a", config),
         plan.reach_a,
         concentration,
     )
     selected_b = _weighted_sample(
         rng,
-        _delivery_weight(audience, plan, "b"),
+        _delivery_weight(audience, plan, "b", config),
         plan.reach_b,
         concentration,
     )
