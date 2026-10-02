@@ -4,7 +4,8 @@
 
 | Notebook | Purpose | Launch |
 | --- | --- | --- |
-| Behavioral market scenarios | Primary mechanism study: overlap emerges from objective, size direction, publisher-local opportunity, and cost | [Open in Colab](https://colab.research.google.com/github/world-federation-of-advertisers/calibrated-vid/blob/main/notebooks/behavioral_market_scenarios.ipynb) |
+| Behavioral market scenarios | Primary person-level study: objective, activity depth, and named campaign conditions change overlap | [Open in Colab](https://colab.research.google.com/github/world-federation-of-advertisers/calibrated-vid/blob/main/notebooks/behavioral_market_scenarios.ipynb) |
+| Population-model sensitivity | Tests whether the behavioral conclusions disappear when their proposed mechanisms are removed | [Open in Colab](https://colab.research.google.com/github/world-federation-of-advertisers/calibrated-vid/blob/main/notebooks/population_model_sensitivity.ipynb) |
 | Two-population calibration | Companion arithmetic illustration using pre-specified overlap populations | [Open in Colab](https://colab.research.google.com/github/world-federation-of-advertisers/calibrated-vid/blob/main/notebooks/two_population_calibration.ipynb) |
 
 This repository contains two complementary synthetic experiments. The first is
@@ -58,50 +59,55 @@ The strong calibrated result is intentional: the simulator guarantees that finge
 .venv/bin/python -m unittest discover -s tests -v
 PYTHONPATH=src .venv/bin/python notebooks/build_two_population_notebook.py
 PYTHONPATH=src .venv/bin/python notebooks/build_behavioral_market_notebook.py
+PYTHONPATH=src .venv/bin/python notebooks/build_model_sensitivity_notebook.py
 ```
 
 The experiment is feasibility evidence, not a production accuracy claim. Its key assumptions are that the fingerprint-bearing subset has the same overlap behavior as the rest of each campaign and that the coverage and agreement parameters are known. Independent panel validation is required before applying those assumptions to real campaigns.
 
-## Behavioral market stress test
+## Intuitive behavioral market
 
-The second notebook replaces the two pre-specified overlap populations with a
-person-level synthetic market. People differ in publisher activity, click and
-conversion propensity, placement availability, delivery cost, and fingerprint
-availability. Every campaign uses the same broad declared audience. Campaign
-delivery selects people according to objective, placement supply,
-publisher-local opportunity, and publisher economics, so overlap emerges
-rather than being configured.
+The primary notebook uses one stable synthetic population. People differ in
+publisher activity, placement use, time-of-day availability, response
+propensity, and opportunity cost. It models people and publisher-local
+delivery—not account identifiers or a production VID system.
 
-It illustrates three hypothetical failure shapes:
+Every test fixes each publisher's reach and asks which people fill that reach.
+The two publishers select audiences independently; opportunity on one does not
+remove impressions from the other. Overlap is calculated only after both
+audiences have been selected.
 
-1. matched Traffic campaigns generally have less overlap than Reach campaigns;
-2. reversing medium and large publisher sizes changes overlap; and
-3. equal-size large Reach campaigns retain material overlap dispersion.
+It illustrates three conditional failure shapes:
 
-| Synthetic test | Held-out result |
+1. Traffic can select different publisher-specific responders than Reach.
+2. A medium campaign samples the top of a publisher's activity ordering while
+   a large campaign extends farther, so reversing publisher sizes can change
+   overlap.
+3. Equal-size large Reach campaigns can encounter different active populations
+   under named placement, flight, and time-window profiles.
+
+| Synthetic test | Default result |
 | --- | --- |
-| Matched Traffic versus Reach | Traffic overlap is lower in 87.5% of pairs; median gap is 14.8 points |
-| Medium→large versus large→medium | Reversing publisher size changes median overlap by 14.4 points |
-| Equal-size large Reach | Overlap spans 11.0% at P10 to 51.4% at P90 |
+| Matched Traffic versus Reach | Traffic overlap is lower in all 32 pairs; median gap is 13.1 points |
+| Medium→large versus large→medium | Reversing publisher size changes median overlap by 14.6 points |
+| Equal-size large Reach | Overlap spans 17.5% at P10 to 40.0% at P90 |
 
-The fixed large-Reach baseline has held-out overlap MAE of approximately 21
-points for Traffic and 19 points for the two directional configurations. The
-campaign reference reduces those errors to approximately 1.3 to 1.6 points in
-this deliberately favorable synthetic observation model.
+The companion sensitivity notebook turns each proposed mechanism down to zero
+and increases it gradually. Direction disappears when publisher activity
+rankings are identical. Large-Reach dispersion collapses when campaign profiles
+are identical. The Traffic result disappears or reverses when the publishers
+value the same responders. Those falsification checks are more important than
+the exact default magnitudes, which remain illustrative rather than empirical.
 
-The experiment also tests the same coverage-corrected fingerprint reference.
-The reference improves held-out prediction but is intentionally imperfect
-because fingerprint availability varies across latent audience segments.
-Its strong performance remains an upper-bound feasibility result because the
-reference is generated from the simulator's true shared-person set. Opportunity,
-cost, and direction parameters are stress settings rather than empirical estimates.
-No parameter or result is estimated from production data. The values are
-illustrative and deliberately not fitted to confidential data.
+The sensitivity notebook also retains the original broad stress generator as a
+comparison. Its campaign-level shocks make the three patterns easier to
+reproduce but harder to explain causally.
 
 Additional files:
 
-- `src/calibrated_vid/behavioral_market.py`: person-level market and delivery simulation;
-- `notebooks/behavioral_market_scenarios.ipynb`: executed walkthrough of all three scenarios;
-- `notebooks/build_behavioral_market_notebook.py`: deterministic notebook builder;
-- `outputs/behavioral_market/`: campaign, segment, summary, and chart artifacts;
-- `tests/test_behavioral_market.py`: scenario, invariance, and reproducibility tests.
+- `src/calibrated_vid/intuitive_market.py`: primary person-level population and delivery simulation;
+- `src/calibrated_vid/behavioral_market.py`: original stress generator retained for comparison;
+- `src/calibrated_vid/sensitivity.py`: deterministic one-factor and joint parameter sweeps;
+- `notebooks/behavioral_market_scenarios.ipynb`: primary executed walkthrough;
+- `notebooks/population_model_sensitivity.ipynb`: sensitivity audit of both generators;
+- `outputs/behavioral_market/` and `outputs/model_sensitivity/`: generated data and charts;
+- `tests/test_intuitive_market.py` and `tests/test_behavioral_market.py`: invariants and reproducibility tests.
