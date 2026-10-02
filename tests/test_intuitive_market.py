@@ -5,8 +5,14 @@ import unittest
 from dataclasses import replace
 from pathlib import Path
 
+import numpy as np
+
 from calibrated_vid.intuitive_market import (
+    PROFILES,
     IntuitiveConfig,
+    _blend_positive_pair,
+    _effective_active_days,
+    build_population,
     diagnostics,
     run_experiment,
     simulate_market,
@@ -75,6 +81,54 @@ class IntuitiveMarketTest(unittest.TestCase):
             report["large_profiles"]["p10_p90_width_points"],
             2.0,
         )
+
+    def test_positive_cost_blending_preserves_unbounded_inputs(self) -> None:
+        publisher_a = np.asarray([1.40, 0.80])
+        publisher_b = np.asarray([1.10, 2.20])
+
+        unchanged_a, unchanged_b = _blend_positive_pair(
+            publisher_a,
+            publisher_b,
+            1.0,
+        )
+        np.testing.assert_allclose(unchanged_a, publisher_a)
+        np.testing.assert_allclose(unchanged_b, publisher_b)
+
+        midpoint_a, midpoint_b = _blend_positive_pair(
+            publisher_a,
+            publisher_b,
+            0.0,
+        )
+        expected_midpoint = 0.5 * (publisher_a + publisher_b)
+        np.testing.assert_allclose(midpoint_a, expected_midpoint)
+        np.testing.assert_allclose(midpoint_b, expected_midpoint)
+        self.assertTrue(np.all(midpoint_a > 0.0))
+        self.assertTrue(np.all(midpoint_b > 0.0))
+
+        extrapolated_a, extrapolated_b = _blend_positive_pair(
+            np.asarray([0.10]),
+            np.asarray([10.0]),
+            1.5,
+        )
+        self.assertTrue(np.all(extrapolated_a > 0.0))
+        self.assertTrue(np.all(extrapolated_b > 0.0))
+
+    def test_profile_strength_boundary_preserves_positive_durations(self) -> None:
+        config = replace(self.config, profile_strength=1.25)
+        build_population(config)
+        self.assertTrue(
+            all(
+                _effective_active_days(profile, config.profile_strength) > 0.0
+                for profile in PROFILES
+            )
+        )
+
+    def test_profile_strength_above_validated_range_is_rejected(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            "profile_strength must be between 0 and 1.25",
+        ):
+            build_population(replace(self.config, profile_strength=1.5))
 
     def test_outputs_are_reproducible(self) -> None:
         filenames = ["segments.csv", "profiles.csv", "campaigns.csv", "summary.json"]

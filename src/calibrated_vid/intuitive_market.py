@@ -147,6 +147,20 @@ def _blend_pair(a: np.ndarray, b: np.ndarray, contrast: float) -> tuple[np.ndarr
     )
 
 
+def _blend_positive_pair(
+    a: np.ndarray,
+    b: np.ndarray,
+    contrast: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Blends positive values without imposing a probability upper bound."""
+
+    midpoint = 0.5 * (a + b)
+    return (
+        np.maximum(midpoint + contrast * (a - midpoint), 1e-8),
+        np.maximum(midpoint + contrast * (b - midpoint), 1e-8),
+    )
+
+
 def build_population(config: IntuitiveConfig = IntuitiveConfig()) -> SyntheticPopulation:
     """Builds one stable eligible population used by every campaign."""
 
@@ -154,8 +168,8 @@ def build_population(config: IntuitiveConfig = IntuitiveConfig()) -> SyntheticPo
         raise ValueError("activity_contrast must be between 0 and 1.5")
     if not 0.0 <= config.response_contrast <= 1.5:
         raise ValueError("response_contrast must be between 0 and 1.5")
-    if not 0.0 <= config.profile_strength <= 1.5:
-        raise ValueError("profile_strength must be between 0 and 1.5")
+    if not 0.0 <= config.profile_strength <= 1.25:
+        raise ValueError("profile_strength must be between 0 and 1.25")
     shares = np.asarray([row.share for row in SEGMENTS])
     if not np.isclose(shares.sum(), 1.0):
         raise ValueError("Segment shares must sum to one")
@@ -182,7 +196,11 @@ def build_population(config: IntuitiveConfig = IntuitiveConfig()) -> SyntheticPo
 
     raw_cost_a = _values("cost_a", segment) * cost_noise
     raw_cost_b = _values("cost_b", segment) * cost_noise
-    cost_a, cost_b = _blend_pair(raw_cost_a, raw_cost_b, config.activity_contrast)
+    cost_a, cost_b = _blend_positive_pair(
+        raw_cost_a,
+        raw_cost_b,
+        config.activity_contrast,
+    )
 
     return SyntheticPopulation(
         segment=segment,
@@ -303,12 +321,26 @@ def _profile_activity(
     else:
         raise ValueError(f"Unknown schedule {profile.schedule!r}")
     schedule = 1.0 + config.profile_strength * (schedule - 1.0)
-    canonical_days = PROFILE_BY_NAME["broad_long"].active_days
-    effective_days = canonical_days + config.profile_strength * (
-        profile.active_days - canonical_days
-    )
+    effective_days = _effective_active_days(profile, config.profile_strength)
     opportunity = 1.0 - np.exp(-0.075 * effective_days * activity * schedule)
     return np.clip(opportunity, 1e-8, 1.0), click, cost
+
+
+def _effective_active_days(
+    profile: CampaignProfile,
+    profile_strength: float,
+) -> float:
+    """Interpolates flight length while requiring a meaningful positive duration."""
+
+    canonical_days = PROFILE_BY_NAME["broad_long"].active_days
+    effective_days = canonical_days + profile_strength * (
+        profile.active_days - canonical_days
+    )
+    if effective_days <= 0.0:
+        raise ValueError(
+            f"Profile {profile.name!r} has nonpositive effective active days"
+        )
+    return float(effective_days)
 
 
 def _delivery_weight(

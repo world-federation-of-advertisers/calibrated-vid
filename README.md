@@ -87,9 +87,9 @@ It illustrates three conditional failure shapes:
 
 | Synthetic test | Default result |
 | --- | --- |
-| Matched Traffic versus Reach | Traffic overlap is lower in all 32 pairs; median gap is 13.1 points |
-| Medium→large versus large→medium | Reversing publisher size changes median overlap by 14.6 points |
-| Equal-size large Reach | Overlap spans 17.5% at P10 to 40.0% at P90 |
+| Matched Traffic versus Reach | Traffic overlap is lower in all 32 pairs; median gap is 13.2 points |
+| Medium→large versus large→medium | Reversing publisher size changes median overlap by 14.7 points |
+| Equal-size large Reach | Overlap spans 17.6% at P10 to 40.2% at P90 |
 
 The companion sensitivity notebook turns each proposed mechanism down to zero
 and increases it gradually. Direction disappears when publisher activity

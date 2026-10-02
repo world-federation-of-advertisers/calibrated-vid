@@ -180,7 +180,9 @@ plt.show()""",
 
 “Qualitative” means Traffic overlap is lower, the configured direction gap is positive, and the large-Reach P10–P90 width exceeds five points.
 
-“Material” uses deliberately stronger descriptive thresholds: objective gap above five points, direction gap above five points, and large-Reach width above ten points. These thresholds organize the synthetic results; they are not empirical standards.""",
+“Material” uses deliberately stronger descriptive thresholds: objective gap above five points, direction gap above five points, and large-Reach width above ten points. These thresholds organize the synthetic results; they are not empirical standards.
+
+Campaign-profile strength is supported from 0 through 1.25. At the upper boundary, the shortest 10-day profile still has two positive effective days; larger values are rejected rather than silently producing invalid negative durations.""",
         id="joint-explanation",
     ),
     new_code_cell(

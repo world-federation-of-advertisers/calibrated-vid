@@ -351,6 +351,7 @@ This version improves interpretability, not realism in every dimension.
 - It fixes publisher reach and studies audience composition at that size.
 - Its activity and response patterns are synthetic and not estimates of any publisher.
 - Its campaign profiles are stylized summaries of real settings.
+- Campaign-profile strength is restricted to 0–1.25 so every interpolated flight remains positive.
 
 Those choices make the causal comparisons readable. The companion sensitivity notebook tests whether the results require narrow parameter values. Its main standard is not that every random configuration reproduces all three discrepancies; null mechanisms should produce null effects. The standard is that each discrepancy grows smoothly when its stated mechanism is strengthened and disappears when that mechanism is removed.""",
         id="scope",
