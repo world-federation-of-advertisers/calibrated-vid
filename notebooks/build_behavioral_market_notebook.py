@@ -277,12 +277,37 @@ A medium campaign stops after reaching a relatively small group of easy-to-reach
 ]
 medium_large = 100 * np.asarray([left.overlap_rate for left, _ in direction_pairs])
 large_medium = 100 * np.asarray([right.overlap_rate for _, right in direction_pairs])
-fig, ax = plt.subplots(figsize=(6.3, 5.4))
-ax.scatter(large_medium, medium_large, color="#0f766e", alpha=0.78)
-limit = max(medium_large.max(), large_medium.max()) + 2
-ax.plot([0, limit], [0, limit], "--", color="#64748b", linewidth=1)
-ax.set(xlabel="A large → B medium overlap (%)", ylabel="A medium → B large overlap (%)", title="The medium audience samples a different activity depth", xlim=(0, limit), ylim=(0, limit))
-ax.grid(alpha=0.18)
+fig, ax = plt.subplots(figsize=(7.4, 5.5))
+jitter = np.linspace(-0.075, 0.075, len(direction_pairs))
+for offset, left, right in zip(jitter, large_medium, medium_large):
+    ax.plot(
+        [offset, 1.0 + offset],
+        [left, right],
+        color="#94a3b8",
+        alpha=0.28,
+        linewidth=0.8,
+    )
+ax.scatter(jitter, large_medium, color="#2563eb", alpha=0.82, label="A large → B medium")
+ax.scatter(1.0 + jitter, medium_large, color="#0f766e", alpha=0.82, label="A medium → B large")
+ax.scatter(
+    [0.0, 1.0],
+    [np.median(large_medium), np.median(medium_large)],
+    marker="_",
+    s=900,
+    linewidth=4,
+    color="#111827",
+    label="Median",
+    zorder=5,
+)
+ax.set(
+    ylabel="Overlap / smaller publisher reach (%)",
+    title="Reversing publisher size produces two distinct overlap clusters",
+    xticks=[0.0, 1.0],
+    xticklabels=["A large → B medium", "A medium → B large"],
+    xlim=(-0.25, 1.25),
+)
+ax.grid(axis="y", alpha=0.18)
+ax.legend(fontsize=8)
 fig.tight_layout()
 fig.savefig(OUTPUT / "direction_pairing.png", dpi=180)
 plt.show()
