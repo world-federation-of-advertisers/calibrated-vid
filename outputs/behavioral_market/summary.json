@@ -1,146 +1,198 @@
 {
   "config": {
-    "fingerprint_agreement": 0.6,
-    "fingerprint_coverage_a": 0.3,
-    "fingerprint_coverage_b": 0.8,
-    "large_reach": 48000,
-    "medium_reach": 12000,
-    "population_size": 240000,
-    "random_seed": 20260927
+    "activity_contrast": 1.0,
+    "direction_replicates": 24,
+    "large_profile_replicates": 10,
+    "large_reach": 36000,
+    "medium_reach": 10800,
+    "objective_replicates_per_profile": 8,
+    "population_size": 180000,
+    "profile_strength": 1.0,
+    "random_seed": 20261002,
+    "reference_agreement": 0.6,
+    "reference_coverage_a": 0.3,
+    "reference_coverage_b": 0.8,
+    "response_contrast": 1.0,
+    "selection_concentration": 12.0,
+    "traffic_response_exponent": 0.5,
+    "training_replicates": 24
   },
   "diagnostics": {
-    "paired_direction_test": {
-      "medium_large_higher_share": 0.9375,
-      "medium_large_minus_large_medium_median_points": 14.404166666666669,
-      "medium_large_minus_large_medium_p10_points": 1.2583333333333353,
-      "medium_large_minus_large_medium_p90_points": 32.36166666666667,
-      "pairs": 32
+    "baseline_overlap_percent": 32.72951388888889,
+    "direction": {
+      "medium_large_higher_share": 1.0,
+      "medium_large_minus_large_medium_median_points": 14.666666666666664,
+      "p10_points": 14.342592592592595,
+      "p90_points": 15.187037037037035,
+      "pairs": 24
     },
-    "paired_objective_test": {
+    "global_model": {
+      "evaluation_mae_points": 7.989293345543347,
+      "evaluation_p90_error_points": 15.454513888888888
+    },
+    "large_profiles": {
+      "campaigns": 70,
+      "median_overlap_percent": 28.061111111111114,
+      "p10_overlap_percent": 17.589722222222225,
+      "p10_p90_width_points": 22.58111111111111,
+      "p90_overlap_percent": 40.170833333333334,
+      "profiles": [
+        {
+          "campaigns": 10,
+          "label": "Long flight, broad placements",
+          "median_overlap_percent": 32.795833333333334,
+          "p10_overlap_percent": 32.62,
+          "p90_overlap_percent": 32.94444444444444,
+          "profile": "broad_long"
+        },
+        {
+          "campaigns": 10,
+          "label": "Short flight, feed-heavy",
+          "median_overlap_percent": 32.31805555555556,
+          "p10_overlap_percent": 32.14888888888889,
+          "p90_overlap_percent": 32.71,
+          "profile": "feed_short"
+        },
+        {
+          "campaigns": 10,
+          "label": "Short flight, video-heavy",
+          "median_overlap_percent": 26.974999999999998,
+          "p10_overlap_percent": 26.77305555555556,
+          "p90_overlap_percent": 27.061111111111114,
+          "profile": "video_short"
+        },
+        {
+          "campaigns": 10,
+          "label": "A feed-heavy, B video-heavy",
+          "median_overlap_percent": 17.52916666666667,
+          "p10_overlap_percent": 17.415277777777778,
+          "p90_overlap_percent": 17.64138888888889,
+          "profile": "a_feed_b_video"
+        },
+        {
+          "campaigns": 10,
+          "label": "A video-heavy, B feed-heavy",
+          "median_overlap_percent": 25.80972222222222,
+          "p10_overlap_percent": 25.655,
+          "p90_overlap_percent": 25.943055555555556,
+          "profile": "a_video_b_feed"
+        },
+        {
+          "campaigns": 10,
+          "label": "Both publishers: daytime-skewed, feed-heavy",
+          "median_overlap_percent": 40.231944444444444,
+          "p10_overlap_percent": 40.01,
+          "p90_overlap_percent": 40.52138888888889,
+          "profile": "daytime_feed"
+        },
+        {
+          "campaigns": 10,
+          "label": "Both publishers: evening-skewed, video-heavy",
+          "median_overlap_percent": 28.061111111111114,
+          "p10_overlap_percent": 27.948333333333338,
+          "p90_overlap_percent": 28.20916666666666,
+          "profile": "evening_video"
+        }
+      ]
+    },
+    "objective": {
+      "p10_points": -16.636388888888888,
+      "p90_points": -0.8797222222222255,
       "pairs": 32,
-      "traffic_lower_share": 0.875,
-      "traffic_minus_reach_median_points": -14.757291666666667,
-      "traffic_minus_reach_p10_points": -39.04958333333333,
-      "traffic_minus_reach_p90_points": 0.8387500000000072
+      "traffic_lower_share": 1.0,
+      "traffic_minus_reach_median_points": -13.218055555555559
     },
-    "within_large_reach": {
-      "campaigns": 48,
-      "overlap_median_percent": 26.776041666666668,
-      "overlap_p10_p90_width_points": 40.35395833333334,
-      "overlap_p10_percent": 11.038125,
-      "overlap_p90_percent": 51.39208333333334
+    "reference_calibration": {
+      "evaluation_mae_points": 0.6039606227106228,
+      "evaluation_p90_error_points": 1.3097222222222251,
+      "groups": [
+        {
+          "actual_median_overlap_percent": 29.565277777777776,
+          "campaigns": 32,
+          "fixed_incremental_unique_mape_percent": 6.769028028145999,
+          "fixed_incremental_unique_p90_error_percent": 18.398470613484402,
+          "fixed_mae_points": 5.366710069444444,
+          "fixed_overlap_percent": 32.72951388888889,
+          "fixed_p90_error_points": 15.167291666666666,
+          "fixed_union_mape_percent": 2.990798889021183,
+          "group": "Matched Reach",
+          "reference_incremental_unique_mape_percent": 0.7392561009218843,
+          "reference_incremental_unique_p90_error_percent": 1.252893523175123,
+          "reference_mae_points": 0.5324122299382719,
+          "reference_median_overlap_percent": 29.205246913580247,
+          "reference_p90_error_points": 0.9201851851851862,
+          "reference_union_mape_percent": 0.3089583068085494
+        },
+        {
+          "actual_median_overlap_percent": 16.59722222222222,
+          "campaigns": 32,
+          "fixed_incremental_unique_mape_percent": 18.991766590025684,
+          "fixed_incremental_unique_p90_error_percent": 28.20184226510855,
+          "fixed_mae_points": 16.357118055555556,
+          "fixed_overlap_percent": 32.72951388888889,
+          "fixed_p90_error_points": 26.423402777777778,
+          "fixed_union_mape_percent": 8.775323111459363,
+          "group": "Matched Traffic",
+          "reference_incremental_unique_mape_percent": 0.6485453920242725,
+          "reference_incremental_unique_p90_error_percent": 1.1962588269189378,
+          "reference_mae_points": 0.5205246913580249,
+          "reference_median_overlap_percent": 16.493055555555554,
+          "reference_p90_error_points": 0.8875771604938248,
+          "reference_union_mape_percent": 0.28828675525249103
+        },
+        {
+          "actual_median_overlap_percent": 46.754629629629626,
+          "campaigns": 24,
+          "fixed_incremental_unique_mape_percent": 26.234991506201464,
+          "fixed_incremental_unique_p90_error_percent": 26.96980950716534,
+          "fixed_mae_points": 13.978819444444445,
+          "fixed_overlap_percent": 32.72951388888889,
+          "fixed_p90_error_points": 14.28900462962963,
+          "fixed_union_mape_percent": 3.6156674224305454,
+          "group": "Controlled A medium \u2192 B large",
+          "reference_incremental_unique_mape_percent": 1.8955245686381745,
+          "reference_incremental_unique_p90_error_percent": 3.8619903419539687,
+          "reference_mae_points": 1.0094735939643351,
+          "reference_median_overlap_percent": 46.553497942386834,
+          "reference_p90_error_points": 2.0519032921810743,
+          "reference_union_mape_percent": 0.2611222696046466
+        },
+        {
+          "actual_median_overlap_percent": 32.032407407407405,
+          "campaigns": 24,
+          "fixed_incremental_unique_mape_percent": 1.0698606637519377,
+          "fixed_incremental_unique_p90_error_percent": 1.54601695869253,
+          "fixed_mae_points": 0.7283564814814817,
+          "fixed_overlap_percent": 32.72951388888889,
+          "fixed_p90_error_points": 1.0563657407407412,
+          "fixed_union_mape_percent": 0.18144795792992943,
+          "group": "Controlled A large \u2192 B medium",
+          "reference_incremental_unique_mape_percent": 1.3060521713629543,
+          "reference_incremental_unique_p90_error_percent": 2.5073035459322797,
+          "reference_mae_points": 0.8884816529492457,
+          "reference_median_overlap_percent": 31.82870370370371,
+          "reference_p90_error_points": 1.7123456790123497,
+          "reference_union_mape_percent": 0.22136662655961523
+        },
+        {
+          "actual_median_overlap_percent": 28.061111111111114,
+          "campaigns": 70,
+          "fixed_incremental_unique_mape_percent": 7.926675711823139,
+          "fixed_incremental_unique_p90_error_percent": 18.371241716360224,
+          "fixed_mae_points": 5.798809523809522,
+          "fixed_overlap_percent": 32.72951388888889,
+          "fixed_p90_error_points": 15.139791666666667,
+          "fixed_union_mape_percent": 3.3378430889189326,
+          "group": "Large Reach profiles",
+          "reference_incremental_unique_mape_percent": 0.6214674464817702,
+          "reference_incremental_unique_p90_error_percent": 1.3610932232084942,
+          "reference_mae_points": 0.4382275132275134,
+          "reference_median_overlap_percent": 28.385416666666664,
+          "reference_p90_error_points": 0.8505246913580262,
+          "reference_union_mape_percent": 0.25640514872820885
+        }
+      ],
+      "observation_probability_percent": 14.399999999999999
     }
-  },
-  "model": {
-    "fixed_overlap_rate": 0.2942990451388889,
-    "reference_center": 0.3368958886140141,
-    "reference_sensitivity": 0.9174284828348278
-  },
-  "scenarios": [
-    {
-      "calibrated_incremental_mape_percent": 20.892793156448857,
-      "calibrated_incremental_p90_error_percent": 37.39189575349728,
-      "calibrated_overlap_mae_points": 5.182837791782308,
-      "calibrated_overlap_median_percent": 68.26428320637345,
-      "calibrated_overlap_p90_error_points": 6.984563811020138,
-      "calibrated_union_mape_percent": 4.1184410318973494,
-      "campaigns": 20,
-      "direction": "large_large",
-      "fixed_incremental_mape_percent": 169.02722772089902,
-      "fixed_incremental_p90_error_percent": 272.5505180712643,
-      "fixed_overlap_mae_points": 42.80457465277779,
-      "fixed_overlap_p90_error_points": 51.62697048611111,
-      "fixed_overlap_percent": 29.42990451388889,
-      "fixed_union_mape_percent": 33.85603226674577,
-      "objective": "conversion",
-      "overlap_median_percent": 73.409375,
-      "overlap_p10_percent": 61.87416666666666,
-      "overlap_p90_percent": 81.05687499999999,
-      "scenario": "conversion_large_large"
-    },
-    {
-      "calibrated_incremental_mape_percent": 1.9189890978848034,
-      "calibrated_incremental_p90_error_percent": 3.684617832594587,
-      "calibrated_overlap_mae_points": 1.251934937327782,
-      "calibrated_overlap_median_percent": 27.16556175210113,
-      "calibrated_overlap_p90_error_points": 2.1369560336769533,
-      "calibrated_union_mape_percent": 0.7423838280785762,
-      "campaigns": 48,
-      "direction": "large_large",
-      "fixed_incremental_mape_percent": 21.82677321822302,
-      "fixed_incremental_p90_error_percent": 45.1934347965409,
-      "fixed_overlap_mae_points": 12.91956741898148,
-      "fixed_overlap_p90_error_points": 22.295711805555552,
-      "fixed_overlap_percent": 29.42990451388889,
-      "fixed_union_mape_percent": 7.872307630322557,
-      "objective": "reach",
-      "overlap_median_percent": 26.776041666666668,
-      "overlap_p10_percent": 11.038125,
-      "overlap_p90_percent": 51.39208333333334,
-      "scenario": "reach_large_large"
-    },
-    {
-      "calibrated_incremental_mape_percent": 3.4815392194772086,
-      "calibrated_incremental_p90_error_percent": 7.9132533630223145,
-      "calibrated_overlap_mae_points": 1.337186356699318,
-      "calibrated_overlap_median_percent": 21.961746877459674,
-      "calibrated_overlap_p90_error_points": 3.1349237877551595,
-      "calibrated_union_mape_percent": 0.29361540059293334,
-      "campaigns": 32,
-      "direction": "large_medium",
-      "fixed_incremental_mape_percent": 42.366442356860766,
-      "fixed_incremental_p90_error_percent": 107.10813149972455,
-      "fixed_overlap_mae_points": 18.803355577256944,
-      "fixed_overlap_p90_error_points": 36.42176215277779,
-      "fixed_overlap_percent": 29.42990451388889,
-      "fixed_union_mape_percent": 4.055513518813819,
-      "objective": "reach",
-      "overlap_median_percent": 21.475,
-      "overlap_p10_percent": 3.920833333333333,
-      "overlap_p90_percent": 65.85166666666667,
-      "scenario": "reach_large_medium"
-    },
-    {
-      "calibrated_incremental_mape_percent": 3.7145942956957616,
-      "calibrated_incremental_p90_error_percent": 8.61789746422797,
-      "calibrated_overlap_mae_points": 1.3637875740584904,
-      "calibrated_overlap_median_percent": 44.4597009912035,
-      "calibrated_overlap_p90_error_points": 2.96207502083273,
-      "calibrated_union_mape_percent": 0.305361960292197,
-      "campaigns": 32,
-      "direction": "medium_large",
-      "fixed_incremental_mape_percent": 47.23687209765658,
-      "fixed_incremental_p90_error_percent": 116.97901059281118,
-      "fixed_overlap_mae_points": 18.643381076388888,
-      "fixed_overlap_p90_error_points": 38.00842881944446,
-      "fixed_overlap_percent": 29.42990451388889,
-      "fixed_union_mape_percent": 4.166548723147663,
-      "objective": "reach",
-      "overlap_median_percent": 43.74166666666667,
-      "overlap_p10_percent": 20.785,
-      "overlap_p90_percent": 67.43833333333335,
-      "scenario": "reach_medium_large"
-    },
-    {
-      "calibrated_incremental_mape_percent": 1.6608723761168378,
-      "calibrated_incremental_p90_error_percent": 3.189096485469665,
-      "calibrated_overlap_mae_points": 1.4734931281322108,
-      "calibrated_overlap_median_percent": 9.511892160073458,
-      "calibrated_overlap_p90_error_points": 2.702205405635336,
-      "calibrated_union_mape_percent": 0.7805582517971394,
-      "campaigns": 32,
-      "direction": "large_large",
-      "fixed_incremental_mape_percent": 22.557593257128907,
-      "fixed_incremental_p90_error_percent": 26.49916959402836,
-      "fixed_overlap_mae_points": 20.71799045138889,
-      "fixed_overlap_p90_error_points": 25.44261284722222,
-      "fixed_overlap_percent": 29.42990451388889,
-      "fixed_union_mape_percent": 10.794852049636253,
-      "objective": "traffic",
-      "overlap_median_percent": 8.401041666666668,
-      "overlap_p10_percent": 3.9872916666666667,
-      "overlap_p90_percent": 14.008125000000001,
-      "scenario": "traffic_large_large"
-    }
-  ]
+  }
 }
