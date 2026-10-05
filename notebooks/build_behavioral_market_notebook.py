@@ -291,9 +291,9 @@ show_table([diagnostic["objective"]], [
         id="objective-conclusion",
     ),
     new_markdown_cell(
-        """## Test 2: size direction changes how deeply each publisher reaches
+        """## Test 2: controlled direction test—size changes how deeply each publisher reaches
 
-The paired campaigns use the same Reach objective, target, long broad-placement profile, cost structure, and random draw. The medium and large reaches are simply reversed.
+All 24 paired comparisons use the same Reach objective, target, long broad-placement profile, cost structure, and random draw. The medium and large reaches are simply reversed. Because the delivery profile is fixed, the two resulting clusters are expected to be tight: the test isolates the effect of size direction rather than representing every kind of Reach campaign.
 
 The medium audience is nested inside the large audience for each publisher. Publisher A's most available users contain more dual-publisher regulars, while Publisher B's most available users contain more B-heavy regulars. A large campaign expands farther into each publisher's activity ordering. The resulting intersection therefore depends on which publisher supplies the medium audience.""",
         id="direction-explanation",
@@ -301,7 +301,9 @@ The medium audience is nested inside the large audience for each publisher. Publ
     new_markdown_cell(
         """### What is happening and why
 
-A medium campaign stops after reaching a relatively small group of easy-to-reach people. A large campaign keeps going into less-active or more-expensive people. If the easiest people on Publisher A use both publishers while the easiest people on Publisher B are more B-specific, swapping which publisher is medium changes the shared audience—even though the same two reach totals are used.""",
+A medium campaign stops after reaching a relatively small group of easy-to-reach people. A large campaign keeps going into less-active or more-expensive people. If the easiest people on Publisher A use both publishers while the easiest people on Publisher B are more B-specific, swapping which publisher is medium changes the shared audience—even though the same two reach totals are used.
+
+The tightness of the clusters is a feature of this controlled comparison, not a claim that all medium-to-large campaigns behave alike. Test 3 changes campaign profiles and shows the much wider variation that appears across those conditions.""",
         id="direction-plain-language",
     ),
     new_code_cell(
@@ -328,7 +330,7 @@ ax.scatter(
 )
 ax.set(
     ylabel="Overlap / smaller publisher reach (%)",
-    title="Reversing publisher size produces two distinct overlap clusters",
+    title="Controlled test: reversing publisher size shifts overlap",
     xticks=[0.0, 1.0],
     xticklabels=["A large → B medium", "A medium → B large"],
     xlim=(-0.25, 1.25),
@@ -348,7 +350,7 @@ show_table([diagnostic["direction"]], [
         id="direction-results",
     ),
     new_markdown_cell(
-        """> **Test 2 conclusion.** A large-to-large average cannot automatically represent both asymmetric size directions. The result requires publisher activity rankings to differ and delivery to meaningfully prefer the most available users. When either condition is removed, the directional gap collapses.""",
+        """> **Test 2 conclusion.** Within one fixed delivery profile, reversing which publisher is large creates a consistent directional shift. The tight clusters show that controlled effect; they do not contradict Test 3's broad across-profile range. A large-to-large average cannot automatically represent both asymmetric directions, but real-world directional distributions can widen when campaign conditions also vary.""",
         id="direction-conclusion",
     ),
     new_markdown_cell(
@@ -356,7 +358,7 @@ show_table([diagnostic["direction"]], [
 
 Every campaign below has identical large Reach totals on both publishers and uses the Reach objective. Only named campaign conditions change.
 
-Within a profile, repeated campaigns have very similar overlap. Most dispersion occurs **between explainable profiles**—for example, broad long-running delivery versus opposite placement mixes—not because the simulator draws arbitrary archetype shocks for every campaign.""",
+Within a profile, repeated campaigns have very similar overlap. Most dispersion occurs **between explainable profiles**—for example, broad long-running delivery versus opposite placement mixes—not because the simulator draws arbitrary archetype shocks for every campaign. This is why Test 2's fixed-profile directional clusters are tight while the full large-Reach P10–P90 range is wide.""",
         id="profile-explanation",
     ),
     new_markdown_cell(
@@ -413,6 +415,8 @@ show_table([diagnostic["large_profiles"]], [
 
 The fitted baseline is the mean overlap of canonical long, broad-placement, large Reach training campaigns. It is deliberately just one number. The chart compares it with the evaluation regimes generated above.
 
+Each bar is a median and each vertical whisker is that group's P10–P90 range. The two direction bars remain explicitly labeled **controlled** because they use only the fixed broad, long-running profile; the objective and profile groups pool multiple campaign conditions.
+
 This does not prove that no single statistical model can work. It shows that **one unconditional overlap parameter** cannot work across heterogeneous campaign conditions. A richer single model could use objective, publisher-size direction, placements, flight, and realized delivery signals—but it would need representative training data spanning those conditions.""",
         id="global-model-explanation",
     ),
@@ -426,8 +430,8 @@ An average learned from one familiar campaign type can be correct for that type 
         """scenario_groups = {
     "Reach objective pairs": [row for row in evaluation if row.scenario == "objective_reach"],
     "Traffic objective pairs": [row for row in evaluation if row.scenario == "objective_traffic"],
-    "A medium → B large": [row for row in evaluation if row.scenario == "direction_medium_large"],
-    "A large → B medium": [row for row in evaluation if row.scenario == "direction_large_medium"],
+    "Controlled A medium → B large": [row for row in evaluation if row.scenario == "direction_medium_large"],
+    "Controlled A large → B medium": [row for row in evaluation if row.scenario == "direction_large_medium"],
     "Large Reach profiles": [row for row in evaluation if row.scenario == "large_reach_profiles"],
 }
 labels = list(scenario_groups)
@@ -439,7 +443,7 @@ medians = np.asarray([np.median(group_values[label]) for label in labels])
 p10 = np.asarray([np.quantile(group_values[label], 0.10) for label in labels])
 p90 = np.asarray([np.quantile(group_values[label], 0.90) for label in labels])
 baseline = diagnostic["baseline_overlap_percent"]
-fig, ax = plt.subplots(figsize=(9.0, 5.2))
+fig, ax = plt.subplots(figsize=(10.5, 5.4))
 x = np.arange(len(labels))
 ax.bar(
     x,

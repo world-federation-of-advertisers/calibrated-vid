@@ -554,10 +554,10 @@ def diagnostics(campaigns: Iterable[CampaignResult]) -> dict[str, object]:
         "Matched Traffic": [
             row for row in evaluation if row.scenario == "objective_traffic"
         ],
-        "A medium → B large": [
+        "Controlled A medium → B large": [
             row for row in evaluation if row.scenario == "direction_medium_large"
         ],
-        "A large → B medium": [
+        "Controlled A large → B medium": [
             row for row in evaluation if row.scenario == "direction_large_medium"
         ],
         "Large Reach profiles": [
