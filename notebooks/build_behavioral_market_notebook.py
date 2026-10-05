@@ -343,12 +343,91 @@ show_table([diagnostic["global_model"]], [
         id="global-model-results",
     ),
     new_markdown_cell(
+        r"""## Optional calibration exercise: can a campaign reference repair the fixed baseline?
+
+The tests above explain why one canonical overlap does not transfer. This final exercise asks whether a **partial campaign-specific reference** can correct it.
+
+The synthetic reference observes only a subset of the people reached on both publishers:
+
+- 30% of people have a usable reference on Publisher A;
+- 80% have one on Publisher B; and
+- when the same person has references on both, they agree 60% of the time.
+
+The expected observation rate for a truly shared person is therefore:
+
+$$0.30\times0.80\times0.60=0.144$$
+
+The correction is deliberately simple:
+
+$$\widehat{overlap}=\frac{\text{observed cross-publisher reference matches}}
+{0.144\times\text{smaller publisher reach}}$$
+
+This does not change either publisher's reach. It changes only the estimated shared audience and therefore total and incremental unique reach.""",
+        id="reference-calibration-explanation",
+    ),
+    new_markdown_cell(
+        """### In plain language
+
+The fixed model applies the same overlap learned from canonical Reach campaigns to every campaign. The reference estimate instead asks each campaign for a noisy, partial indication of who appeared on both publishers, then corrects for how often that signal is observable.
+
+If the partial matched group behaves like the rest of the campaign, it can reveal whether this campaign belongs above or below the canonical baseline.""",
+        id="reference-calibration-plain-language",
+    ),
+    new_code_cell(
+        """calibration = diagnostic["reference_calibration"]
+calibration_rows = calibration["groups"]
+labels = [row["group"] for row in calibration_rows]
+actual = np.asarray([row["actual_median_overlap_percent"] for row in calibration_rows])
+fixed = np.asarray([row["fixed_overlap_percent"] for row in calibration_rows])
+reference = np.asarray([row["reference_median_overlap_percent"] for row in calibration_rows])
+
+fig, axes = plt.subplots(1, 2, figsize=(13.2, 5.2))
+x = np.arange(len(labels))
+width = 0.26
+axes[0].bar(x - width, actual, width, label="Actual median", color="#1d4ed8")
+axes[0].bar(x, fixed, width, label="Fixed Reach baseline", color="#dc2626")
+axes[0].bar(x + width, reference, width, label="Partial-reference estimate", color="#059669")
+axes[0].set(ylabel="Overlap / smaller reach (%)", title="Campaign reference follows the changing overlap", xticks=x, xticklabels=labels)
+axes[0].tick_params(axis="x", rotation=22)
+axes[0].grid(axis="y", alpha=0.18)
+axes[0].legend(fontsize=8)
+
+fixed_mae = np.asarray([row["fixed_mae_points"] for row in calibration_rows])
+reference_mae = np.asarray([row["reference_mae_points"] for row in calibration_rows])
+axes[1].bar(x - width / 2, fixed_mae, width, label="Fixed baseline", color="#dc2626")
+axes[1].bar(x + width / 2, reference_mae, width, label="Partial reference", color="#059669")
+axes[1].set(ylabel="Mean absolute overlap error (points)", title="Coverage correction reduces held-out error", xticks=x, xticklabels=labels)
+axes[1].tick_params(axis="x", rotation=22)
+axes[1].grid(axis="y", alpha=0.18)
+axes[1].legend(fontsize=8)
+fig.tight_layout()
+fig.savefig(OUTPUT / "reference_calibration.png", dpi=180)
+plt.show()
+
+show_table(calibration_rows, [
+    ("group", "Evaluation group"),
+    ("campaigns", "Campaigns"),
+    ("fixed_mae_points", "Fixed overlap MAE points"),
+    ("reference_mae_points", "Reference overlap MAE points"),
+    ("fixed_incremental_unique_mape_percent", "Fixed incremental unique MAPE %"),
+    ("reference_incremental_unique_mape_percent", "Reference incremental unique MAPE %"),
+])""",
+        id="reference-calibration-results",
+    ),
+    new_markdown_cell(
+        """> **Calibration conclusion.** In this controlled population, the partial campaign reference follows all three changing overlap patterns and substantially improves the groups that the fixed baseline misses. A group already close to the baseline can instead gain only noise. The exercise shows how campaign-specific information could repair a one-number baseline and improve the smaller publisher's incremental unique-reach estimate where miscalibration is material.
+
+> **Important limitation.** This is a deliberately favorable upper-bound exercise, not independent validation. The reference is created by randomly thinning the simulator's true shared-person set, and the correction knows the exact coverage and agreement rates. Real use would need to establish that reference availability is representative, that the rates are estimable, and that the result holds against an external people-based benchmark. The reference does not prove the synthetic mechanisms are real.""",
+        id="reference-calibration-conclusion",
+    ),
+    new_markdown_cell(
         """## Scope and remaining shortcut
 
 This version improves interpretability, not realism in every dimension.
 
 - It starts from known people and does not model accounts or VID assignment.
 - It fixes publisher reach and studies audience composition at that size.
+- Its optional reference exercise assumes fingerprint availability is independent of campaign delivery and uses known coverage and agreement rates.
 - Its activity and response patterns are synthetic and not estimates of any publisher.
 - Its campaign profiles are stylized summaries of real settings.
 - Campaign-profile strength is restricted to 0–1.25 so every interpolated flight remains positive.

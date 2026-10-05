@@ -102,6 +102,13 @@ The sensitivity notebook also retains the original broad stress generator as a
 comparison. Its campaign-level shocks make the three patterns easier to
 reproduce but harder to explain causally.
 
+The primary notebook ends with an optional campaign-reference calibration
+exercise. It observes only a coverage-limited sample of shared people, corrects
+the match count for known publisher coverage and cross-publisher agreement, and
+compares that estimate with the fixed large-Reach baseline. This restores the
+end-to-end demonstration while keeping it clearly labeled as a favorable
+feasibility upper bound rather than independent validation.
+
 Additional files:
 
 - `src/calibrated_vid/intuitive_market.py`: primary person-level population and delivery simulation;

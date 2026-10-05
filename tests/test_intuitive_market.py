@@ -130,6 +130,51 @@ class IntuitiveMarketTest(unittest.TestCase):
         ):
             build_population(replace(self.config, profile_strength=1.5))
 
+    def test_reference_configuration_rejects_invalid_probabilities(self) -> None:
+        for field, value in (
+            ("reference_coverage_a", 0.0),
+            ("reference_coverage_b", 1.01),
+            ("reference_agreement", -0.1),
+        ):
+            with self.subTest(field=field, value=value):
+                with self.assertRaisesRegex(
+                    ValueError,
+                    f"{field} must be greater than zero and at most one",
+                ):
+                    build_population(replace(self.config, **{field: value}))
+
+    def test_reference_estimates_are_valid_and_improve_the_fixed_baseline(self) -> None:
+        campaigns = simulate_market(self.config)
+        report = diagnostics(campaigns)
+        calibration = report["reference_calibration"]
+
+        self.assertTrue(
+            all(0.0 <= row.reference_overlap_estimate <= 1.0 for row in campaigns)
+        )
+        self.assertLess(
+            calibration["evaluation_mae_points"],
+            report["global_model"]["evaluation_mae_points"],
+        )
+        for group in calibration["groups"]:
+            with self.subTest(group=group["group"]):
+                if group["fixed_mae_points"] >= 3.0:
+                    self.assertLess(
+                        group["reference_mae_points"],
+                        group["fixed_mae_points"],
+                    )
+
+    def test_reference_sampling_does_not_change_publisher_reach(self) -> None:
+        campaigns = simulate_market(self.config)
+        self.assertTrue(
+            all(
+                row.reach_a
+                in {self.config.medium_reach, self.config.large_reach}
+                and row.reach_b
+                in {self.config.medium_reach, self.config.large_reach}
+                for row in campaigns
+            )
+        )
+
     def test_outputs_are_reproducible(self) -> None:
         filenames = ["segments.csv", "profiles.csv", "campaigns.csv", "summary.json"]
         with tempfile.TemporaryDirectory() as first, tempfile.TemporaryDirectory() as second:

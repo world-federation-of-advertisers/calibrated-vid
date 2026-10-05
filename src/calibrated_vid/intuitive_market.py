@@ -60,6 +60,9 @@ class IntuitiveConfig:
     objective_replicates_per_profile: int = 8
     direction_replicates: int = 24
     large_profile_replicates: int = 10
+    reference_coverage_a: float = 0.30
+    reference_coverage_b: float = 0.80
+    reference_agreement: float = 0.60
     random_seed: int = 20261002
 
 
@@ -89,6 +92,9 @@ class CampaignResult:
     overlap: int
     overlap_rate: float
     union_reach: int
+    reference_matches: int
+    reference_observation_probability: float
+    reference_overlap_estimate: float
 
 
 @dataclass(frozen=True)
@@ -103,6 +109,9 @@ class SyntheticPopulation:
     click_b: np.ndarray
     cost_a: np.ndarray
     cost_b: np.ndarray
+    reference_a: np.ndarray
+    reference_b: np.ndarray
+    reference_agrees: np.ndarray
 
 
 SEGMENTS: tuple[SegmentSpec, ...] = (
@@ -170,6 +179,13 @@ def build_population(config: IntuitiveConfig = IntuitiveConfig()) -> SyntheticPo
         raise ValueError("response_contrast must be between 0 and 1.5")
     if not 0.0 <= config.profile_strength <= 1.25:
         raise ValueError("profile_strength must be between 0 and 1.25")
+    for name, value in (
+        ("reference_coverage_a", config.reference_coverage_a),
+        ("reference_coverage_b", config.reference_coverage_b),
+        ("reference_agreement", config.reference_agreement),
+    ):
+        if not 0.0 < value <= 1.0:
+            raise ValueError(f"{name} must be greater than zero and at most one")
     shares = np.asarray([row.share for row in SEGMENTS])
     if not np.isclose(shares.sum(), 1.0):
         raise ValueError("Segment shares must sum to one")
@@ -201,6 +217,23 @@ def build_population(config: IntuitiveConfig = IntuitiveConfig()) -> SyntheticPo
         raw_cost_b,
         config.activity_contrast,
     )
+    daytime_share = np.clip(
+        _values("daytime_share", segment)
+        * rng.lognormal(0.0, 0.08, config.population_size),
+        0.03,
+        0.97,
+    )
+
+    # Reference availability is sampled independently of campaign delivery.  The
+    # final agreement draw represents the chance that two available identifiers
+    # can be recognized as the same person across publishers.
+    reference_a = rng.random(config.population_size) < config.reference_coverage_a
+    reference_b = rng.random(config.population_size) < config.reference_coverage_b
+    reference_agrees = (
+        reference_a
+        & reference_b
+        & (rng.random(config.population_size) < config.reference_agreement)
+    )
 
     return SyntheticPopulation(
         segment=segment,
@@ -208,11 +241,14 @@ def build_population(config: IntuitiveConfig = IntuitiveConfig()) -> SyntheticPo
         feed_b=feed_b,
         video_a=video_a,
         video_b=video_b,
-        daytime_share=np.clip(_values("daytime_share", segment) * rng.lognormal(0.0, 0.08, config.population_size), 0.03, 0.97),
+        daytime_share=daytime_share,
         click_a=click_a,
         click_b=click_b,
         cost_a=cost_a,
         cost_b=cost_b,
+        reference_a=reference_a,
+        reference_b=reference_b,
+        reference_agrees=reference_agrees,
     )
 
 
@@ -404,6 +440,21 @@ def simulate_campaign(
     reached_b[selected_b] = True
     overlap = int(np.count_nonzero(reached_a & reached_b))
     smaller = min(plan.reach_a, plan.reach_b)
+    reference_matches = int(
+        np.count_nonzero(reached_a & reached_b & population.reference_agrees)
+    )
+    reference_observation_probability = (
+        config.reference_coverage_a
+        * config.reference_coverage_b
+        * config.reference_agreement
+    )
+    reference_overlap_estimate = float(
+        np.clip(
+            reference_matches / (reference_observation_probability * smaller),
+            0.0,
+            1.0,
+        )
+    )
     direction = (
         "large_large"
         if plan.reach_a == plan.reach_b
@@ -422,6 +473,9 @@ def simulate_campaign(
         overlap=overlap,
         overlap_rate=overlap / smaller,
         union_reach=plan.reach_a + plan.reach_b - overlap,
+        reference_matches=reference_matches,
+        reference_observation_probability=reference_observation_probability,
+        reference_overlap_estimate=reference_overlap_estimate,
     )
 
 
@@ -432,6 +486,8 @@ def simulate_market(config: IntuitiveConfig = IntuitiveConfig()) -> list[Campaig
 
 def diagnostics(campaigns: Iterable[CampaignResult]) -> dict[str, object]:
     rows = list(campaigns)
+    if not rows:
+        raise ValueError("At least one campaign is required")
     evaluation = [row for row in rows if row.split == "evaluation"]
     by_comparison: dict[str, dict[str, CampaignResult]] = {}
     for row in evaluation:
@@ -471,6 +527,85 @@ def diagnostics(campaigns: Iterable[CampaignResult]) -> dict[str, object]:
     training = [row.overlap_rate for row in rows if row.split == "train"]
     baseline = float(np.mean(training))
     evaluation_error = np.asarray([100.0 * abs(row.overlap_rate - baseline) for row in evaluation])
+    reference_error = np.asarray(
+        [
+            100.0 * abs(row.overlap_rate - row.reference_overlap_estimate)
+            for row in evaluation
+        ]
+    )
+    calibration_groups = {
+        "Matched Reach": [
+            row for row in evaluation if row.scenario == "objective_reach"
+        ],
+        "Matched Traffic": [
+            row for row in evaluation if row.scenario == "objective_traffic"
+        ],
+        "A medium → B large": [
+            row for row in evaluation if row.scenario == "direction_medium_large"
+        ],
+        "A large → B medium": [
+            row for row in evaluation if row.scenario == "direction_large_medium"
+        ],
+        "Large Reach profiles": [
+            row for row in evaluation if row.scenario == "large_reach_profiles"
+        ],
+    }
+    calibration_rows = []
+    for label, group in calibration_groups.items():
+        actual = np.asarray([row.overlap_rate for row in group])
+        reference = np.asarray([row.reference_overlap_estimate for row in group])
+        fixed_error = 100.0 * np.abs(actual - baseline)
+        calibrated_error = 100.0 * np.abs(actual - reference)
+        smaller = np.asarray(
+            [min(row.reach_a, row.reach_b) for row in group], dtype=float
+        )
+        total_reach = np.asarray(
+            [row.reach_a + row.reach_b for row in group], dtype=float
+        )
+        actual_union = total_reach - actual * smaller
+        fixed_union = total_reach - baseline * smaller
+        reference_union = total_reach - reference * smaller
+        actual_incremental = (1.0 - actual) * smaller
+        fixed_incremental = (1.0 - baseline) * smaller
+        reference_incremental = (1.0 - reference) * smaller
+        calibration_rows.append(
+            {
+                "group": label,
+                "campaigns": len(group),
+                "actual_median_overlap_percent": float(100.0 * np.median(actual)),
+                "fixed_overlap_percent": float(100.0 * baseline),
+                "reference_median_overlap_percent": float(
+                    100.0 * np.median(reference)
+                ),
+                "fixed_mae_points": float(np.mean(fixed_error)),
+                "reference_mae_points": float(np.mean(calibrated_error)),
+                "fixed_p90_error_points": float(np.quantile(fixed_error, 0.90)),
+                "reference_p90_error_points": float(
+                    np.quantile(calibrated_error, 0.90)
+                ),
+                "fixed_union_mape_percent": float(
+                    100.0 * np.mean(np.abs(fixed_union - actual_union) / actual_union)
+                ),
+                "reference_union_mape_percent": float(
+                    100.0
+                    * np.mean(np.abs(reference_union - actual_union) / actual_union)
+                ),
+                "fixed_incremental_unique_mape_percent": float(
+                    100.0
+                    * np.mean(
+                        np.abs(fixed_incremental - actual_incremental)
+                        / actual_incremental
+                    )
+                ),
+                "reference_incremental_unique_mape_percent": float(
+                    100.0
+                    * np.mean(
+                        np.abs(reference_incremental - actual_incremental)
+                        / actual_incremental
+                    )
+                ),
+            }
+        )
     p10 = float(100.0 * np.quantile(large_overlap, 0.10))
     p90 = float(100.0 * np.quantile(large_overlap, 0.90))
     return {
@@ -500,6 +635,16 @@ def diagnostics(campaigns: Iterable[CampaignResult]) -> dict[str, object]:
         "global_model": {
             "evaluation_mae_points": float(np.mean(evaluation_error)),
             "evaluation_p90_error_points": float(np.quantile(evaluation_error, 0.90)),
+        },
+        "reference_calibration": {
+            "observation_probability_percent": float(
+                100.0 * rows[0].reference_observation_probability
+            ),
+            "evaluation_mae_points": float(np.mean(reference_error)),
+            "evaluation_p90_error_points": float(
+                np.quantile(reference_error, 0.90)
+            ),
+            "groups": calibration_rows,
         },
     }
 

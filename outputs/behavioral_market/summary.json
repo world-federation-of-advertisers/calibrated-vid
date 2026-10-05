@@ -9,6 +9,9 @@
     "population_size": 180000,
     "profile_strength": 1.0,
     "random_seed": 20261002,
+    "reference_agreement": 0.6,
+    "reference_coverage_a": 0.3,
+    "reference_coverage_b": 0.8,
     "response_contrast": 1.0,
     "selection_concentration": 12.0,
     "traffic_response_exponent": 0.5,
@@ -98,6 +101,88 @@
       "pairs": 32,
       "traffic_lower_share": 1.0,
       "traffic_minus_reach_median_points": -13.218055555555559
+    },
+    "reference_calibration": {
+      "evaluation_mae_points": 0.6039606227106228,
+      "evaluation_p90_error_points": 1.3097222222222251,
+      "groups": [
+        {
+          "actual_median_overlap_percent": 29.565277777777776,
+          "campaigns": 32,
+          "fixed_incremental_unique_mape_percent": 6.769028028145999,
+          "fixed_mae_points": 5.366710069444444,
+          "fixed_overlap_percent": 32.72951388888889,
+          "fixed_p90_error_points": 15.167291666666666,
+          "fixed_union_mape_percent": 2.990798889021183,
+          "group": "Matched Reach",
+          "reference_incremental_unique_mape_percent": 0.7392561009218843,
+          "reference_mae_points": 0.5324122299382719,
+          "reference_median_overlap_percent": 29.205246913580247,
+          "reference_p90_error_points": 0.9201851851851862,
+          "reference_union_mape_percent": 0.3089583068085494
+        },
+        {
+          "actual_median_overlap_percent": 16.59722222222222,
+          "campaigns": 32,
+          "fixed_incremental_unique_mape_percent": 18.991766590025684,
+          "fixed_mae_points": 16.357118055555556,
+          "fixed_overlap_percent": 32.72951388888889,
+          "fixed_p90_error_points": 26.423402777777778,
+          "fixed_union_mape_percent": 8.775323111459363,
+          "group": "Matched Traffic",
+          "reference_incremental_unique_mape_percent": 0.6485453920242726,
+          "reference_mae_points": 0.5205246913580249,
+          "reference_median_overlap_percent": 16.493055555555554,
+          "reference_p90_error_points": 0.8875771604938248,
+          "reference_union_mape_percent": 0.28828675525249103
+        },
+        {
+          "actual_median_overlap_percent": 46.754629629629626,
+          "campaigns": 24,
+          "fixed_incremental_unique_mape_percent": 26.23499150620146,
+          "fixed_mae_points": 13.978819444444445,
+          "fixed_overlap_percent": 32.72951388888889,
+          "fixed_p90_error_points": 14.28900462962963,
+          "fixed_union_mape_percent": 3.6156674224305454,
+          "group": "A medium \u2192 B large",
+          "reference_incremental_unique_mape_percent": 1.8955245686381743,
+          "reference_mae_points": 1.0094735939643351,
+          "reference_median_overlap_percent": 46.553497942386834,
+          "reference_p90_error_points": 2.0519032921810743,
+          "reference_union_mape_percent": 0.2611222696046466
+        },
+        {
+          "actual_median_overlap_percent": 32.032407407407405,
+          "campaigns": 24,
+          "fixed_incremental_unique_mape_percent": 1.069860663751938,
+          "fixed_mae_points": 0.7283564814814817,
+          "fixed_overlap_percent": 32.72951388888889,
+          "fixed_p90_error_points": 1.0563657407407412,
+          "fixed_union_mape_percent": 0.18144795792992943,
+          "group": "A large \u2192 B medium",
+          "reference_incremental_unique_mape_percent": 1.3060521713629543,
+          "reference_mae_points": 0.8884816529492457,
+          "reference_median_overlap_percent": 31.82870370370371,
+          "reference_p90_error_points": 1.7123456790123497,
+          "reference_union_mape_percent": 0.22136662655961523
+        },
+        {
+          "actual_median_overlap_percent": 28.061111111111114,
+          "campaigns": 70,
+          "fixed_incremental_unique_mape_percent": 7.926675711823138,
+          "fixed_mae_points": 5.798809523809522,
+          "fixed_overlap_percent": 32.72951388888889,
+          "fixed_p90_error_points": 15.139791666666667,
+          "fixed_union_mape_percent": 3.3378430889189326,
+          "group": "Large Reach profiles",
+          "reference_incremental_unique_mape_percent": 0.6214674464817702,
+          "reference_mae_points": 0.4382275132275134,
+          "reference_median_overlap_percent": 28.385416666666664,
+          "reference_p90_error_points": 0.8505246913580262,
+          "reference_union_mape_percent": 0.25640514872820885
+        }
+      ],
+      "observation_probability_percent": 14.399999999999999
     }
   }
 }
