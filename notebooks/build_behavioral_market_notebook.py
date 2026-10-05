@@ -95,7 +95,7 @@ import numpy as np
 from pathlib import Path
 from IPython.display import HTML, display
 
-from calibrated_vid.intuitive_market import PROFILES, SEGMENTS, run_experiment
+from calibrated_vid.intuitive_market import PROFILE_BY_NAME, PROFILES, SEGMENTS, run_experiment
 
 ROOT = Path.cwd()
 if not (ROOT / "src").exists():
@@ -234,7 +234,42 @@ objective_pairs = [
 reach = 100 * np.asarray([left.overlap_rate for left, _ in objective_pairs])
 traffic = 100 * np.asarray([right.overlap_rate for _, right in objective_pairs])
 fig, ax = plt.subplots(figsize=(6.3, 5.4))
-ax.scatter(reach, traffic, color="#7c3aed", alpha=0.78)
+objective_profiles = sorted({left.profile for left, _ in objective_pairs})
+profile_colors = {
+    profile: plt.cm.tab10(index)
+    for index, profile in enumerate(objective_profiles)
+}
+label_offsets = {
+    "a_feed_b_video": ((8, 8), "left"),
+    "broad_long": ((-8, 12), "right"),
+    "feed_short": ((-8, -18), "right"),
+    "video_short": ((8, 10), "left"),
+}
+for profile in objective_profiles:
+    profile_pairs = [
+        (left, right)
+        for left, right in objective_pairs
+        if left.profile == profile
+    ]
+    profile_reach = 100 * np.asarray([left.overlap_rate for left, _ in profile_pairs])
+    profile_traffic = 100 * np.asarray([right.overlap_rate for _, right in profile_pairs])
+    ax.scatter(
+        profile_reach,
+        profile_traffic,
+        color=profile_colors[profile],
+        alpha=0.82,
+    )
+    offset, alignment = label_offsets[profile]
+    ax.annotate(
+        PROFILE_BY_NAME[profile].label,
+        (np.median(profile_reach), np.median(profile_traffic)),
+        xytext=offset,
+        textcoords="offset points",
+        ha=alignment,
+        fontsize=8,
+        color=profile_colors[profile],
+        weight="bold",
+    )
 limit = max(reach.max(), traffic.max()) + 2
 ax.plot([0, limit], [0, limit], "--", color="#64748b", linewidth=1)
 ax.set(xlabel="Matched Reach overlap / smaller reach (%)", ylabel="Matched Traffic overlap / smaller reach (%)", title="Local response optimization changes audience composition", xlim=(0, limit), ylim=(0, limit))
