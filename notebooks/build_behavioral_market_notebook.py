@@ -374,9 +374,24 @@ low = med - np.asarray([row["p10_overlap_percent"] for row in profiles])
 high = np.asarray([row["p90_overlap_percent"] for row in profiles]) - med
 ax.errorbar(med, y, xerr=[low, high], fmt="o", color="#2563eb", ecolor="#93c5fd", capsize=4)
 ax.axvline(diagnostic["baseline_overlap_percent"], color="#dc2626", linestyle="--", label="Canonical large-Reach baseline")
-ax.set(xlabel="Overlap / smaller publisher reach (%)", ylabel="", yticks=y, yticklabels=[row["label"] for row in profiles], title="Named campaign conditions create distinct overlap regimes")
+ax.set(xlabel="Overlap / smaller publisher reach (%)", ylabel="", yticks=y, yticklabels=[row["label"] for row in profiles], title="Same-size Reach campaigns have different overlap by delivery profile")
 ax.grid(axis="x", alpha=0.18)
 ax.legend(fontsize=8)
+ax.text(
+    0.99,
+    0.02,
+    (
+        f"Across profiles: P10 {diagnostic['large_profiles']['p10_overlap_percent']:.1f}%  |  "
+        f"Median {diagnostic['large_profiles']['median_overlap_percent']:.1f}%  |  "
+        f"P90 {diagnostic['large_profiles']['p90_overlap_percent']:.1f}%"
+    ),
+    transform=ax.transAxes,
+    ha="right",
+    va="bottom",
+    fontsize=8,
+    color="#334155",
+    bbox={"boxstyle": "round,pad=0.35", "facecolor": "white", "edgecolor": "#cbd5e1"},
+)
 fig.tight_layout()
 fig.savefig(OUTPUT / "profile_overlap.png", dpi=180)
 plt.show()
@@ -388,50 +403,6 @@ show_table([diagnostic["large_profiles"]], [
     ("p10_p90_width_points", "P10–P90 width points"),
 ])""",
         id="profile-results",
-    ),
-    new_code_cell(
-        """large_campaigns = sorted(
-    [row for row in evaluation if row.scenario == "large_reach_profiles"],
-    key=lambda row: row.overlap_rate,
-)
-profile_order = [row.name for row in PROFILES]
-profile_colors = {
-    profile: plt.cm.tab10(index % 10)
-    for index, profile in enumerate(profile_order)
-}
-fig, ax = plt.subplots(figsize=(10.2, 5.5))
-for profile in profile_order:
-    positions = [
-        index + 1
-        for index, row in enumerate(large_campaigns)
-        if row.profile == profile
-    ]
-    values = [
-        100 * row.overlap_rate
-        for row in large_campaigns
-        if row.profile == profile
-    ]
-    ax.scatter(
-        positions,
-        values,
-        color=profile_colors[profile],
-        alpha=0.82,
-        label=next(row.label for row in PROFILES if row.name == profile),
-    )
-ax.axhline(diagnostic["large_profiles"]["p10_overlap_percent"], color="#64748b", linestyle=":", label="Overall P10 / P90")
-ax.axhline(diagnostic["large_profiles"]["p90_overlap_percent"], color="#64748b", linestyle=":")
-ax.axhline(diagnostic["baseline_overlap_percent"], color="#dc2626", linestyle="--", label="Canonical baseline")
-ax.set(
-    xlabel="Equal-size large Reach campaigns, ordered by overlap",
-    ylabel="Overlap / smaller publisher reach (%)",
-    title="Named campaign conditions occupy visibly different overlap regimes",
-)
-ax.grid(alpha=0.18)
-ax.legend(fontsize=7, ncol=2, loc="best")
-fig.tight_layout()
-fig.savefig(OUTPUT / "large_reach_campaigns.png", dpi=180)
-plt.show()""",
-        id="profile-campaign-chart",
     ),
     new_markdown_cell(
         """> **Test 3 conclusion.** One large-Reach average represents the canonical profile but misses other large campaigns whose placement, flight, or availability window reaches a different portion of the same eligible market. When all profiles are made identical, the P10–P90 width collapses to sampling noise.""",
@@ -460,11 +431,25 @@ An average learned from one familiar campaign type can be correct for that type 
     "Large Reach profiles": [row for row in evaluation if row.scenario == "large_reach_profiles"],
 }
 labels = list(scenario_groups)
-medians = [100 * np.median([row.overlap_rate for row in scenario_groups[label]]) for label in labels]
+group_values = {
+    label: 100 * np.asarray([row.overlap_rate for row in scenario_groups[label]])
+    for label in labels
+}
+medians = np.asarray([np.median(group_values[label]) for label in labels])
+p10 = np.asarray([np.quantile(group_values[label], 0.10) for label in labels])
+p90 = np.asarray([np.quantile(group_values[label], 0.90) for label in labels])
 baseline = diagnostic["baseline_overlap_percent"]
 fig, ax = plt.subplots(figsize=(9.0, 5.2))
 x = np.arange(len(labels))
-ax.bar(x, medians, color="#2563eb", label="Actual cohort median")
+ax.bar(
+    x,
+    medians,
+    yerr=[medians - p10, p90 - medians],
+    color="#2563eb",
+    ecolor="#0f172a",
+    capsize=5,
+    label="Actual median with P10–P90",
+)
 ax.axhline(baseline, color="#dc2626", linestyle="--", linewidth=2, label="Single canonical baseline")
 ax.set(ylabel="Overlap / smaller reach (%)", title="One canonical large-Reach overlap does not transfer", xticks=x, xticklabels=labels)
 ax.tick_params(axis="x", rotation=20)

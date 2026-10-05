@@ -135,8 +135,22 @@ PROFILES: tuple[CampaignProfile, ...] = (
     CampaignProfile("video_short", "Short flight, video-heavy", 10, 0.90, 0.90, "broad"),
     CampaignProfile("a_feed_b_video", "A feed-heavy, B video-heavy", 18, 0.08, 0.88, "broad"),
     CampaignProfile("a_video_b_feed", "A video-heavy, B feed-heavy", 18, 0.88, 0.08, "broad"),
-    CampaignProfile("daytime_feed", "Daytime, feed-heavy", 18, 0.10, 0.10, "daytime"),
-    CampaignProfile("evening_video", "Evening, video-heavy", 18, 0.82, 0.82, "evening"),
+    CampaignProfile(
+        "daytime_feed",
+        "Both publishers: daytime-skewed, feed-heavy",
+        18,
+        0.10,
+        0.10,
+        "daytime",
+    ),
+    CampaignProfile(
+        "evening_video",
+        "Both publishers: evening-skewed, video-heavy",
+        18,
+        0.82,
+        0.82,
+        "evening",
+    ),
 )
 
 PROFILE_BY_NAME = {profile.name: profile for profile in PROFILES}

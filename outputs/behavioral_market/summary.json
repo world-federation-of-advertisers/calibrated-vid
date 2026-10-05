@@ -79,7 +79,7 @@
         },
         {
           "campaigns": 10,
-          "label": "Daytime, feed-heavy",
+          "label": "Both publishers: daytime-skewed, feed-heavy",
           "median_overlap_percent": 40.231944444444444,
           "p10_overlap_percent": 40.01,
           "p90_overlap_percent": 40.52138888888889,
@@ -87,7 +87,7 @@
         },
         {
           "campaigns": 10,
-          "label": "Evening, video-heavy",
+          "label": "Both publishers: evening-skewed, video-heavy",
           "median_overlap_percent": 28.061111111111114,
           "p10_overlap_percent": 27.948333333333338,
           "p90_overlap_percent": 28.20916666666666,
