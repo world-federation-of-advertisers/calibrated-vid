@@ -568,6 +568,16 @@ def diagnostics(campaigns: Iterable[CampaignResult]) -> dict[str, object]:
         actual_incremental = (1.0 - actual) * smaller
         fixed_incremental = (1.0 - baseline) * smaller
         reference_incremental = (1.0 - reference) * smaller
+        fixed_incremental_relative_error = (
+            100.0
+            * np.abs(fixed_incremental - actual_incremental)
+            / actual_incremental
+        )
+        reference_incremental_relative_error = (
+            100.0
+            * np.abs(reference_incremental - actual_incremental)
+            / actual_incremental
+        )
         calibration_rows.append(
             {
                 "group": label,
@@ -591,18 +601,16 @@ def diagnostics(campaigns: Iterable[CampaignResult]) -> dict[str, object]:
                     * np.mean(np.abs(reference_union - actual_union) / actual_union)
                 ),
                 "fixed_incremental_unique_mape_percent": float(
-                    100.0
-                    * np.mean(
-                        np.abs(fixed_incremental - actual_incremental)
-                        / actual_incremental
-                    )
+                    np.mean(fixed_incremental_relative_error)
                 ),
                 "reference_incremental_unique_mape_percent": float(
-                    100.0
-                    * np.mean(
-                        np.abs(reference_incremental - actual_incremental)
-                        / actual_incremental
-                    )
+                    np.mean(reference_incremental_relative_error)
+                ),
+                "fixed_incremental_unique_p90_error_percent": float(
+                    np.quantile(fixed_incremental_relative_error, 0.90)
+                ),
+                "reference_incremental_unique_p90_error_percent": float(
+                    np.quantile(reference_incremental_relative_error, 0.90)
                 ),
             }
         )

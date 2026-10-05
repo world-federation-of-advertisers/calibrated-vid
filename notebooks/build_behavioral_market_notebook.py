@@ -166,6 +166,46 @@ show_table(profile_rows, [
 ])""",
         id="population-tables",
     ),
+    new_code_cell(
+        """fig, ax = plt.subplots(figsize=(9.0, 5.8))
+normalizer = plt.Normalize(-0.35, 0.35)
+mapper = plt.cm.ScalarMappable(norm=normalizer, cmap="coolwarm")
+for segment in SEGMENTS:
+    activity_a = 0.65 * segment.feed_a + 0.35 * segment.video_a
+    activity_b = 0.65 * segment.feed_b + 0.35 * segment.video_b
+    response_asymmetry = segment.click_a - segment.click_b
+    ax.scatter(
+        activity_a,
+        activity_b,
+        s=1500 * segment.share,
+        color=mapper.to_rgba(response_asymmetry),
+        edgecolor="white",
+        linewidth=0.9,
+    )
+    label_on_left = activity_a > 0.82
+    ax.annotate(
+        segment.name.replace("_", " "),
+        (activity_a, activity_b),
+        xytext=((-6 if label_on_left else 6), 5),
+        textcoords="offset points",
+        fontsize=8,
+        ha=("right" if label_on_left else "left"),
+    )
+ax.plot([0, 1], [0, 1], color="#94a3b8", linewidth=1, linestyle="--")
+ax.set(
+    xlabel="Publisher A activity propensity",
+    ylabel="Publisher B activity propensity",
+    title="The same market contains mismatched publisher activity and response",
+    xlim=(0, 1.03),
+    ylim=(0, 1.03),
+)
+ax.grid(alpha=0.18)
+fig.colorbar(mapper, ax=ax, label="Relative response score: A minus B")
+fig.tight_layout()
+fig.savefig(OUTPUT / "population_composition.png", dpi=180)
+plt.show()""",
+        id="population-composition-chart",
+    ),
     new_markdown_cell(
         """## Test 1: Traffic and Reach select different people
 
@@ -296,6 +336,50 @@ show_table([diagnostic["large_profiles"]], [
 ])""",
         id="profile-results",
     ),
+    new_code_cell(
+        """large_campaigns = sorted(
+    [row for row in evaluation if row.scenario == "large_reach_profiles"],
+    key=lambda row: row.overlap_rate,
+)
+profile_order = [row.name for row in PROFILES]
+profile_colors = {
+    profile: plt.cm.tab10(index % 10)
+    for index, profile in enumerate(profile_order)
+}
+fig, ax = plt.subplots(figsize=(10.2, 5.5))
+for profile in profile_order:
+    positions = [
+        index + 1
+        for index, row in enumerate(large_campaigns)
+        if row.profile == profile
+    ]
+    values = [
+        100 * row.overlap_rate
+        for row in large_campaigns
+        if row.profile == profile
+    ]
+    ax.scatter(
+        positions,
+        values,
+        color=profile_colors[profile],
+        alpha=0.82,
+        label=next(row.label for row in PROFILES if row.name == profile),
+    )
+ax.axhline(diagnostic["large_profiles"]["p10_overlap_percent"], color="#64748b", linestyle=":", label="Overall P10 / P90")
+ax.axhline(diagnostic["large_profiles"]["p90_overlap_percent"], color="#64748b", linestyle=":")
+ax.axhline(diagnostic["baseline_overlap_percent"], color="#dc2626", linestyle="--", label="Canonical baseline")
+ax.set(
+    xlabel="Equal-size large Reach campaigns, ordered by overlap",
+    ylabel="Overlap / smaller publisher reach (%)",
+    title="Named campaign conditions occupy visibly different overlap regimes",
+)
+ax.grid(alpha=0.18)
+ax.legend(fontsize=7, ncol=2, loc="best")
+fig.tight_layout()
+fig.savefig(OUTPUT / "large_reach_campaigns.png", dpi=180)
+plt.show()""",
+        id="profile-campaign-chart",
+    ),
     new_markdown_cell(
         """> **Test 3 conclusion.** One large-Reach average represents the canonical profile but misses other large campaigns whose placement, flight, or availability window reaches a different portion of the same eligible market. When all profiles are made identical, the P10–P90 width collapses to sampling noise.""",
         id="profile-conclusion",
@@ -411,8 +495,38 @@ show_table(calibration_rows, [
     ("reference_mae_points", "Reference overlap MAE points"),
     ("fixed_incremental_unique_mape_percent", "Fixed incremental unique MAPE %"),
     ("reference_incremental_unique_mape_percent", "Reference incremental unique MAPE %"),
+    ("fixed_incremental_unique_p90_error_percent", "Fixed incremental unique P90 error %"),
+    ("reference_incremental_unique_p90_error_percent", "Reference incremental unique P90 error %"),
 ])""",
         id="reference-calibration-results",
+    ),
+    new_code_cell(
+        """fixed_p90 = np.asarray([
+    row["fixed_incremental_unique_p90_error_percent"]
+    for row in calibration_rows
+])
+reference_p90 = np.asarray([
+    row["reference_incremental_unique_p90_error_percent"]
+    for row in calibration_rows
+])
+fig, ax = plt.subplots(figsize=(10.0, 5.5))
+x = np.arange(len(labels))
+width = 0.36
+ax.bar(x - width / 2, fixed_p90, width, label="Fixed Reach baseline", color="#dc2626")
+ax.bar(x + width / 2, reference_p90, width, label="Partial campaign reference", color="#059669")
+ax.set(
+    ylabel="P90 absolute incremental-unique error (%)",
+    title="Campaign reference reduces tail error where the fixed baseline misses",
+    xticks=x,
+    xticklabels=labels,
+)
+ax.tick_params(axis="x", rotation=20)
+ax.grid(axis="y", alpha=0.18)
+ax.legend()
+fig.tight_layout()
+fig.savefig(OUTPUT / "reference_incremental_unique_error.png", dpi=180)
+plt.show()""",
+        id="reference-planning-error-chart",
     ),
     new_markdown_cell(
         """> **Calibration conclusion.** In this controlled population, the partial campaign reference follows all three changing overlap patterns and substantially improves the groups that the fixed baseline misses. A group already close to the baseline can instead gain only noise. The exercise shows how campaign-specific information could repair a one-number baseline and improve the smaller publisher's incremental unique-reach estimate where miscalibration is material.
