@@ -4,9 +4,12 @@
 
 | Notebook | Purpose | Launch |
 | --- | --- | --- |
-| Behavioral market scenarios | Primary person-level study: objective, activity depth, and named campaign conditions change overlap | [Open in Colab](https://colab.research.google.com/github/world-federation-of-advertisers/calibrated-vid/blob/main/notebooks/behavioral_market_scenarios.ipynb) |
+| Intuitive population overlap | Primary person-level study: objective, activity depth, and named campaign conditions change overlap, followed by campaign-reference calibration | [Open in Colab](https://colab.research.google.com/github/world-federation-of-advertisers/calibrated-vid/blob/main/notebooks/intuitive_population_overlap.ipynb) |
 | Population-model sensitivity | Tests whether the behavioral conclusions disappear when their proposed mechanisms are removed | [Open in Colab](https://colab.research.google.com/github/world-federation-of-advertisers/calibrated-vid/blob/main/notebooks/population_model_sensitivity.ipynb) |
 | Two-population calibration | Companion arithmetic illustration using pre-specified overlap populations | [Open in Colab](https://colab.research.google.com/github/world-federation-of-advertisers/calibrated-vid/blob/main/notebooks/two_population_calibration.ipynb) |
+
+The former `behavioral_market_scenarios.ipynb` path is retained as an identical
+generated compatibility copy so existing links continue to work.
 
 This repository contains two complementary synthetic experiments. The first is
 a deliberately small arithmetic illustration that asks:
@@ -114,7 +117,8 @@ Additional files:
 - `src/calibrated_vid/intuitive_market.py`: primary person-level population and delivery simulation;
 - `src/calibrated_vid/behavioral_market.py`: original stress generator retained for comparison;
 - `src/calibrated_vid/sensitivity.py`: deterministic one-factor and joint parameter sweeps;
-- `notebooks/behavioral_market_scenarios.ipynb`: primary executed walkthrough;
+- `notebooks/intuitive_population_overlap.ipynb`: primary executed walkthrough;
+- `notebooks/behavioral_market_scenarios.ipynb`: generated compatibility copy of the primary notebook;
 - `notebooks/population_model_sensitivity.ipynb`: sensitivity audit of both generators;
 - `outputs/behavioral_market/` and `outputs/model_sensitivity/`: generated data and charts;
 - `tests/test_intuitive_market.py` and `tests/test_behavioral_market.py`: invariants and reproducibility tests.

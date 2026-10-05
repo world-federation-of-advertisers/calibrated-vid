@@ -11,7 +11,8 @@ from nbformat.v4 import new_code_cell, new_markdown_cell, new_notebook
 
 
 ROOT = Path(__file__).resolve().parents[1]
-NOTEBOOK = ROOT / "notebooks" / "behavioral_market_scenarios.ipynb"
+NOTEBOOK = ROOT / "notebooks" / "intuitive_population_overlap.ipynb"
+LEGACY_NOTEBOOK = ROOT / "notebooks" / "behavioral_market_scenarios.ipynb"
 NOTEBOOK_METADATA = {
     "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
     "language_info": {"name": "python", "version": "3.10"},
@@ -427,6 +428,21 @@ show_table([diagnostic["global_model"]], [
         id="global-model-results",
     ),
     new_markdown_cell(
+        """## Scope and remaining shortcut
+
+This version improves interpretability, not realism in every dimension.
+
+- It starts from known people and does not model accounts or VID assignment.
+- It fixes publisher reach and studies audience composition at that size.
+- Its optional reference exercise assumes fingerprint availability is independent of campaign delivery and uses known coverage and agreement rates.
+- Its activity and response patterns are synthetic and not estimates of any publisher.
+- Its campaign profiles are stylized summaries of real settings.
+- Campaign-profile strength is restricted to 0–1.25 so every interpolated flight remains positive.
+
+Those choices make the causal comparisons readable. The companion sensitivity notebook tests whether the results require narrow parameter values. Its main standard is not that every random configuration reproduces all three discrepancies; null mechanisms should produce null effects. The standard is that each discrepancy grows smoothly when its stated mechanism is strengthened and disappears when that mechanism is removed.""",
+        id="scope",
+    ),
+    new_markdown_cell(
         r"""## Optional calibration exercise: can a campaign reference repair the fixed baseline?
 
 The tests above explain why one canonical overlap does not transfer. This final exercise asks whether a **partial campaign-specific reference** can correct it.
@@ -534,21 +550,6 @@ plt.show()""",
 > **Important limitation.** This is a deliberately favorable upper-bound exercise, not independent validation. The reference is created by randomly thinning the simulator's true shared-person set, and the correction knows the exact coverage and agreement rates. Real use would need to establish that reference availability is representative, that the rates are estimable, and that the result holds against an external people-based benchmark. The reference does not prove the synthetic mechanisms are real.""",
         id="reference-calibration-conclusion",
     ),
-    new_markdown_cell(
-        """## Scope and remaining shortcut
-
-This version improves interpretability, not realism in every dimension.
-
-- It starts from known people and does not model accounts or VID assignment.
-- It fixes publisher reach and studies audience composition at that size.
-- Its optional reference exercise assumes fingerprint availability is independent of campaign delivery and uses known coverage and agreement rates.
-- Its activity and response patterns are synthetic and not estimates of any publisher.
-- Its campaign profiles are stylized summaries of real settings.
-- Campaign-profile strength is restricted to 0–1.25 so every interpolated flight remains positive.
-
-Those choices make the causal comparisons readable. The companion sensitivity notebook tests whether the results require narrow parameter values. Its main standard is not that every random configuration reproduces all three discrepancies; null mechanisms should produce null effects. The standard is that each discrepancy grows smoothly when its stated mechanism is strengthened and disappears when that mechanism is removed.""",
-        id="scope",
-    ),
 ]
 
 
@@ -586,4 +587,5 @@ for cell in executed.cells:
     cell.metadata.pop("execution", None)
 executed.metadata = nbformat.from_dict(NOTEBOOK_METADATA)
 nbformat.write(executed, NOTEBOOK)
+nbformat.write(executed, LEGACY_NOTEBOOK)
 print(NOTEBOOK)
