@@ -314,14 +314,6 @@ medium_large = 100 * np.asarray([left.overlap_rate for left, _ in direction_pair
 large_medium = 100 * np.asarray([right.overlap_rate for _, right in direction_pairs])
 fig, ax = plt.subplots(figsize=(7.4, 5.5))
 jitter = np.linspace(-0.075, 0.075, len(direction_pairs))
-for offset, left, right in zip(jitter, large_medium, medium_large):
-    ax.plot(
-        [offset, 1.0 + offset],
-        [left, right],
-        color="#94a3b8",
-        alpha=0.28,
-        linewidth=0.8,
-    )
 ax.scatter(jitter, large_medium, color="#2563eb", alpha=0.82, label="A large → B medium")
 ax.scatter(1.0 + jitter, medium_large, color="#0f766e", alpha=0.82, label="A medium → B large")
 ax.scatter(
